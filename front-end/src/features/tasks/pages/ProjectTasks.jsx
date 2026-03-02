@@ -8,6 +8,7 @@ export default function ProjectTasks({
   error,
   workspaceTags = [],
   onDeleteTask,
+  onEditTask,
 }) {
   const [activeTaskId, setActiveTaskId] = useState(null);
 
@@ -64,6 +65,7 @@ export default function ProjectTasks({
           key={task.id}
           task={task}
           onDelete={handleDelete}
+          onEdit={onEditTask}
           activeTaskId={activeTaskId}
           setActiveTaskId={setActiveTaskId}
           workspaceTags={workspaceTags}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Plus } from "lucide-react";
 
 import "../../features/tasks/style/tasks.css";
@@ -41,17 +41,11 @@ function PersonalWorkspace() {
     setTasks,
   } = useProjectTasks(projectSelecionado);
 
+  const [editingTaskId, seteditingTaskId] = useState(null);
+
   const [isCreatingProject, setIsCreatingProject] = useState(false);
 
-  useEffect(() => {
-    if (!workspaceId) {
-      return;
-    }
-
-    const controller = new AbortController();
-
-    return () => controller.abort();
-  }, [workspaceId]);
+  const { tags } = useWorkspaceTags(workspaceId);
 
   function openCreateProject() {
     setIsCreatingProject(true);
@@ -75,13 +69,28 @@ function PersonalWorkspace() {
     setTasks((prev) => [newTask, ...prev]);
   }
 
+  function handleUpdatedTask(updatedTask) {
+    setTasks((prev) =>
+      prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)),
+    );
+
+    seteditingTaskId(null);
+  }
+
   function handleDeletedTask(taskId) {
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
   }
 
-  const erroTela = errorMe || errorWorkspace || errorProjects || errorTasks;
+  function handleEditTask(task) {
+    seteditingTaskId(task.id);
 
-  const { tags, loadingTags } = useWorkspaceTags(workspaceId);
+    const el = document.getElementById("modalTask");
+    if (el && window.bootstrap) {
+      window.bootstrap.Modal.getOrCreateInstance(el).show();
+    }
+  }
+
+  const erroTela = errorMe || errorWorkspace || errorProjects || errorTasks;
 
   return (
     <div className="tasks-page">
@@ -121,6 +130,7 @@ function PersonalWorkspace() {
           error={errorTasks}
           workspaceTags={tags}
           onDeleteTask={handleDeletedTask}
+          onEditTask={handleEditTask}
         />
       )}
 
@@ -129,17 +139,18 @@ function PersonalWorkspace() {
         className="floating-btn btn-color"
         data-bs-toggle="modal"
         data-bs-target="#modalTask"
+        onClick={() => seteditingTaskId(null)}
         disabled={projectSelecionado === "ALL" || !projectSelecionado}
-        title={
-          projectSelecionado === "ALL"
-            ? "Selecione um projeto para criar tarefa"
-            : "Nova tarefa"
-        }
       >
         <Plus /> Nova Tarefa
       </Button>
 
-      <TaskModal projectId={projectSelecionado} onCreated={handleCreatedTask} />
+      <TaskModal
+        projectId={projectSelecionado}
+        taskId={editingTaskId}
+        onCreated={handleCreatedTask}
+        onUpdated={handleUpdatedTask}
+      />
     </div>
   );
 }

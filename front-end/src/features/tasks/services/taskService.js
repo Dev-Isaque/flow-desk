@@ -11,6 +11,16 @@ export async function createTask(payload) {
     return res.dados;
 }
 
+export async function updateTask(taskId, payload) {
+    const res = await apiRequest(`/tasks/${taskId}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+    });
+
+    if (!res.sucesso) throw new Error(res.mensagem);
+    return res.dados;
+}
+
 export async function deleteTask(taskId) {
     const res = await apiRequest(`/tasks/${taskId}`, {
         method: "DELETE",

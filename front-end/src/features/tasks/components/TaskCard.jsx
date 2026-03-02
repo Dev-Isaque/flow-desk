@@ -14,7 +14,13 @@ import { Button } from "../../../shared/components/Button";
 import { useTaskTimer } from "../hooks/useTaskTimer";
 import { TaskProgress } from "./TaskProgress";
 
-export function TaskCard({ task, onDelete, activeTaskId, setActiveTaskId }) {
+export function TaskCard({
+  task,
+  onDelete,
+  onEdit,
+  activeTaskId,
+  setActiveTaskId,
+}) {
   const done = task?.status === "DONE";
   const isActive = task?.id === activeTaskId;
 
@@ -172,9 +178,12 @@ export function TaskCard({ task, onDelete, activeTaskId, setActiveTaskId }) {
                 </Link>
               </li>
               <li>
-                <Link to={`/tasks/${task.id}/edit`} className="dropdown-item">
+                <button
+                  className="dropdown-item"
+                  onClick={() => onEdit?.(task)}
+                >
                   Editar
-                </Link>
+                </button>
               </li>
               <li>
                 <hr className="dropdown-divider" />

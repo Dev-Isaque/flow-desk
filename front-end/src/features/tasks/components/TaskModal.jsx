@@ -1,14 +1,18 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "../../../shared/components/Button";
 import { Modal } from "../../../shared/components/Modal";
 import { Input } from "../../../shared/components/Input";
-import { createTask } from "../services/taskService";
+import { useTask } from "../hooks/useTask";
 import { useTaskEnums } from "../hooks/useTaskEnums";
 
 import "../style/modal.css";
 
-export function TaskModal({ projectId, onCreated }) {
+export function TaskModal({ projectId, taskId, onCreated, onUpdated }) {
+  const { task, createTask, updateTask, saving, error } = useTask(taskId);
+
   const { statuses, priorities, loading } = useTaskEnums();
+
+  const isEditing = !!taskId;
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -17,10 +21,18 @@ export function TaskModal({ projectId, onCreated }) {
   const [dueDate, setDueDate] = useState("");
   const [estimatedTime, setEstimatedTime] = useState("");
 
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
-
   const today = new Date().toISOString().split("T")[0];
+
+  useEffect(() => {
+    if (isEditing && task) {
+      setTitle(task.title || "");
+      setDescription(task.description || "");
+      setPriority(task.priority || "MEDIUM");
+      setStatus(task.status || "BACKLOG");
+      setDueDate(task.dueDateTime?.split("T")[0] || "");
+      setEstimatedTime(task.estimatedTime || "");
+    }
+  }, [isEditing, task]);
 
   const canSave = useMemo(() => {
     return (
@@ -34,9 +46,8 @@ export function TaskModal({ projectId, onCreated }) {
 
   async function handleSave() {
     if (!canSave) return;
+
     try {
-      setSaving(true);
-      setError(null);
       const payload = {
         projectId,
         title: title.trim(),
@@ -46,31 +57,40 @@ export function TaskModal({ projectId, onCreated }) {
         dueDateTime: dueDate ? `${dueDate}T00:00:00` : null,
         estimatedTime: estimatedTime || null,
       };
-      const created = await createTask(payload);
-      if (onCreated) onCreated(created);
 
-      setTitle("");
-      setDescription("");
-      setPriority("MEDIUM");
-      setStatus("BACKLOG");
-      setDueDate("");
-      setEstimatedTime("");
+      let result;
 
+      if (isEditing) {
+        result = await updateTask(payload);
+        if (onUpdated) onUpdated(result);
+      } else {
+        result = await createTask(payload);
+        if (onCreated) onCreated(result);
+      }
+
+      // Fecha modal
       const el = document.getElementById("modalTask");
       if (el && window.bootstrap) {
         window.bootstrap.Modal.getOrCreateInstance(el).hide();
       }
+
+      if (!isEditing) {
+        setTitle("");
+        setDescription("");
+        setPriority("MEDIUM");
+        setStatus("BACKLOG");
+        setDueDate("");
+        setEstimatedTime("");
+      }
     } catch (e) {
-      setError(e.message || "Erro ao salvar");
-    } finally {
-      setSaving(false);
+      console.error("Erro ao salvar tarefa:", e);
     }
   }
 
   return (
     <Modal
       id="modalTask"
-      title="Nova Tarefa"
+      title={isEditing ? "Editar Tarefa" : "Nova Tarefa"}
       footer={
         <>
           <Button
@@ -81,6 +101,7 @@ export function TaskModal({ projectId, onCreated }) {
           >
             Cancelar
           </Button>
+
           <Button
             type="button"
             className="btn-color"
@@ -88,15 +109,14 @@ export function TaskModal({ projectId, onCreated }) {
             disabled={!canSave}
             style={{ padding: "0.6rem 1.5rem", borderRadius: "10px" }}
           >
-            {saving ? "Salvando..." : "Criar Tarefa"}
+            {saving ? "Salvando..." : isEditing ? "Atualizar" : "Criar Tarefa"}
           </Button>
         </>
       }
     >
-      {projectId === "ALL" && (
+      {projectId === "ALL" && !isEditing && (
         <div className="project-warning">
-          <strong>Atenção:</strong> Selecione um projeto específico na barra
-          lateral antes de criar uma tarefa.
+          <strong>Atenção:</strong> Selecione um projeto antes de criar.
         </div>
       )}
 
@@ -111,8 +131,7 @@ export function TaskModal({ projectId, onCreated }) {
 
       <div className="d-flex flex-column gap-3">
         <Input
-          label="Título da Tarefa"
-          placeholder="Ex: Finalizar protótipo do FlowDesk"
+          label="Título"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           disabled={saving}
@@ -120,10 +139,9 @@ export function TaskModal({ projectId, onCreated }) {
         />
 
         <Input
-          label="Descrição Detalhada"
+          label="Descrição"
           as="textarea"
           rows={3}
-          placeholder="Descreva o que precisa ser feito..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           disabled={saving}
@@ -148,7 +166,7 @@ export function TaskModal({ projectId, onCreated }) {
 
           <div className="col-md-6">
             <Input
-              label="Status Inicial"
+              label="Status"
               as="select"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
