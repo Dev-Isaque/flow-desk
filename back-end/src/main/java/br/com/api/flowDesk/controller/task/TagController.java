@@ -42,13 +42,9 @@ public class TagController {
     @PostMapping("/{workspaceId}/tags")
     public ResponseEntity<TagDTO> create(
             @PathVariable UUID workspaceId,
-            @RequestBody @Valid CreateTagRequest dto,
-            @RequestHeader("Authorization") String authorization) {
-
-        String token = authorization.replace("Bearer ", "").trim();
-        var user = authTokenService.requireUserByToken(token);
+            @RequestBody @Valid CreateTagRequest dto) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(tagService.create(workspaceId, dto, user.getEmail()));
+                .body(tagService.create(workspaceId, dto));
     }
 }

@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 
-import "../../features/tasks/styles/tasks.css";
-
 import { Topbar } from "../../shared/components/Topbar";
 import { Sidebar } from "../../shared/components/Sidebar";
 import { Button } from "../../shared/components/Button";

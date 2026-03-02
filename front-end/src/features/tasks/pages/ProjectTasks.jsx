@@ -19,31 +19,50 @@ export default function ProjectTasks({
     return list;
   }, [tasks, activeTaskId]);
 
-  function handleToggle(task) {
-    console.log("toggle", task);
-  }
-
   async function handleDelete(task) {
     const confirmed = window.confirm(`Deseja excluir "${task.title}"?`);
 
     if (!confirmed) return;
 
-    await deleteTaskRequest(task.id);
-
-    onDeleteTask?.(task.id);
+    try {
+      await deleteTaskRequest(task.id);
+      onDeleteTask?.(task.id);
+    } catch (error) {
+      console.error("Erro ao excluir tarefa:", error);
+      alert("Erro ao excluir a tarefa. Tente novamente.");
+    }
   }
 
-  if (loading) return <p>Carregando tarefas...</p>;
-  if (error) return <p className="auth-error">{error}</p>;
-  if (!tasks.length) return <p>Nenhuma tarefa neste projeto</p>;
+  if (loading) {
+    return (
+      <div className="task-list task-list--loading">
+        <p>Carregando tarefas...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="task-list task-list--error">
+        <p className="auth-error">{error}</p>
+      </div>
+    );
+  }
+
+  if (!tasks.length) {
+    return (
+      <div className="task-list task-list--empty">
+        <p>Nenhuma tarefa neste projeto</p>
+      </div>
+    );
+  }
 
   return (
     <div className="task-list">
-      {orderedTasks.map((t) => (
+      {orderedTasks.map((task) => (
         <TaskCard
-          key={t.id}
-          task={t}
-          onToggle={handleToggle}
+          key={task.id}
+          task={task}
           onDelete={handleDelete}
           activeTaskId={activeTaskId}
           setActiveTaskId={setActiveTaskId}

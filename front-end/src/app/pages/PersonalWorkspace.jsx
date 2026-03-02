@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 
+import "../../features/tasks/style/tasks.css";
+
 import { ProjectBar } from "../../features/projects/components/ProjectBar";
 import { CreateProjectInline } from "../../features/projects/components/CreateProjectInline";
 

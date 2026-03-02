@@ -197,6 +197,23 @@ public class TaskService {
         taskRepository.delete(task);
     }
 
+    @Transactional
+    public TaskDTO updateStatus(UUID taskId, TaskStatus newStatus, UserModel user) {
+
+        TaskModel task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+
+        if (!task.getCreatedBy().getId().equals(user.getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "Você não pode alterar esta tarefa");
+        }
+
+        task.setStatus(newStatus);
+
+        return toDTO(taskRepository.save(task));
+    }
+
     @Transactional(readOnly = true)
     public TaskProgressDTO getTaskProgress(UUID taskId) {
         var task = taskRepository.findById(taskId)
@@ -228,13 +245,13 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDTO addTagToTask(UUID taskId, CreateTagRequest tagDto, String userEmail) {
+    public TaskDTO addTagToTask(UUID taskId, CreateTagRequest tagDto) {
         TaskModel task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
 
         UUID workspaceId = task.getProject().getWorkspace().getId();
 
-        TagDTO tagResult = tagService.create(workspaceId, tagDto, userEmail);
+        TagDTO tagResult = tagService.create(workspaceId, tagDto);
 
         TagModel tagEntity = tagRepository.findById(tagResult.getId()).orElseThrow();
 
@@ -260,4 +277,5 @@ public class TaskService {
 
         return toResponse(task);
     }
+
 }

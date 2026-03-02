@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.api.flowDesk.dto.task.TaskDTO;
 import br.com.api.flowDesk.dto.task.request.CreateTagRequest;
 import br.com.api.flowDesk.dto.task.request.CreateTaskRequest;
+import br.com.api.flowDesk.dto.task.request.StatusTaskRequest;
 import br.com.api.flowDesk.dto.task.response.TaskResponse;
 import br.com.api.flowDesk.dto.taskitem.TaskProgressDTO;
 import br.com.api.flowDesk.service.auth.AuthTokenService;
@@ -61,6 +63,18 @@ public class TaskController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{taskId}/status")
+    public ResponseEntity<TaskDTO> updateStatus(
+            @PathVariable UUID taskId,
+            @RequestBody StatusTaskRequest newStatus,
+            @RequestHeader("Authorization") String authorization) {
+
+        String token = authorization.replace("Bearer ", "").trim();
+        var user = authTokenService.requireUserByToken(token);
+
+        return ResponseEntity.ok(taskService.updateStatus(taskId, newStatus.getStatus(), user));
+    }
+
     @GetMapping("/{taskId}/progress")
     public ResponseEntity<TaskProgressDTO> getProgress(@PathVariable UUID taskId) {
         return ResponseEntity.ok(taskService.getTaskProgress(taskId));
@@ -71,16 +85,13 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getTaskById(taskId));
     }
 
+    // FIX: removido token/user — taskService.addTagToTask não precisa mais de email
     @PostMapping("/{taskId}/tags")
     public ResponseEntity<TaskDTO> addTagToTask(
             @PathVariable UUID taskId,
-            @RequestBody @Valid CreateTagRequest dto,
-            @RequestHeader("Authorization") String authorization) {
+            @RequestBody @Valid CreateTagRequest dto) {
 
-        String token = authorization.replace("Bearer ", "").trim();
-        var user = authTokenService.requireUserByToken(token);
-
-        return ResponseEntity.ok(taskService.addTagToTask(taskId, dto, user.getEmail()));
+        return ResponseEntity.ok(taskService.addTagToTask(taskId, dto));
     }
 
     @DeleteMapping("/{taskId}/tags/{tagId}")

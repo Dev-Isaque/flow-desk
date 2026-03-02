@@ -13,34 +13,57 @@ import { Button } from "../../../shared/components/Button";
 import { useTaskTimer } from "../hooks/useTaskTimer";
 import { TaskProgress } from "./TaskProgress";
 
-export function TaskCard({ task, onToggle, onDelete }) {
+export function TaskCard({ task, onDelete, activeTaskId, setActiveTaskId }) {
   const done = task?.status === "DONE";
+  const isActive = task?.id === activeTaskId;
 
   const timer = useTaskTimer(task?.estimatedTime);
 
-  async function handleToggle() {
-    if (!onToggle) return;
-
-    await onToggle(task);
-  }
-
   function handlePlayPause() {
+    setActiveTaskId(task?.id);
     if (timer.isRunning) return timer.pause();
     if (timer.isPaused) return timer.resume();
     return timer.start();
   }
 
+  function getStatusConfig(status) {
+    switch (status) {
+      case "BACKLOG":
+        return {
+          label: "Backlog",
+          className: "status-backlog",
+          icon: <Circle size={14} />,
+        };
+
+      case "IN_PROGRESS":
+        return {
+          label: "Em andamento",
+          className: "status-progress",
+          icon: <Play size={14} />,
+        };
+
+      case "DONE":
+        return {
+          label: "Concluída",
+          className: "status-done",
+          icon: <CheckCircle2 size={14} />,
+        };
+
+      default:
+        return {
+          label: status,
+          className: "status-default",
+          icon: <Circle size={14} />,
+        };
+    }
+  }
+
+  const statusConfig = getStatusConfig(task?.status);
+
   return (
-    <div className="task-card">
+    <div className={`task-card mt-3 ${isActive ? "task-card--active" : ""}`}>
       <div className="task-row">
         <div className="task-left">
-          <Button
-            className="task-check p-0 border-0 bg-transparent"
-            onClick={handleToggle}
-          >
-            {done ? <CheckCircle2 size={20} /> : <Circle size={20} />}
-          </Button>
-
           <div className="task-info">
             <div className="task-meta-row">
               {task?.estimatedTime && (
@@ -48,9 +71,14 @@ export function TaskCard({ task, onToggle, onDelete }) {
                   className={`task-time ${timer.isRunning ? "is-running" : ""}`}
                 >
                   <Clock size={14} />
-                  {timer.timeText}
+                  <span>{timer.timeText}</span>
                 </div>
               )}
+
+              <div className={`task-status ${statusConfig.className}`}>
+                {statusConfig.icon}
+                <span>{statusConfig.label}</span>
+              </div>
 
               <TaskProgress taskId={task.id} />
             </div>
@@ -71,33 +99,30 @@ export function TaskCard({ task, onToggle, onDelete }) {
           <Button
             className={timer.isRunning ? "task-play" : "task-menu"}
             onClick={handlePlayPause}
-            title="Iniciar/Pausar"
+            title={timer.isRunning ? "Pausar" : "Iniciar"}
           >
             {timer.isRunning ? <Pause size={18} /> : <Play size={18} />}
           </Button>
 
           <Button
-            className="task-menu p-0 bg-transparent border-0"
+            className="task-menu"
             onClick={timer.restart}
             title="Recomeçar"
           >
             <RotateCcw size={18} />
           </Button>
 
-          <Button
-            className="task-menu p-0 bg-transparent border-0"
-            onClick={timer.stop}
-            title="Parar"
-          >
+          <Button className="task-menu" onClick={timer.stop} title="Parar">
             <Square size={18} />
           </Button>
 
           <div className="dropstart">
             <Button
-              className="task-menu p-0 bg-transparent border-0 dropdown-toggle"
+              className="task-menu dropdown-toggle"
               type="button"
               data-bs-toggle="dropdown"
               aria-expanded="false"
+              title="Mais opções"
             >
               <EllipsisVertical size={18} />
             </Button>
@@ -115,7 +140,7 @@ export function TaskCard({ task, onToggle, onDelete }) {
               </li>
               <li>
                 <Button
-                  className="text-danger"
+                  className="dropdown-item text-danger"
                   onClick={() => onDelete?.(task)}
                 >
                   Excluir

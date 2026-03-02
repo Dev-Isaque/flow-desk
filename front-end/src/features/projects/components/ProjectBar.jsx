@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 import { Button } from "../../../shared/components/Button";
+import "../style/projectBar.css";
 
 export function ProjectBar({
   projects = [],
@@ -14,12 +15,12 @@ export function ProjectBar({
   createSlot,
 }) {
   return (
-    <div className="d-flex gap-2 flex-wrap align-items-center">
+    <div className="project-bar">
       <Button
         type="button"
-        className={
-          projectSelecionado === "ALL" ? "btn-color" : "btn-outline-primary"
-        }
+        className={`project-tab ${
+          projectSelecionado === "ALL" ? "project-tab--active" : ""
+        }`}
         onClick={() => setProjectSelecionado("ALL")}
         disabled={savingProject}
       >
@@ -27,7 +28,7 @@ export function ProjectBar({
       </Button>
 
       {loadingProjects && (
-        <span style={{ opacity: 0.7 }}>Carregando projetos...</span>
+        <span className="project-bar__loading">Carregando projetos...</span>
       )}
 
       {!loadingProjects &&
@@ -35,9 +36,9 @@ export function ProjectBar({
           <Button
             key={p.id}
             type="button"
-            className={
-              projectSelecionado === p.id ? "btn-color" : "btn-outline-primary"
-            }
+            className={`project-tab ${
+              projectSelecionado === p.id ? "project-tab--active" : ""
+            }`}
             onClick={() => setProjectSelecionado(p.id)}
             disabled={savingProject || isCreatingProject}
           >
@@ -48,14 +49,14 @@ export function ProjectBar({
       {!isCreatingProject ? (
         <Button
           type="button"
-          className="btn-color"
+          className="project-add-button"
           onClick={onOpenCreate}
           disabled={
             loadingWorkspace || !workspaceId || loadingProjects || savingProject
           }
           title={!workspaceId ? "Carregando workspace..." : "Criar projeto"}
         >
-          <Plus />
+          <Plus size={18} />
         </Button>
       ) : (
         createSlot

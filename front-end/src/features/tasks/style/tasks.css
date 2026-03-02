@@ -2,11 +2,12 @@
    DROPDOWN
  */
 .dropdown-menu {
-    background: var(--card-color);
+    background: color-mix(in srgb, var(--card-color) 90%, white 10%);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 8px;
     box-shadow: var(--shadow-lg);
+    z-index: 1050;
 }
 
 .dropdown-item {
@@ -26,84 +27,145 @@
     color: #dc2626;
 }
 
-
 /* TASK CARD */
 .task-card {
     background: var(--card-color);
     border: 1px solid var(--border-color);
-    border-radius: 20px;
-    padding: 18px 24px;
-    margin: 20px 0;
+    border-radius: 16px;
+    padding: 16px 20px;
     transition: all 0.25s ease;
     box-shadow: var(--shadow);
+    position: relative;
+    z-index: 1;
 }
 
 .task-card:hover {
     border-color: var(--primary-color);
     box-shadow: 0 0 30px rgba(var(--primary-rgb), 0.18);
+    transform: translateY(-2px);
+    z-index: 2;
+}
+
+.task-card:has(.show) {
+    z-index: 10;
+    transform: none !important;
+}
+
+.task-card--active {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg,
+            var(--card-color) 0%,
+            rgba(var(--primary-rgb), 0.02) 100%);
+    box-shadow: 0 0 30px rgba(var(--primary-rgb), 0.15);
 }
 
 .task-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
 }
+
+/* TASK LEFT SECTION (Content) */
 
 .task-left {
     display: flex;
-    align-items: center;
-    gap: 18px;
-}
-
-.task-check {
-    background: transparent !important;
-    border: none !important;
-    color: var(--primary-color) !important;
-    cursor: pointer;
-    padding: 0;
+    align-items: flex-start;
+    gap: 16px;
+    flex: 1;
+    min-width: 0;
 }
 
 .task-info {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
 }
 
 .task-title {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: var(--text-color);
-    line-height: 1.3;
-    margin-top: 2px;
+    line-height: 1.4;
+    word-break: break-word;
+    margin: 0;
 }
 
-/* --- Task Meta Row (Timer + Progress) --- */
+/* 
+   TASK META ROW (Timer + Status + Progress)
+   */
+
 .task-meta-row {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
     margin-bottom: 4px;
 }
 
-/* --- Timer --- */
+/* --- Timer Badge --- */
 .task-time {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    background: rgba(var(--primary-rgb), 0.08);
-    padding: 4px 10px 4px 8px;
-    border-radius: 30px;
+    gap: 5px;
+    background: rgba(var(--primary-rgb), 0.1);
+    padding: 5px 12px;
+    border-radius: 20px;
     color: var(--primary-color);
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     line-height: 1;
     height: 28px;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.task-time svg {
+    flex-shrink: 0;
 }
 
 .task-time.is-running {
     background: rgba(var(--primary-rgb), 0.15);
     animation: pulse 2s infinite;
+    box-shadow: 0 0 12px rgba(var(--primary-rgb), 0.2);
+}
+
+/* --- Status Badge --- */
+.task-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1;
+    height: 28px;
+    white-space: nowrap;
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary-color);
+}
+
+.task-status svg {
+    flex-shrink: 0;
+}
+
+.task-status.status-backlog {
+    background: rgba(100, 116, 139, 0.1);
+    color: #64748b;
+}
+
+.task-status.status-progress {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.task-status.status-done {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
 }
 
 /* --- Task Actions --- */
@@ -628,36 +690,6 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
-
-/* 
-   ANIMAÇÕES
- */
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.7;
-    }
-}
-
-@keyframes taskDonePop {
-    0% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.015);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}
-
 
 /* 
    RESPONSIVIDADE

@@ -27,7 +27,7 @@ public class TagService {
     }
 
     @Transactional
-    public TagDTO create(UUID workspaceId, CreateTagRequest dto, String userEmail) {
+    public TagDTO create(UUID workspaceId, CreateTagRequest dto) {
 
         String cleanedName = dto.getName().trim();
 
