@@ -15,7 +15,6 @@ import { useTaskTimer } from "../hooks/useTaskTimer";
 import { TaskProgress } from "./TaskProgress";
 
 export function TaskCard({ task, onDelete, activeTaskId, setActiveTaskId }) {
-
   const done = task?.status === "DONE";
   const isActive = task?.id === activeTaskId;
 
@@ -73,7 +72,6 @@ export function TaskCard({ task, onDelete, activeTaskId, setActiveTaskId }) {
                 marginBottom: "8px",
               }}
             >
-              
               <div
                 className={`task-priority ${getPriorityClassName(task?.priority)}`}
                 style={{ display: "flex", alignItems: "center", gap: "4px" }}
@@ -125,25 +123,36 @@ export function TaskCard({ task, onDelete, activeTaskId, setActiveTaskId }) {
           className="task-actions"
           style={{ display: "flex", gap: "8px", alignItems: "center" }}
         >
-          <Button
-            className={timer.isRunning ? "task-play" : "task-menu"}
-            onClick={handlePlayPause}
-            title={timer.isRunning ? "Pausar" : "Iniciar"}
-          >
-            {timer.isRunning ? <Pause size={18} /> : <Play size={18} />}
-          </Button>
+          {task?.estimatedTime && (
+            <>
+              <Button
+                className={timer.isRunning ? "task-play" : "task-menu"}
+                onClick={() => {
+                  setActiveTaskId(task?.id);
+                  if (timer.isRunning) {
+                    timer.pause();
+                  } else {
+                    timer.start();
+                  }
+                }}
+                title={timer.isRunning ? "Pausar" : "Iniciar"}
+              >
+                {timer.isRunning ? <Pause size={18} /> : <Play size={18} />}
+              </Button>
 
-          <Button
-            className="task-menu"
-            onClick={timer.restart}
-            title="Recomeçar"
-          >
-            <RotateCcw size={18} />
-          </Button>
+              <Button
+                className="task-menu"
+                onClick={timer.restart}
+                title="Recomeçar"
+              >
+                <RotateCcw size={18} />
+              </Button>
 
-          <Button className="task-menu" onClick={timer.stop} title="Parar">
-            <Square size={18} />
-          </Button>
+              <Button className="task-menu" onClick={timer.stop} title="Parar">
+                <Square size={18} />
+              </Button>
+            </>
+          )}
 
           <div className="dropstart">
             <Button
