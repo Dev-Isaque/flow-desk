@@ -29,9 +29,12 @@ export default function TaskDetails() {
   const {
     task: initialTask,
     loading: taskLoading,
-    reload: reloadTask,
+    deleteTask,
+    isDeleting,
   } = useTask(taskId);
+
   const { progress, reload: reloadProgress } = useTaskProgress(taskId);
+
   const {
     items,
     loading: itemsLoading,
@@ -45,6 +48,7 @@ export default function TaskDetails() {
     taskWithTags,
     workspaceTags,
     associateTag,
+    removeTag,
     isProcessing,
     loadingTags,
   } = useTaskTags(initialTask, initialTask?.workspaceId);
@@ -72,6 +76,18 @@ export default function TaskDetails() {
   async function handleToggle(item) {
     await toggleDone(item.id, !item.done);
     await reloadProgress();
+  }
+
+  async function handleDelete() {
+    const confirmed = window.confirm(
+      "Tem certeza que deseja excluir esta tarefa?",
+    );
+    if (!confirmed) return;
+
+    const deleted = await deleteTask();
+    if (deleted) {
+      navigate(-1);
+    }
   }
 
   const formatDate = (dateString) => {
@@ -185,6 +201,7 @@ export default function TaskDetails() {
             task={taskWithTags || initialTask}
             workspaceTags={workspaceTags}
             onAddTag={associateTag}
+            onRemoveTag={removeTag}
             isProcessing={isProcessing}
             loadingTags={loadingTags}
           />
@@ -199,6 +216,14 @@ export default function TaskDetails() {
             <Button className="btn-secondary w-100 p-2 mt-2">
               <Share2 size={20} />
               <span className="ms-2">Compartilhar tarefa</span>
+            </Button>
+
+            <Button
+              className="btn-danger w-100 p-2 mt-2"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Excluindo..." : "Excluir tarefa"}
             </Button>
           </div>
         </div>

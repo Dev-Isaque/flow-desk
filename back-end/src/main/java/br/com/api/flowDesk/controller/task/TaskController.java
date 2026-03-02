@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.api.flowDesk.dto.task.TaskDTO;
 import br.com.api.flowDesk.dto.task.request.CreateTagRequest;
 import br.com.api.flowDesk.dto.task.request.CreateTaskRequest;
+import br.com.api.flowDesk.dto.task.response.TaskResponse;
 import br.com.api.flowDesk.dto.taskitem.TaskProgressDTO;
 import br.com.api.flowDesk.service.auth.AuthTokenService;
 import br.com.api.flowDesk.service.task.TaskService;
@@ -46,6 +48,19 @@ public class TaskController {
                 .body(taskService.create(dto, user.getEmail()));
     }
 
+    @DeleteMapping("/{taskId}")
+    public ResponseEntity<Void> deleteTask(
+            @PathVariable UUID taskId,
+            @RequestHeader("Authorization") String authorization) {
+
+        String token = authorization.replace("Bearer ", "").trim();
+        var user = authTokenService.requireUserByToken(token);
+
+        taskService.delete(taskId, user);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{taskId}/progress")
     public ResponseEntity<TaskProgressDTO> getProgress(@PathVariable UUID taskId) {
         return ResponseEntity.ok(taskService.getTaskProgress(taskId));
@@ -66,6 +81,14 @@ public class TaskController {
         var user = authTokenService.requireUserByToken(token);
 
         return ResponseEntity.ok(taskService.addTagToTask(taskId, dto, user.getEmail()));
+    }
+
+    @DeleteMapping("/{taskId}/tags/{tagId}")
+    public ResponseEntity<TaskResponse> removeTag(
+            @PathVariable UUID taskId,
+            @PathVariable UUID tagId) {
+        TaskResponse updatedTask = taskService.removeTag(taskId, tagId);
+        return ResponseEntity.ok(updatedTask);
     }
 
 }

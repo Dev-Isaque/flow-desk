@@ -9,6 +9,7 @@ export function TaskBody({
   loading,
   error,
   workspaceTags,
+  onDeleteTask,
 }) {
   if (loadingWorkspace) {
     return (
@@ -44,6 +45,7 @@ export function TaskBody({
       loading={loading}
       error={error}
       workspaceTags={workspaceTags}
+      onDeleteTask={onDeleteTask}
     />
   );
 }

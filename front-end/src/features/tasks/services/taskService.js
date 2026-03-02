@@ -1,9 +1,19 @@
+import { ImageOff } from "lucide-react";
 import { apiRequest } from "../../api/apiRequest";
 
 export async function createTask(payload) {
     const res = await apiRequest("/tasks/create", {
         method: "POST",
         body: JSON.stringify(payload),
+    });
+
+    if (!res.sucesso) throw new Error(res.mensagem);
+    return res.dados;
+}
+
+export async function deleteTask(taskId) {
+    const res = await apiRequest(`/tasks/${taskId}`, {
+        method: "DELETE",
     });
 
     if (!res.sucesso) throw new Error(res.mensagem);
@@ -45,5 +55,16 @@ export async function addTagToTask(taskId, tagName) {
     });
 
     if (!res.sucesso) throw new Error(res.mensagem);
-    return res.dados; // Retorna a tarefa atualizada com a nova tag
+    return res.dados;
+}
+
+export async function removeTagFromTask(taskId, tagId) {
+    const response = await apiRequest(
+        `/tasks/${taskId}/tags/${tagId}`,
+        {
+            method: "DELETE"
+        }
+    );
+
+    return response.dados;
 }

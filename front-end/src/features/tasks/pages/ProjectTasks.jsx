@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import { TaskCard } from "../components/TaskCard";
+import { deleteTask as deleteTaskRequest } from "../services/taskService";
 
 export default function ProjectTasks({
   tasks = [],
   loading,
   error,
   workspaceTags = [],
+  onDeleteTask,
 }) {
   const [activeTaskId, setActiveTaskId] = useState(null);
 
@@ -21,6 +23,16 @@ export default function ProjectTasks({
     console.log("toggle", task);
   }
 
+  async function handleDelete(task) {
+    const confirmed = window.confirm(`Deseja excluir "${task.title}"?`);
+
+    if (!confirmed) return;
+
+    await deleteTaskRequest(task.id);
+
+    onDeleteTask?.(task.id);
+  }
+
   if (loading) return <p>Carregando tarefas...</p>;
   if (error) return <p className="auth-error">{error}</p>;
   if (!tasks.length) return <p>Nenhuma tarefa neste projeto</p>;
@@ -32,6 +44,7 @@ export default function ProjectTasks({
           key={t.id}
           task={t}
           onToggle={handleToggle}
+          onDelete={handleDelete}
           activeTaskId={activeTaskId}
           setActiveTaskId={setActiveTaskId}
           workspaceTags={workspaceTags}

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useWorkspaceTags } from "../../wokspace/hooks/useWorkspaceTags";
-import { addTagToTask } from "../services/taskService";
+import { addTagToTask, removeTagFromTask } from "../services/taskService";
 
 export function useTaskTags(initialTask, workspaceId) {
     const [task, setTask] = useState(initialTask);
@@ -38,10 +38,30 @@ export function useTaskTags(initialTask, workspaceId) {
         }
     }, [task?.id, reloadTags]);
 
+    const removeTag = useCallback(async (tagId) => {
+        if (!task?.id) return;
+
+        setIsAssociating(true);
+        try {
+            const updatedTask = await removeTagFromTask(task.id, tagId);
+
+            setTask(updatedTask);
+            await reloadTags();
+
+            return updatedTask;
+        } catch (err) {
+            console.error("Erro ao remover tag:", err);
+            throw err;
+        } finally {
+            setIsAssociating(false);
+        }
+    }, [task?.id, reloadTags]);
+
     return {
         taskWithTags: task,
         workspaceTags,
         associateTag,
+        removeTag,
         loadingTags,
         isProcessing: isAssociating || creatingTag
     };

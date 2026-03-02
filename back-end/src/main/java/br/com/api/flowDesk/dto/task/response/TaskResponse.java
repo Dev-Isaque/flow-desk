@@ -1,7 +1,7 @@
-package br.com.api.flowDesk.dto.task;
+package br.com.api.flowDesk.dto.task.response;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import br.com.api.flowDesk.enums.task.TaskPriority;
@@ -11,23 +11,23 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class TaskDTO {
+public class TaskResponse {
 
     private UUID id;
+
     private String title;
 
+    private String description;
+
     private TaskStatus status;
+
     private TaskPriority priority;
 
     private LocalDateTime dueDateTime;
-    private String estimatedTime;
 
-    private UUID projectId;
     private UUID workspaceId;
-    private UUID createdById;
 
     private String createdByName;
 
-    private LocalDateTime createdAt;
-    private List<TagDTO> tags;
+    private Set<TagResponse> tags;
 }

@@ -15,6 +15,7 @@ export function TaskProperty({
   task,
   workspaceTags = [],
   onAddTag,
+  onRemoveTag,
   isProcessing,
   loadingTags,
 }) {
@@ -90,8 +91,16 @@ export function TaskProperty({
 
         <div className="d-flex flex-wrap gap-2 align-items-center">
           {task?.tags?.map((tag) => (
-            <span key={tag.id} className="value tag-badge">
+            <span
+              key={tag.id}
+              className="value tag-badge d-flex align-items-center gap-1"
+            >
               {tag.name}
+              <X
+                size={12}
+                className="cursor-pointer"
+                onClick={() => onRemoveTag(tag.id)}
+              />
             </span>
           ))}
 

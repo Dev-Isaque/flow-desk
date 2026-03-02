@@ -13,7 +13,7 @@ import { Button } from "../../../shared/components/Button";
 import { useTaskTimer } from "../hooks/useTaskTimer";
 import { TaskProgress } from "./TaskProgress";
 
-export function TaskCard({ task, onToggle }) {
+export function TaskCard({ task, onToggle, onDelete }) {
   const done = task?.status === "DONE";
 
   const timer = useTaskTimer(task?.estimatedTime);
@@ -109,10 +109,17 @@ export function TaskCard({ task, onToggle }) {
                 </Link>
               </li>
               <li>
-                <button className="dropdown-item">Editar</button>
+                <Link to={`/tasks/${task.id}/edit`} className="dropdown-item">
+                  Editar
+                </Link>
               </li>
               <li>
-                <button className="dropdown-item text-danger">Excluir</button>
+                <Button
+                  className="text-danger"
+                  onClick={() => onDelete?.(task)}
+                >
+                  Excluir
+                </Button>
               </li>
             </ul>
           </div>

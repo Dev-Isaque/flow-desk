@@ -1,6 +1,7 @@
 package br.com.api.flowDesk.service.task;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -14,11 +15,14 @@ import br.com.api.flowDesk.dto.task.TagDTO;
 import br.com.api.flowDesk.dto.task.TaskDTO;
 import br.com.api.flowDesk.dto.task.request.CreateTagRequest;
 import br.com.api.flowDesk.dto.task.request.CreateTaskRequest;
+import br.com.api.flowDesk.dto.task.response.TagResponse;
+import br.com.api.flowDesk.dto.task.response.TaskResponse;
 import br.com.api.flowDesk.dto.taskitem.TaskProgressDTO;
 import br.com.api.flowDesk.enums.task.TaskPriority;
 import br.com.api.flowDesk.enums.task.TaskStatus;
 import br.com.api.flowDesk.model.task.TagModel;
 import br.com.api.flowDesk.model.task.TaskModel;
+import br.com.api.flowDesk.model.user.UserModel;
 import br.com.api.flowDesk.repository.task.ProjectRepository;
 import br.com.api.flowDesk.repository.task.TagRepository;
 import br.com.api.flowDesk.repository.task.TaskItemRepository;
@@ -91,10 +95,32 @@ public class TaskService {
                 task.getDueDateTime(),
                 formatEstimatedTime(task.getEstimatedTimeSeconds()),
                 task.getProject().getId(),
+                task.getProject().getWorkspace().getId(),
                 task.getCreatedBy().getId(),
                 task.getCreatedBy().getName(),
                 task.getCreatedAt(),
                 tagDTOs);
+    }
+
+    private TaskResponse toResponse(TaskModel task) {
+
+        Set<TagResponse> tagResponses = task.getTags()
+                .stream()
+                .map(tag -> new TagResponse(
+                        tag.getId(),
+                        tag.getName()))
+                .collect(Collectors.toSet());
+
+        return new TaskResponse(
+                task.getId(),
+                task.getTitle(),
+                task.getDescription(),
+                task.getStatus(),
+                task.getPriority(),
+                task.getDueDateTime(),
+                task.getProject().getWorkspace().getId(),
+                task.getCreatedBy().getName(),
+                tagResponses);
     }
 
     @Transactional
@@ -153,6 +179,24 @@ public class TaskService {
         return toDTO(taskRepository.save(task));
     }
 
+    @Transactional
+    public void delete(UUID taskId, UserModel user) {
+
+        TaskModel task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+
+        if (!task.getCreatedBy().getId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para excluir esta tarefa");
+        }
+
+        for (TagModel tag : task.getTags()) {
+            tag.getTasks().remove(task);
+        }
+        task.getTags().clear();
+
+        taskRepository.delete(task);
+    }
+
     @Transactional(readOnly = true)
     public TaskProgressDTO getTaskProgress(UUID taskId) {
         var task = taskRepository.findById(taskId)
@@ -197,5 +241,23 @@ public class TaskService {
         task.getTags().add(tagEntity);
 
         return toDTO(taskRepository.save(task));
+    }
+
+    @Transactional
+    public TaskResponse removeTag(UUID taskId, UUID tagId) {
+
+        TaskModel task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+
+        TagModel tag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag não encontrada"));
+
+        task.getTags().remove(tag);
+
+        tag.getTasks().remove(task);
+
+        taskRepository.save(task);
+
+        return toResponse(task);
     }
 }

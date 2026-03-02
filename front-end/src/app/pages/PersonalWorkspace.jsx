@@ -73,6 +73,10 @@ function PersonalWorkspace() {
     setTasks((prev) => [newTask, ...prev]);
   }
 
+  function handleDeletedTask(taskId) {
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+  }
+
   const erroTela = errorMe || errorWorkspace || errorProjects || errorTasks;
 
   const { tags, loadingTags } = useWorkspaceTags(workspaceId);
@@ -114,6 +118,7 @@ function PersonalWorkspace() {
           loading={loadingTasks}
           error={errorTasks}
           workspaceTags={tags}
+          onDeleteTask={handleDeletedTask}
         />
       )}
 
