@@ -20,6 +20,7 @@ import br.com.api.flowDesk.dto.task.TaskDTO;
 import br.com.api.flowDesk.dto.task.request.CreateTagRequest;
 import br.com.api.flowDesk.dto.task.request.CreateTaskRequest;
 import br.com.api.flowDesk.dto.task.request.StatusTaskRequest;
+import br.com.api.flowDesk.dto.task.request.UpdateTaskRequest;
 import br.com.api.flowDesk.dto.task.response.TaskResponse;
 import br.com.api.flowDesk.dto.taskitem.TaskProgressDTO;
 import br.com.api.flowDesk.service.auth.AuthTokenService;
@@ -47,7 +48,19 @@ public class TaskController {
         var user = authTokenService.requireUserByToken(token);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(taskService.create(dto, user.getEmail()));
+                .body(taskService.create(dto, user));
+    }
+
+    @PatchMapping("/{taskId}")
+    public ResponseEntity<TaskDTO> updateTask(
+            @PathVariable UUID taskId,
+            @RequestBody UpdateTaskRequest dto,
+            @RequestHeader("Authorization") String authorization) {
+
+        String token = authorization.replace("Bearer ", "").trim();
+        var user = authTokenService.requireUserByToken(token);
+
+        return ResponseEntity.ok(taskService.update(taskId, dto, user));
     }
 
     @DeleteMapping("/{taskId}")

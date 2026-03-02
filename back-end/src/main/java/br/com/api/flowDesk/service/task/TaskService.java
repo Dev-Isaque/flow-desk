@@ -15,6 +15,7 @@ import br.com.api.flowDesk.dto.task.TagDTO;
 import br.com.api.flowDesk.dto.task.TaskDTO;
 import br.com.api.flowDesk.dto.task.request.CreateTagRequest;
 import br.com.api.flowDesk.dto.task.request.CreateTaskRequest;
+import br.com.api.flowDesk.dto.task.request.UpdateTaskRequest;
 import br.com.api.flowDesk.dto.task.response.TagResponse;
 import br.com.api.flowDesk.dto.task.response.TaskResponse;
 import br.com.api.flowDesk.dto.taskitem.TaskProgressDTO;
@@ -124,56 +125,102 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDTO create(CreateTaskRequest dto, String loggedEmail) {
+    public TaskDTO create(CreateTaskRequest dto, UserModel user) {
 
         var project = projectRepository.findById(dto.getProjectId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projeto não encontrado"));
-
-        var user = userRepository.findByEmail(loggedEmail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário inválido"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Projeto não encontrado"));
 
         if (dto.getTitle() == null || dto.getTitle().trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Título é obrigatório");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Título é obrigatório");
         }
 
         var task = new TaskModel();
         task.setProject(project);
         task.setTitle(dto.getTitle().trim());
-        task.setDescription(dto.getDescription() != null ? dto.getDescription().trim() : null);
+        task.setDescription(
+                dto.getDescription() != null ? dto.getDescription().trim() : null);
 
         task.setPriority(
                 dto.getPriority() != null
                         ? dto.getPriority()
                         : TaskPriority.MEDIUM);
+
         task.setStatus(
                 dto.getStatus() != null
                         ? dto.getStatus()
                         : TaskStatus.BACKLOG);
 
         task.setDueDateTime(dto.getDueDateTime());
-
-        task.setEstimatedTimeSeconds(parseEstimatedTime(dto.getEstimatedTime()));
+        task.setEstimatedTimeSeconds(
+                parseEstimatedTime(dto.getEstimatedTime()));
 
         task.setCreatedBy(user);
 
+        // Tags (mantive sua lógica)
         if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()) {
 
             var tags = tagRepository.findAllById(dto.getTagIds());
 
             if (tags.size() != dto.getTagIds().size()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Uma ou mais tags não existem");
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Uma ou mais tags não existem");
             }
 
             var workspaceId = project.getWorkspace().getId();
 
             boolean anyFromOtherWorkspace = tags.stream()
-                    .anyMatch(l -> !l.getWorkspace().getId().equals(workspaceId));
+                    .anyMatch(t -> !t.getWorkspace().getId().equals(workspaceId));
 
             if (anyFromOtherWorkspace) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "tag de outro workspace não é permitida");
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Tag de outro workspace não é permitida");
             }
 
             task.getTags().addAll(tags);
+        }
+
+        return toDTO(taskRepository.save(task));
+    }
+
+    @Transactional
+    public TaskDTO update(UUID taskId, UpdateTaskRequest dto, UserModel user) {
+
+        var task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+
+        if (!task.getCreatedBy().getId().equals(user.getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Você não pode alterar esta tarefa");
+        }
+
+        if (dto.getTitle() != null && !dto.getTitle().trim().isEmpty()) {
+            task.setTitle(dto.getTitle().trim());
+        }
+
+        if (dto.getDescription() != null) {
+            task.setDescription(dto.getDescription().trim());
+        }
+
+        if (dto.getPriority() != null) {
+            task.setPriority(dto.getPriority());
+        }
+
+        if (dto.getStatus() != null) {
+            task.setStatus(dto.getStatus());
+        }
+
+        if (dto.getDueDateTime() != null) {
+            task.setDueDateTime(dto.getDueDateTime());
+        }
+
+        if (dto.getEstimatedTime() != null) {
+            task.setEstimatedTimeSeconds(
+                    parseEstimatedTime(dto.getEstimatedTime()));
         }
 
         return toDTO(taskRepository.save(task));

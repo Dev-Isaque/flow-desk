@@ -51,7 +51,11 @@ export function TaskProperty({
         <TriangleAlert size={18} />
         <div>
           <span className="label">Prioridade</span>
-          <span className="value priority-badge">{task?.priority}</span>
+          <span
+            className={`value priority-badge priority-${task?.priority?.toLowerCase()}`}
+          >
+            {task?.priorityDescription || "Não definida"}
+          </span>
         </div>
       </div>
 
@@ -59,7 +63,11 @@ export function TaskProperty({
         <ClockFading size={18} />
         <div>
           <span className="label">Status</span>
-          <span className="value status-badge">{task?.status}</span>
+          <span
+            className={`value status-badge status-${task?.status?.toLowerCase()}`}
+          >
+            {task?.statusDescription || "Sem status"}
+          </span>
         </div>
       </div>
 
