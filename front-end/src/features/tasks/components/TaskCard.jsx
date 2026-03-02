@@ -8,12 +8,14 @@ import {
   Play,
   RotateCcw,
   Square,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "../../../shared/components/Button";
 import { useTaskTimer } from "../hooks/useTaskTimer";
 import { TaskProgress } from "./TaskProgress";
 
 export function TaskCard({ task, onDelete, activeTaskId, setActiveTaskId }) {
+
   const done = task?.status === "DONE";
   const isActive = task?.id === activeTaskId;
 
@@ -26,59 +28,77 @@ export function TaskCard({ task, onDelete, activeTaskId, setActiveTaskId }) {
     return timer.start();
   }
 
-  function getStatusConfig(status) {
+  function getStatusVisual(status) {
     switch (status) {
       case "BACKLOG":
         return {
-          label: "Backlog",
           className: "status-backlog",
           icon: <Circle size={14} />,
         };
-
       case "IN_PROGRESS":
         return {
-          label: "Em andamento",
           className: "status-progress",
           icon: <Play size={14} />,
         };
-
       case "DONE":
         return {
-          label: "Concluída",
           className: "status-done",
           icon: <CheckCircle2 size={14} />,
         };
-
       default:
         return {
-          label: status,
           className: "status-default",
           icon: <Circle size={14} />,
         };
     }
   }
 
-  const statusConfig = getStatusConfig(task?.status);
+  function getPriorityClassName(priority) {
+    return `priority-${priority?.toLowerCase() || "default"}`;
+  }
+
+  const statusVisual = getStatusVisual(task?.status);
 
   return (
     <div className={`task-card mt-3 ${isActive ? "task-card--active" : ""}`}>
       <div className="task-row">
         <div className="task-left">
           <div className="task-info">
-            <div className="task-meta-row">
+            <div
+              className="task-meta-row"
+              style={{
+                display: "flex",
+                gap: "12px",
+                alignItems: "center",
+                marginBottom: "8px",
+              }}
+            >
+              
+              <div
+                className={`task-priority ${getPriorityClassName(task?.priority)}`}
+                style={{ display: "flex", alignItems: "center", gap: "4px" }}
+              >
+                <AlertTriangle size={12} />
+                <span>{task?.priorityDescription}</span>
+              </div>
+
+              <div
+                className={`task-status ${statusVisual.className}`}
+                style={{ display: "flex", alignItems: "center", gap: "4px" }}
+              >
+                {statusVisual.icon}
+                <span>{task?.statusDescription}</span>
+              </div>
+
               {task?.estimatedTime && (
                 <div
                   className={`task-time ${timer.isRunning ? "is-running" : ""}`}
+                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
                 >
                   <Clock size={14} />
                   <span>{timer.timeText}</span>
                 </div>
               )}
-
-              <div className={`task-status ${statusConfig.className}`}>
-                {statusConfig.icon}
-                <span>{statusConfig.label}</span>
-              </div>
 
               <TaskProgress taskId={task.id} />
             </div>
@@ -86,16 +106,25 @@ export function TaskCard({ task, onDelete, activeTaskId, setActiveTaskId }) {
             <div
               className="task-title"
               style={{
+                fontSize: "16px",
+                fontWeight: "500",
                 textDecoration: done ? "line-through" : "none",
                 opacity: done ? 0.6 : 1,
               }}
             >
               {task?.title}
             </div>
+
+            <div style={{ fontSize: "12px", color: "#888", marginTop: "4px" }}>
+              Criado por: {task?.createdByName}
+            </div>
           </div>
         </div>
 
-        <div className="task-actions">
+        <div
+          className="task-actions"
+          style={{ display: "flex", gap: "8px", alignItems: "center" }}
+        >
           <Button
             className={timer.isRunning ? "task-play" : "task-menu"}
             onClick={handlePlayPause}
@@ -137,6 +166,9 @@ export function TaskCard({ task, onDelete, activeTaskId, setActiveTaskId }) {
                 <Link to={`/tasks/${task.id}/edit`} className="dropdown-item">
                   Editar
                 </Link>
+              </li>
+              <li>
+                <hr className="dropdown-divider" />
               </li>
               <li>
                 <Button

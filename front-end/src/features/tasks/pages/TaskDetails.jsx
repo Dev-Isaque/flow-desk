@@ -127,6 +127,7 @@ export default function TaskDetails() {
             </Button>
           </div>
 
+{console.log(taskId)}
           <div className="task-details__header">
             <div className="task-hero">
               <div className="task-hero__content">

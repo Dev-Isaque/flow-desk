@@ -85,7 +85,6 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getTaskById(taskId));
     }
 
-    // FIX: removido token/user — taskService.addTagToTask não precisa mais de email
     @PostMapping("/{taskId}/tags")
     public ResponseEntity<TaskDTO> addTagToTask(
             @PathVariable UUID taskId,

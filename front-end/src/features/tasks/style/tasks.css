@@ -1,32 +1,3 @@
-/* 
-   DROPDOWN
- */
-.dropdown-menu {
-    background: color-mix(in srgb, var(--card-color) 90%, white 10%);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 8px;
-    box-shadow: var(--shadow-lg);
-    z-index: 1050;
-}
-
-.dropdown-item {
-    color: var(--text-color);
-    border-radius: 8px;
-    padding: 8px 16px;
-    transition: all 0.2s ease;
-}
-
-.dropdown-item:hover {
-    background: rgba(var(--primary-rgb), 0.08);
-    color: var(--primary-color);
-}
-
-.dropdown-item.text-danger:hover {
-    background: rgba(220, 38, 38, 0.1);
-    color: #dc2626;
-}
-
 /* TASK CARD */
 .task-card {
     background: var(--card-color);
@@ -94,6 +65,12 @@
     margin: 0;
 }
 
+.task-creator {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
 /* 
    TASK META ROW (Timer + Status + Progress)
    */
@@ -103,7 +80,135 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+}
+
+/* --- Priority Badge --- */
+.task-priority {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1;
+    height: 28px;
+    white-space: nowrap;
+    border: 1px solid;
+    transition: all 0.2s ease;
+}
+
+.task-priority svg {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+}
+
+/* Priority Levels */
+.task-priority.priority-alta,
+.task-priority.priority-high {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.task-priority.priority-alta:hover,
+.task-priority.priority-high:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.task-priority.priority-media,
+.task-priority.priority-medium {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.task-priority.priority-media:hover,
+.task-priority.priority-medium:hover {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.task-priority.priority-baixa,
+.task-priority.priority-low {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    border-color: rgba(34, 197, 94, 0.2);
+}
+
+.task-priority.priority-baixa:hover,
+.task-priority.priority-low:hover {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.task-priority.priority-default {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+    border-color: rgba(107, 114, 128, 0.2);
+}
+
+.task-priority.priority-default:hover {
+    background: rgba(107, 114, 128, 0.15);
+    border-color: rgba(107, 114, 128, 0.3);
+}
+
+/* --- Status Badge --- */
+.task-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1;
+    height: 28px;
+    white-space: nowrap;
+    border: 1px solid;
+    transition: all 0.2s ease;
+}
+
+.task-status svg {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+}
+
+.task-status.status-backlog {
+    background: rgba(100, 116, 139, 0.1);
+    color: #64748b;
+    border-color: rgba(100, 116, 139, 0.2);
+}
+
+.task-status.status-backlog:hover {
+    background: rgba(100, 116, 139, 0.15);
+    border-color: rgba(100, 116, 139, 0.3);
+}
+
+.task-status.status-progress {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.task-status.status-progress:hover {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.task-status.status-done {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.task-status.status-done:hover {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.3);
 }
 
 /* --- Timer Badge --- */
@@ -112,8 +217,8 @@
     align-items: center;
     gap: 5px;
     background: rgba(var(--primary-rgb), 0.1);
-    padding: 5px 12px;
-    border-radius: 20px;
+    padding: 6px 12px;
+    border-radius: 8px;
     color: var(--primary-color);
     font-weight: 600;
     font-size: 0.8rem;
@@ -121,6 +226,7 @@
     height: 28px;
     white-space: nowrap;
     transition: all 0.3s ease;
+    border: 1px solid rgba(var(--primary-rgb), 0.2);
 }
 
 .task-time svg {
@@ -131,41 +237,7 @@
     background: rgba(var(--primary-rgb), 0.15);
     animation: pulse 2s infinite;
     box-shadow: 0 0 12px rgba(var(--primary-rgb), 0.2);
-}
-
-/* --- Status Badge --- */
-.task-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    line-height: 1;
-    height: 28px;
-    white-space: nowrap;
-    background: rgba(var(--primary-rgb), 0.1);
-    color: var(--primary-color);
-}
-
-.task-status svg {
-    flex-shrink: 0;
-}
-
-.task-status.status-backlog {
-    background: rgba(100, 116, 139, 0.1);
-    color: #64748b;
-}
-
-.task-status.status-progress {
-    background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
-}
-
-.task-status.status-done {
-    background: rgba(16, 185, 129, 0.1);
-    color: #10b981;
+    border-color: rgba(var(--primary-rgb), 0.3);
 }
 
 /* --- Task Actions --- */
@@ -281,6 +353,35 @@
     font-size: 1rem;
     font-weight: 600;
     color: var(--primary-color);
+}
+
+/* 
+   DROPDOWN
+ */
+.dropdown-menu {
+    background: color-mix(in srgb, var(--card-color) 90%, white 10%);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: var(--shadow-lg);
+    z-index: 1050;
+}
+
+.dropdown-item {
+    color: var(--text-color);
+    border-radius: 8px;
+    padding: 8px 16px;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background: rgba(var(--primary-rgb), 0.08);
+    color: var(--primary-color);
+}
+
+.dropdown-item.text-danger:hover {
+    background: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
 }
 
 /* --- Variante: Hero --- */
@@ -498,7 +599,6 @@
     text-transform: uppercase;
     letter-spacing: 0.06em;
     line-height: 1;
-    user-select: none;
     white-space: nowrap;
 }
 

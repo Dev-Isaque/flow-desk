@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import br.com.api.flowDesk.enums.task.TaskPriority;
 import br.com.api.flowDesk.enums.task.TaskStatus;
 import lombok.AllArgsConstructor;
@@ -30,4 +32,14 @@ public class TaskDTO {
 
     private LocalDateTime createdAt;
     private List<TagDTO> tags;
+
+    @JsonProperty("statusDescription")
+    public String getStatusDescription() {
+        return status != null ? status.getDescription() : null;
+    }
+
+    @JsonProperty("priorityDescription")
+    public String getPriorityDescription() {
+        return priority != null ? priority.getDescription() : null;
+    }
 }
