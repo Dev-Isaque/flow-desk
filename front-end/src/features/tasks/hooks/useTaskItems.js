@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import {
     listTaskItems,
     createTaskItem,
@@ -45,9 +45,17 @@ export function useTaskItems(taskId) {
         setItems((prev) => prev.filter((x) => x.id !== itemId));
     }
 
+    const allItemsDone = useMemo(() => {
+        if (!items.length) return false;
+        return items.every((item) => item.done);
+    }, [items]);
+
     useEffect(() => {
         load();
     }, [load]);
 
-    return { items, loading, error, reload: load, addItem, toggleDone, remove };
+    return {
+        items, loading, error, reload: load, addItem, toggleDone, remove,
+        allItemsDone,
+    };
 }

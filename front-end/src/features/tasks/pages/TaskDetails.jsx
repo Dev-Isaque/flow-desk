@@ -32,7 +32,9 @@ export default function TaskDetails() {
     task: initialTask,
     loading: taskLoading,
     deleteTask,
+    updateTask,
     isDeleting,
+    saving: taskSaving,
   } = useTask(taskId);
 
   const { progress, reload: reloadProgress } = useTaskProgress(taskId);
@@ -44,6 +46,7 @@ export default function TaskDetails() {
     addItem,
     toggleDone,
     remove,
+    allItemsDone,
   } = useTaskItems(taskId);
 
   const {
@@ -94,6 +97,23 @@ export default function TaskDetails() {
     }
   }
 
+  async function handleCompleteTask() {
+    try {
+      if (initialTask?.status === "DONE") {
+        await updateTask({ status: "IN_PROGRESS" });
+        return;
+      }
+
+      if (!allItemsDone) {
+        alert("Complete todas as subtarefas antes de concluir.");
+        return;
+      }
+
+      await updateTask({ status: "DONE" });
+    } catch (error) {
+      alert("Não foi possível atualizar a tarefa: " + error.message);
+    }
+  }
   function handleEdit() {
     setShowEditModal(true);
 
@@ -214,11 +234,20 @@ export default function TaskDetails() {
           <TaskFiles taskId={taskId} />
 
           <div className="d-flex flex-column gap-2 mt-4 mb-3">
-            <Button className="btn-color w-100 p-2">
+            <Button
+              className={`w-100 p-2 ${
+                initialTask?.status === "DONE" ? "btn-success" : "btn-color"
+              }`}
+              onClick={handleCompleteTask}
+              disabled={taskSaving}
+            >
               <BadgeCheck size={20} />
-              <span className="ms-2">Concluir Tarefa</span>
+              <span className="ms-2">
+                {initialTask?.status === "DONE"
+                  ? "Tarefa Concluída"
+                  : "Concluir Tarefa"}
+              </span>
             </Button>
-
             <Button className="btn-light w-100 p-2" onClick={handleEdit}>
               Editar
             </Button>
