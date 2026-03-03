@@ -6,11 +6,14 @@ export async function apiRequest(url, options = {}) {
     const method = (options.method || "GET").toUpperCase();
 
     const headers = {
-        "Content-Type": "application/json",
         Accept: "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options.headers || {}),
     };
+
+    if (!(options.body instanceof FormData)) {
+        headers["Content-Type"] = "application/json";
+    }
 
     const fetchOptions = {
         ...options,

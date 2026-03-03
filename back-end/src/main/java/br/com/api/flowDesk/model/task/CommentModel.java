@@ -14,6 +14,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -21,7 +22,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "comments")
+@Table(name = "comments", indexes = {
+        @Index(name = "idx_comment_task", columnList = "task_id"),
+        @Index(name = "idx_comment_task_created", columnList = "task_id, created_at")
+})
 @Getter
 @Setter
 public class CommentModel {

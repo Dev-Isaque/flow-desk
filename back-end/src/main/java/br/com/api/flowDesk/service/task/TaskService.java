@@ -45,6 +45,8 @@ public class TaskService {
     private TaskItemRepository taskItemRepository;
     @Autowired
     private TagService tagService;
+    @Autowired
+    private AttachmentService attachmentService;
 
     public List<TaskDTO> listByProject(UUID projectId) {
         return taskRepository.findByProjectId(projectId)
@@ -158,7 +160,6 @@ public class TaskService {
 
         task.setCreatedBy(user);
 
-        // Tags (mantive sua lógica)
         if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()) {
 
             var tags = tagRepository.findAllById(dto.getTagIds());
@@ -230,16 +231,19 @@ public class TaskService {
     public void delete(UUID taskId, UserModel user) {
 
         TaskModel task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
 
         if (!task.getCreatedBy().getId().equals(user.getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para excluir esta tarefa");
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Você não tem permissão para excluir esta tarefa");
         }
 
-        for (TagModel tag : task.getTags()) {
-            tag.getTasks().remove(task);
+        var attachments = attachmentService.findByTask(taskId);
+        for (var attachment : attachments) {
+            attachmentService.delete(attachment.getId());
         }
-        task.getTags().clear();
 
         taskRepository.delete(task);
     }

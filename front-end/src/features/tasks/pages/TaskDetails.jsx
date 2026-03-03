@@ -14,6 +14,7 @@ import { TaskComment } from "../components/TaskComment";
 import { TaskDescription } from "../components/TaskDescription";
 import { TaskProperty } from "../components/Taskproperty";
 import { TaskFiles } from "../components/TaskFiles";
+import { TaskModal } from "../components/TaskModal";
 
 import { useTask } from "../hooks/useTask";
 import { useTaskItems } from "../hooks/useTaskItems";
@@ -61,6 +62,8 @@ export default function TaskDetails() {
     [newTitle, saving],
   );
 
+  const [showEditModal, setShowEditModal] = useState(false);
+
   async function handleAdd() {
     if (!canAdd) return;
     try {
@@ -86,8 +89,19 @@ export default function TaskDetails() {
 
     const deleted = await deleteTask();
     if (deleted) {
-      navigate(-1);
+      navigate("/personal");
     }
+  }
+
+  function handleEdit() {
+    setShowEditModal(true);
+
+    setTimeout(() => {
+      const el = document.getElementById("modalTask");
+      if (el && window.bootstrap) {
+        window.bootstrap.Modal.getOrCreateInstance(el).show();
+      }
+    }, 100);
   }
 
   const formatDate = (dateString) => {
@@ -213,13 +227,20 @@ export default function TaskDetails() {
               <BadgeCheck size={20} />
               <span className="ms-2">Concluir Tarefa</span>
             </Button>
-            <Button className="btn-secondary w-100 p-2 mt-2">
+
+            <Button className="btn-light w-100 p-2" onClick={handleEdit}>
+              Editar
+            </Button>
+
+            <Button className="btn-secondary w-100 p-2">
               <Share2 size={20} />
               <span className="ms-2">Compartilhar tarefa</span>
             </Button>
 
+            <hr className="my-2" />
+
             <Button
-              className="btn-danger w-100 p-2 mt-2"
+              className="btn-danger w-100 p-2"
               onClick={handleDelete}
               disabled={isDeleting}
             >
@@ -228,6 +249,17 @@ export default function TaskDetails() {
           </div>
         </div>
       </div>
+
+      {showEditModal && (
+        <TaskModal
+          taskId={taskId}
+          projectId={initialTask.workspaceId}
+          onUpdated={() => {
+            setShowEditModal(false);
+            window.location.reload();
+          }}
+        />
+      )}
     </div>
   );
 }

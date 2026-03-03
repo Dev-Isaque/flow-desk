@@ -22,6 +22,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -32,7 +33,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "tasks")
+@Table(name = "tasks", indexes = {
+        @Index(name = "idx_task_project", columnList = "project_id"),
+        @Index(name = "idx_task_assigned", columnList = "assigned_to"),
+        @Index(name = "idx_task_created_by", columnList = "created_by")
+})
 @Getter
 @Setter
 public class TaskModel {
@@ -86,6 +91,12 @@ public class TaskModel {
     @ManyToMany
     @JoinTable(name = "task_tags", joinColumns = @JoinColumn(name = "task_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<TagModel> tags = new HashSet<>();
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TaskItemModel> items = new ArrayList<>();
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AttachmentModel> attachments = new ArrayList<>();
 
     public Duration getEstimatedTime() {
         return estimatedTimeSeconds != null ? Duration.ofSeconds(estimatedTimeSeconds) : null;
