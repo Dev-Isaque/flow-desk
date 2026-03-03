@@ -9,7 +9,9 @@ import {
   Loader2,
 } from "lucide-react";
 import { useState, useMemo } from "react";
+
 import { Button } from "../../../shared/components/Button";
+import { formatDate } from "../../../shared/utils/formatDate";
 
 export function TaskProperty({
   task,
@@ -83,7 +85,7 @@ export function TaskProperty({
         <CalendarDays size={18} />
         <div>
           <span className="label">Entrega</span>
-          <span className="value">{task?.dueDateTime}</span>
+          <span className="value">{formatDate(task?.dueDateTime)}</span>
         </div>
       </div>
 

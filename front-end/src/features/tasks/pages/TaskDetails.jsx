@@ -22,6 +22,7 @@ import { useTaskProgress } from "../hooks/useTaskProgress";
 import { useTaskTags } from "../hooks/useTaskTags";
 
 import { Button } from "../../../shared/components/Button";
+import { formatDate } from "../../../shared/utils/formatDate";
 
 export default function TaskDetails() {
   const { taskId } = useParams();
@@ -103,16 +104,6 @@ export default function TaskDetails() {
       }
     }, 100);
   }
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
 
   if (taskLoading) {
     return (
