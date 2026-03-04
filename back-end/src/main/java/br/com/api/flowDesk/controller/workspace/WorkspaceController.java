@@ -52,7 +52,7 @@ public class WorkspaceController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/cadastrar")
+    @PostMapping("/create")
     public ResponseEntity<WorkspaceResponse> create(
             @RequestBody @Valid CreateWorkspaceRequest dto,
             @RequestHeader("Authorization") String authHeader) {
