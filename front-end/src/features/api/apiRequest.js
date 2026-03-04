@@ -30,6 +30,11 @@ export async function apiRequest(url, options = {}) {
 
     const response = await fetch(`${API_URL}${url}`, fetchOptions);
 
+    if (options.responseType === "blob") {
+        if (!response.ok) throw new Error("Erro na requisição");
+        return response.blob();
+    }
+
     let data = null;
     try {
         data = await response.json();

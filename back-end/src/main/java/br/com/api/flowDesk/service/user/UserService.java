@@ -9,13 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.api.flowDesk.dto.user.UserDTO;
-import br.com.api.flowDesk.enums.WorkspaceType;
-import br.com.api.flowDesk.model.task.WorkspaceMemberModel;
-import br.com.api.flowDesk.model.task.WorkspaceModel;
 import br.com.api.flowDesk.model.user.UserModel;
-import br.com.api.flowDesk.repository.task.WorkspaceMemberRepository;
-import br.com.api.flowDesk.repository.task.WorkspaceRepository;
 import br.com.api.flowDesk.repository.user.UserRepository;
+import br.com.api.flowDesk.service.workspace.WorkspaceService;
 
 @Service
 public class UserService {
@@ -24,10 +20,7 @@ public class UserService {
     private UserRepository ur;
 
     @Autowired
-    private WorkspaceRepository workspaceRepository;
-
-    @Autowired
-    private WorkspaceMemberRepository workspaceMemberRepository;
+    private WorkspaceService workspaceService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -64,19 +57,7 @@ public class UserService {
 
         user = ur.save(user);
 
-        WorkspaceModel workspace = new WorkspaceModel();
-        workspace.setName("Pessoal");
-        workspace.setColor("#4f46e5");
-        workspace.setType(WorkspaceType.PERSONAL);
-
-        workspace = workspaceRepository.save(workspace);
-
-        WorkspaceMemberModel member = new WorkspaceMemberModel();
-        member.setWorkspace(workspace);
-        member.setUser(user);
-        member.setRole("OWNER");
-
-        workspaceMemberRepository.save(member);
+        workspaceService.getOrCreatePersonal(user);
 
         return user;
     }

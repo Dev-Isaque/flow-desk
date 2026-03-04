@@ -1,8 +1,8 @@
-package br.com.api.flowDesk.dto.task.response;
+package br.com.api.flowDesk.dto.workspace.response;
 
 import java.util.UUID;
 
-import br.com.api.flowDesk.enums.WorkspaceType;
+import br.com.api.flowDesk.enums.workspace.WorkspaceType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

@@ -1,4 +1,4 @@
-package br.com.api.flowDesk.dto.task.request;
+package br.com.api.flowDesk.dto.workspace.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

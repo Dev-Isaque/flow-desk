@@ -56,3 +56,13 @@ export async function downloadAttachmentFile(taskId, attachmentId, originalFileN
     link.parentNode.removeChild(link);
     window.URL.revokeObjectURL(url);
 }
+
+export async function previewAttachmentFile(taskId, attachmentId) {
+    const blob = await apiRequest(
+        `/tasks/${taskId}/attachments/${attachmentId}/view`,
+        { responseType: "blob" }
+    );
+
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, "_blank");
+}

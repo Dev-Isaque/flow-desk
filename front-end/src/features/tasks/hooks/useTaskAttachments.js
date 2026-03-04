@@ -3,7 +3,8 @@ import {
     listAttachments,
     uploadAttachment,
     deleteAttachment,
-    downloadAttachmentFile, // <-- IMPORTADO AQUI
+    downloadAttachmentFile,
+    previewAttachmentFile,
 } from "../services/attachmentService";
 
 export function useTaskAttachments(taskId) {
@@ -45,13 +46,21 @@ export function useTaskAttachments(taskId) {
         );
     };
 
-    // --- NOVA FUNÇÃO NO HOOK ---
     const download = async (attachmentId, originalFileName) => {
         try {
             await downloadAttachmentFile(taskId, attachmentId, originalFileName);
         } catch (error) {
             console.error(error.message);
             alert("Não foi possível fazer o download do arquivo.");
+        }
+    };
+
+    const preview = async (attachmentId) => {
+        try {
+            await previewAttachmentFile(taskId, attachmentId);
+        } catch (error) {
+            console.error(error.message);
+            alert("Não foi possível visualizar o arquivo.");
         }
     };
 
@@ -62,6 +71,7 @@ export function useTaskAttachments(taskId) {
         loadAttachments,
         upload,
         remove,
-        download, // <-- DISPONIBILIZADO AQUI
+        download,
+        preview,
     };
 }

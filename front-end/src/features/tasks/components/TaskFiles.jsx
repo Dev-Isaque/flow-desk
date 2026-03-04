@@ -1,11 +1,12 @@
-import { Files, Plus, Trash2, Download } from "lucide-react";
+import { Files, Plus, Trash2, Download, Eye } from "lucide-react";
 import { useRef } from "react";
 import { useTaskAttachments } from "../hooks/useTaskAttachments";
+import { Button } from "../../../shared/components/Button";
 
 export function TaskFiles({ taskId }) {
   const fileInputRef = useRef(null);
 
-  const { attachments, loading, uploading, upload, remove, download } =
+  const { attachments, loading, uploading, upload, remove, download, preview } =
     useTaskAttachments(taskId);
 
   function handleUploadClick() {
@@ -27,13 +28,13 @@ export function TaskFiles({ taskId }) {
           <Files size={20} /> Arquivos
         </h5>
 
-        <button
-          className="btn btn-sm btn-outline-primary"
+        <Button
+          className="btn-color btn-sm"
           onClick={handleUploadClick}
           disabled={uploading}
         >
           <Plus size={16} />
-        </button>
+        </Button>
       </div>
 
       <input
@@ -60,21 +61,28 @@ export function TaskFiles({ taskId }) {
             </span>
 
             <div className="d-flex gap-2">
-              <button
-                className="btn btn-sm btn-outline-secondary"
+              <Button
+                className="btn-sm btn-outline-primary"
+                onClick={() => preview(file.id)}
+                title="Visualizar arquivo"
+              >
+                <Eye size={14} />
+              </Button>
+              <Button
+                className="btn-sm btn-outline-secondary"
                 onClick={() => download(file.id, file.originalFileName)}
                 title="Baixar arquivo"
               >
                 <Download size={14} />
-              </button>
+              </Button>
 
-              <button
-                className="btn btn-sm btn-outline-danger"
+              <Button
+                className="btn-sm btn-outline-danger"
                 onClick={() => remove(file.id)}
                 title="Excluir arquivo"
               >
                 <Trash2 size={14} />
-              </button>
+              </Button>
             </div>
           </li>
         ))}

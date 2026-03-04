@@ -10,8 +10,8 @@ import br.com.api.flowDesk.dto.task.request.CreateProjectRequest;
 import br.com.api.flowDesk.model.task.ProjectModel;
 import br.com.api.flowDesk.model.user.UserModel;
 import br.com.api.flowDesk.repository.task.ProjectRepository;
-import br.com.api.flowDesk.repository.task.WorkspaceMemberRepository;
-import br.com.api.flowDesk.repository.task.WorkspaceRepository;
+import br.com.api.flowDesk.repository.workspace.WorkspaceMemberRepository;
+import br.com.api.flowDesk.repository.workspace.WorkspaceRepository;
 
 @Service
 public class ProjectService {
@@ -29,7 +29,7 @@ public class ProjectService {
         var workspace = workspaceRepository.findById(dto.getWorkspaceId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Workspace não encontrado"));
 
-        boolean isMember = workspaceMemberRepository.existsByWorkspaceIdAndUserId(workspace.getId(), user.getId());
+        boolean isMember = workspaceMemberRepository.existsByWorkspace_IdAndUser_Id(workspace.getId(), user.getId());
         if (!isMember) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem acesso a esse workspace");
         }

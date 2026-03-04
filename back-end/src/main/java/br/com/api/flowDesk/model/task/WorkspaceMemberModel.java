@@ -8,9 +8,12 @@ import org.hibernate.annotations.UuidGenerator;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import br.com.api.flowDesk.enums.workspace.WorkspaceRole;
 import br.com.api.flowDesk.model.user.UserModel;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -39,7 +42,8 @@ public class WorkspaceMemberModel {
     @JoinColumn(name = "user_id", nullable = false)
     private UserModel user;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private WorkspaceRole role;
 
     @CreationTimestamp
     @Column(name = "joined_at", updatable = false)

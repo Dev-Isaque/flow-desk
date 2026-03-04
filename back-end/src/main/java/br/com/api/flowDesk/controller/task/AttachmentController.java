@@ -74,4 +74,21 @@ public class AttachmentController {
                 .body(file);
     }
 
+    @GetMapping("/{attachmentId}/view")
+    public ResponseEntity<Resource> viewAttachment(
+            @PathVariable UUID taskId,
+            @PathVariable UUID attachmentId) {
+
+        AttachmentModel attachment = attachmentService.findById(attachmentId);
+
+        Resource file = attachmentService
+                .loadFileAsResource(attachment.getStoredFileName());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(attachment.getContentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + attachment.getOriginalFileName() + "\"")
+                .body(file);
+    }
+
 }
