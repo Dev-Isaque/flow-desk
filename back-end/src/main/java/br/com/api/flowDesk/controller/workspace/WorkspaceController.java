@@ -45,7 +45,8 @@ public class WorkspaceController {
                                                 ws.getId(),
                                                 ws.getName(),
                                                 ws.getColor(),
-                                                ws.getType()))
+                                                ws.getType(),
+                                                ws.getMemberCount()))
                                 .toList();
 
                 return ResponseEntity.ok(response);

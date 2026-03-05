@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.api.flowDesk.dto.workspace.request.CreateWorkspaceRequest;
+import br.com.api.flowDesk.dto.workspace.response.WorkspaceResponse;
 import br.com.api.flowDesk.enums.workspace.WorkspaceRole;
 import br.com.api.flowDesk.enums.workspace.WorkspaceType;
 import br.com.api.flowDesk.model.task.WorkspaceMemberModel;
@@ -102,8 +103,18 @@ public class WorkspaceService {
                 });
     }
 
-    public List<WorkspaceModel> findAllSharedByUser(UUID userId) {
-        return workspaceRepository
+    public List<WorkspaceResponse> findAllSharedByUser(UUID userId) {
+
+        var workspaces = workspaceRepository
                 .findDistinctByMembers_User_IdAndType(userId, WorkspaceType.SHARED);
+
+        return workspaces.stream()
+                .map(ws -> new WorkspaceResponse(
+                        ws.getId(),
+                        ws.getName(),
+                        ws.getColor(),
+                        ws.getType(),
+                        ws.getMembers().size()))
+                .toList();
     }
 }
