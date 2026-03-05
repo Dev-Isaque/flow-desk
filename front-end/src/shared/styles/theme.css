@@ -117,7 +117,6 @@ body {
   background-color: var(--secondary-color) !important;
 }
 
-/* Textos (Colors) */
 .theme-text {
   color: var(--text-color) !important;
 }
@@ -141,13 +140,6 @@ body {
   border-radius: 8px;
   padding: 0.5rem 0.8rem;
   transition: all 0.2s ease;
-}
-
-.theme-input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  background-color: var(--card-color);
-  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
 }
 
 .theme-input::placeholder {

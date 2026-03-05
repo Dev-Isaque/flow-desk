@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Plus, Users, Search, MoreVertical } from "lucide-react";
-import { Modal as BsModal } from "bootstrap";
 
 import "../../features/tasks/style/tasks.css";
 import "../../features/wokspace/style/wokspaces.css";
@@ -35,18 +34,12 @@ function GroupWorkspace() {
     fetchWorkspaces();
   }, []);
 
-  const closeModal = (id) => {
-    const modal = BsModal.getInstance(document.getElementById(id));
-    if (modal) modal.hide();
-  };
-
   const handleConfirmAddMember = async () => {
     if (newMemberEmail.trim() === "") return;
 
     await handleAddMember(activeWorkspaceId, newMemberEmail);
 
     setNewMemberEmail("");
-    closeModal("modalMembro");
   };
 
   const handleConfirmCreateGroup = async () => {
@@ -56,7 +49,6 @@ function GroupWorkspace() {
 
     setNewGroupName("");
     setNewGroupColor("#14b8a6");
-    closeModal("modalCriarGrupo");
   };
 
   const erroTela = errorMe || error;
