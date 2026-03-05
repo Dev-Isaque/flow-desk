@@ -1,191 +1,322 @@
 import { useState, useEffect } from "react";
-import { Plus, Users } from "lucide-react"; 
+import { Plus, Users, Search, MoreVertical } from "lucide-react";
+import { Modal as BsModal } from "bootstrap";
 
 import "../../features/tasks/style/tasks.css";
+import "../../features/wokspace/style/wokspaces.css";
 
-import { ProjectBar } from "../../features/projects/components/ProjectBar";
-import { CreateProjectInline } from "../../features/projects/components/CreateProjectInline";
 import { Button } from "../../shared/components/Button";
-import { TaskModal } from "../../features/tasks/components/TaskModal";
-import { TaskBody } from "../../features/tasks/components/TaskBody";
-
-import { useProjects } from "../../features/projects/hooks/useProjects";
-import { useSharedWorkspace } from "../../features/wokspace/hooks/useSharedWorkspace"; 
+import { Topbar } from "../../shared/components/Topbar";
+import { Modal } from "../../shared/components/Modal";
+import { useSharedWorkspace } from "../../features/wokspace/hooks/useSharedWorkspace";
 import { useMe } from "../../features/user/hooks/useMe";
-import { useProjectTasks } from "../../features/tasks/hooks/useProjectTasks";
-import { useWorkspaceTags } from "../../features/wokspace/hooks/useWorkspaceTags";
+import { WorkspaceBoard } from "../../features/wokspace/components/WorkspaceBoard";
 
 function GroupWorkspace() {
-  const { usuario, errorMe } = useMe();
-
-  const { workspaces, loading, error, handleAddMember, fetchWorkspaces } =
-    useSharedWorkspace();
+  const { user, errorMe } = useMe();
+  const {
+    workspaces,
+    loading,
+    error,
+    handleAddMember,
+    handleCreateWorkspace,
+    fetchWorkspaces,
+  } = useSharedWorkspace();
 
   const [activeWorkspaceId, setActiveWorkspaceId] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [newMemberEmail, setNewMemberEmail] = useState("");
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupColor, setNewGroupColor] = useState("#14b8a6");
 
   useEffect(() => {
     fetchWorkspaces();
   }, []);
 
-  useEffect(() => {
-    if (workspaces.length > 0 && !activeWorkspaceId) {
-      setActiveWorkspaceId(workspaces[0].id);
-    }
-  }, [workspaces, activeWorkspaceId]);
-
-  const {
-    projects,
-    projectSelecionado,
-    setProjectSelecionado,
-    loadingProjects,
-    savingProject,
-    errorProjects,
-    addProject,
-  } = useProjects({ workspaceId: activeWorkspaceId });
-
-  const {
-    tasks,
-    loading: loadingTasks,
-    error: errorTasks,
-    setTasks,
-  } = useProjectTasks(projectSelecionado);
-
-  const [editingTaskId, seteditingTaskId] = useState(null);
-  const [isCreatingProject, setIsCreatingProject] = useState(false);
-  const { tags } = useWorkspaceTags(activeWorkspaceId);
-
-  function openCreateProject() {
-    setIsCreatingProject(true);
-  }
-  function cancelCreateProject() {
-    if (!savingProject) setIsCreatingProject(false);
-  }
-
-  async function confirmCreateProject(name) {
-    if (savingProject) return;
-    const result = await addProject({ name });
-    if (result?.ok) setIsCreatingProject(false);
-  }
-
-  function handleCreatedTask(newTask) {
-    setTasks((prev) => [newTask, ...prev]);
-  }
-  function handleUpdatedTask(updatedTask) {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)),
-    );
-    seteditingTaskId(null);
-  }
-  function handleDeletedTask(taskId) {
-    setTasks((prev) => prev.filter((t) => t.id !== taskId));
-  }
-  function handleEditTask(task) {
-    seteditingTaskId(task.id);
-    const el = document.getElementById("modalTask");
-    if (el && window.bootstrap)
-      window.bootstrap.Modal.getOrCreateInstance(el).show();
-  }
-
-  const openAddMemberModal = () => {
-    const email = prompt("Digite o email do novo membro:");
-    if (email) {
-      handleAddMember(activeWorkspaceId, email);
-    }
+  const closeModal = (id) => {
+    const modal = BsModal.getInstance(document.getElementById(id));
+    if (modal) modal.hide();
   };
 
-  const erroTela = errorMe || error || errorProjects || errorTasks;
-  const workspaceAtivo = workspaces.find((w) => w.id === activeWorkspaceId);
+  const handleConfirmAddMember = async () => {
+    if (newMemberEmail.trim() === "") return;
+
+    await handleAddMember(activeWorkspaceId, newMemberEmail);
+
+    setNewMemberEmail("");
+    closeModal("modalMembro");
+  };
+
+  const handleConfirmCreateGroup = async () => {
+    if (newGroupName.trim() === "") return;
+
+    await handleCreateWorkspace(newGroupName, newGroupColor);
+
+    setNewGroupName("");
+    setNewGroupColor("#14b8a6");
+    closeModal("modalCriarGrupo");
+  };
+
+  const erroTela = errorMe || error;
+
+  const workspaceAtivo = Array.isArray(workspaces)
+    ? workspaces.find((w) => w.id === activeWorkspaceId)
+    : null;
+
+  const filteredWorkspaces = Array.isArray(workspaces)
+    ? workspaces.filter((workspace) =>
+        workspace.name.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    : [];
+
+  const breadcrumb =
+    activeWorkspaceId && workspaceAtivo ? (
+      <span>
+        <span
+          onClick={() => setActiveWorkspaceId("")}
+          className="text-muted hover-primary"
+          style={{ cursor: "pointer", transition: "color 0.2s" }}
+        >
+          Grupos
+        </span>
+        <span className="mx-2 text-muted">{">"}</span>
+        <span className="theme-text">{workspaceAtivo.name}</span>
+      </span>
+    ) : (
+      <span className="theme-text">Grupos</span>
+    );
 
   return (
-    <div className="tasks-page">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h1>Equipes{usuario ? `, ${usuario.name}` : ""}</h1>
-          {workspaces.length > 0 && (
-            <select
-              className="form-select mt-2"
-              value={activeWorkspaceId}
-              onChange={(e) => setActiveWorkspaceId(e.target.value)}
-            >
-              {workspaces.map((ws) => (
-                <option key={ws.id} value={ws.id}>
-                  {ws.name}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-
-        {activeWorkspaceId && (
-          <Button onClick={openAddMemberModal} className="btn-outline-primary">
-            <Users size={18} className="me-2" /> Adicionar Membro
-          </Button>
-        )}
-      </div>
+    <div className="tasks-page position-relative">
+      <Topbar breadcrumb={breadcrumb} />
 
       {erroTela && <p className="auth-error">{erroTela}</p>}
 
-      {!activeWorkspaceId && !loading ? (
-        <div className="task-body-state">
-          <p>Você ainda não participa de nenhum workspace em grupo.</p>
-        </div>
-      ) : (
-        <>
-          <ProjectBar
-            projects={projects}
-            projectSelecionado={projectSelecionado}
-            setProjectSelecionado={setProjectSelecionado}
-            isCreatingProject={isCreatingProject}
-            onOpenCreate={openCreateProject}
-            loadingWorkspace={loading}
-            workspaceId={activeWorkspaceId}
-            loadingProjects={loadingProjects}
-            savingProject={savingProject}
-            createSlot={
-              <CreateProjectInline
-                savingProject={savingProject}
-                onConfirm={confirmCreateProject}
-                onCancel={cancelCreateProject}
-              />
-            }
-          />
+      {!activeWorkspaceId ? (
+        <div className="workspace-dashboard">
+          <div className="d-flex justify-content-between align-items-end mb-4">
+            <div>
+              <h1 className="mb-1 theme-text">Meus Grupos</h1>
+              <p className="mb-0 theme-text-muted">
+                Gerencie suas equipes e colabore em projetos.
+              </p>
+            </div>
+
+            <Button
+              className="btn-color px-4"
+              data-bs-toggle="modal"
+              data-bs-target="#modalCriarGrupo"
+            >
+              <Plus size={18} className="me-2" /> Criar Novo Grupo
+            </Button>
+          </div>
+
+          <div className="search-bar-container mb-4 position-relative">
+            <Search
+              size={18}
+              className="position-absolute theme-text-muted"
+              style={{ left: "15px", top: "12px" }}
+            />
+
+            <input
+              type="text"
+              className="form-control workspace-search-input ps-5 py-2"
+              placeholder="Buscar por nome do grupo..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
 
           {loading ? (
             <div className="task-body-state">
-              <p>Carregando workspace...</p>
+              <p className="theme-text-muted">Carregando seus grupos...</p>
             </div>
           ) : (
-            <TaskBody
-              workspaceId={activeWorkspaceId}
-              projectId={projectSelecionado}
-              tasks={tasks}
-              loading={loadingTasks}
-              error={errorTasks}
-              workspaceTags={tags}
-              onDeleteTask={handleDeletedTask}
-              onEditTask={handleEditTask}
-            />
+            <div className="row g-4">
+              {filteredWorkspaces.map((workspace) => (
+                <div className="col-12 col-md-6 col-lg-4" key={workspace.id}>
+                  <div
+                    className="workspace-card"
+                    onClick={() => setActiveWorkspaceId(workspace.id)}
+                  >
+                    <div className="d-flex justify-content-between align-items-start mb-3">
+                      <span
+                        className="badge rounded-pill"
+                        style={{
+                          backgroundColor: workspace.color || "var(--primary-color)",
+                          color: "#fff",
+                        }}
+                      >
+                        Ativo
+                      </span>
+
+                      <button
+                        className="btn btn-sm p-0 theme-text-muted hover-primary"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreVertical size={18} />
+                      </button>
+                    </div>
+
+                    <h4 className="workspace-card-title">{workspace.name}</h4>
+
+                    <p className="workspace-card-desc">
+                      Espaço de trabalho compartilhado.
+                    </p>
+
+                    <div className="mt-auto">
+                      <div className="workspace-card-footer mb-2">
+                        <span>Progresso</span>
+                        <span>0%</span>
+                      </div>
+
+                      <div className="workspace-progress-bg">
+                        <div
+                          className="progress-bar h-100"
+                          style={{
+                            width: "0%",
+                            backgroundColor: workspace.color || "var(--primary-color)",
+                          }}
+                        ></div>
+                      </div>
+
+                      <div className="workspace-card-footer">
+                        <div className="d-flex align-items-center">
+                          <Users size={14} className="me-1" />
+                          {workspace.memberCount || 1}
+                        </div>
+
+                        <span>Criado recentemente</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <div className="col-12 col-md-6 col-lg-4">
+                <div
+                  className="workspace-new-card"
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalCriarGrupo"
+                >
+                  <div className="workspace-new-icon-wrapper">
+                    <Plus size={24} />
+                  </div>
+
+                  <h5 className="theme-text">Novo Grupo</h5>
+
+                  <p
+                    className="theme-text-muted"
+                    style={{ fontSize: "0.9rem" }}
+                  >
+                    Crie um novo espaço de trabalho
+                  </p>
+                </div>
+              </div>
+            </div>
           )}
-
-          <Button
-            type="button"
-            className="floating-btn btn-color"
-            data-bs-toggle="modal"
-            data-bs-target="#modalTask"
-            onClick={() => seteditingTaskId(null)}
-            disabled={projectSelecionado === "ALL" || !projectSelecionado}
-          >
-            <Plus /> Nova Tarefa
-          </Button>
-
-          <TaskModal
-            projectId={projectSelecionado}
-            taskId={editingTaskId}
-            onCreated={handleCreatedTask}
-            onUpdated={handleUpdatedTask}
-          />
-        </>
+        </div>
+      ) : (
+        <WorkspaceBoard
+          workspaceId={activeWorkspaceId}
+          loadingWorkspace={loading}
+          title={workspaceAtivo?.name || "Grupo"}
+          onBack={() => setActiveWorkspaceId("")}
+          extraHeaderActions={
+            <Button
+              className="btn-outline-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#modalMembro"
+            >
+              <Users size={18} className="me-2" /> Adicionar Membro
+            </Button>
+          }
+        />
       )}
+
+      <Modal
+        id="modalMembro"
+        title="Adicionar Novo Membro"
+        footer={
+          <>
+            <button
+              className="btn btn-link theme-text-muted text-decoration-none"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+
+            <Button className="btn-color px-4" onClick={handleConfirmAddMember}>
+              Adicionar
+            </Button>
+          </>
+        }
+      >
+        <label className="form-label theme-text-muted fw-medium">
+          E-mail do usuário
+        </label>
+
+        <input
+          className="form-control theme-input"
+          value={newMemberEmail}
+          onChange={(e) => setNewMemberEmail(e.target.value)}
+          placeholder="exemplo@email.com"
+        />
+      </Modal>
+
+      <Modal
+        id="modalCriarGrupo"
+        title="Criar Novo Grupo"
+        footer={
+          <>
+            <button
+              className="btn btn-link theme-text-muted text-decoration-none"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+
+            <Button
+              className="btn-color px-4"
+              onClick={handleConfirmCreateGroup}
+            >
+              Criar Grupo
+            </Button>
+          </>
+        }
+      >
+        <div className="mb-3">
+          <label className="form-label theme-text-muted fw-medium">
+            Nome do Grupo
+          </label>
+
+          <input
+            className="form-control theme-input"
+            value={newGroupName}
+            onChange={(e) => setNewGroupName(e.target.value)}
+            placeholder="Nome da equipe"
+          />
+        </div>
+
+        <div className="d-flex gap-2">
+          {["#14b8a6", "#3b82f6", "#8b5cf6", "#f43f5e", "#f59e0b"].map((c) => (
+            <div
+              key={c}
+              onClick={() => setNewGroupColor(c)}
+              style={{
+                width: 30,
+                height: 30,
+                backgroundColor: c,
+                borderRadius: "50%",
+                cursor: "pointer",
+                border:
+                  newGroupColor === c ? "3px solid var(--text-color)" : "none",
+              }}
+            />
+          ))}
+        </div>
+      </Modal>
     </div>
   );
 }

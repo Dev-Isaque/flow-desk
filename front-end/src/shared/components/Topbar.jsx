@@ -1,35 +1,71 @@
-import { Search, Bell, Menu } from "lucide-react";
-
+import { Bell, ArrowLeft } from "lucide-react";
 import { AlternateTheme } from "./AlternateTheme";
+import { useMe } from "../../features/user/hooks/useMe";
 
-export function Topbar() {
+export function Topbar({ breadcrumb, onBack }) {
+  const { usuario } = useMe();
+
+  const getInitials = (name) => {
+    if (!name) return "US";
+    const words = name.trim().split(" ");
+    if (words.length > 1) {
+      return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
   return (
-    <nav className="navbar px-3 py-2 topbar">
-      <span
-        className="navbar-brand fw-semibold"
-        style={{ color: "var(--text-muted)" }}
-      >
-        Tarefas Pessoais
-      </span>
+    <div className="d-flex justify-content-between align-items-center w-100 mb-5">
+      <div className="d-flex align-items-center gap-2">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="btn btn-link p-0 border-0 theme-text hover-primary"
+          >
+            <ArrowLeft size={18} />
+          </button>
+        )}
 
-      <div className="d-flex align-items-center gap-2 ms-auto">
-        <div className="input-group search-box">
-          <span className="input-group-text bg-transparent border-0 text-muted">
-            <Search size={16} />
-          </span>
-          <input
-            type="text"
-            className="form-control bg-transparent border-0 text-white"
-            placeholder="Buscar tarefas..."
-          />
+        <div className="small fw-medium theme-text-muted">
+          {breadcrumb || "Home"}
         </div>
+      </div>
 
-        <button className="icon-btn">
+      <div className="d-flex align-items-center gap-3">
+        <button className="btn btn-link p-0 border-0 theme-text hover-primary">
           <Bell size={18} />
         </button>
 
         <AlternateTheme />
+
+        <div className="d-flex align-items-center gap-2 border-start border-secondary ps-3 ms-1">
+          <div className="text-end d-none d-md-block">
+            <p
+              className="mb-0 fw-semibold theme-text"
+              style={{ fontSize: "0.85rem" }}
+            >
+              {usuario ? usuario.name : "Carregando..."}
+            </p>
+            <p
+              className="mb-0 theme-text-muted"
+              style={{ fontSize: "0.7rem", letterSpacing: "0.5px" }}
+            >
+              MEMBER
+            </p>
+          </div>
+          <div
+            className="rounded-circle d-flex justify-content-center align-items-center fw-bold"
+            style={{
+              width: "36px",
+              height: "36px",
+              backgroundColor: "var(--primary-color)",
+              color: "#102222",
+            }}
+          >
+            {usuario ? getInitials(usuario.name) : "..."}
+          </div>
+        </div>
       </div>
-    </nav>
+    </div>
   );
 }

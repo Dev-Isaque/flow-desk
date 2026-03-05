@@ -52,8 +52,6 @@ export function AppLayout() {
           <Menu size={20} />
         </Button>
 
-        <Topbar />
-
         <div className="app-content">
           <Outlet />
         </div>

@@ -68,7 +68,6 @@ export function TaskModal({ projectId, taskId, onCreated, onUpdated }) {
         if (onCreated) onCreated(result);
       }
 
-      // Fecha modal
       const el = document.getElementById("modalTask");
       if (el && window.bootstrap) {
         window.bootstrap.Modal.getOrCreateInstance(el).hide();

@@ -3,19 +3,18 @@ import { getMe } from "../service/userService";
 
 export function useMe() {
     const [usuario, setUsuario] = useState(null);
-    const [loadingMe, setLoadingMe] = useState(true); // ✅ Começa como true
+    const [loadingMe, setLoadingMe] = useState(true);
     const [errorMe, setErrorMe] = useState("");
 
     useEffect(() => {
-        let alive = true; // ✅ Flag para cleanup
-
+        let alive = true; 
         async function load() {
             if (alive) setLoadingMe(true);
             setErrorMe("");
 
             const r = await getMe();
 
-            if (!alive) return; // ✅ Previne state updates após desmontagem
+            if (!alive) return; 
 
             if (!r?.sucesso) {
                 setErrorMe(r?.mensagem || "Não foi possível carregar o usuário");
@@ -30,7 +29,7 @@ export function useMe() {
         load();
 
         return () => {
-            alive = false; // ✅ Cleanup
+            alive = false; 
         };
     }, []);
 

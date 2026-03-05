@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.api.flowDesk.dto.workspace.request.AddMemberRequest;
 import br.com.api.flowDesk.dto.workspace.request.CreateWorkspaceRequest;
 import br.com.api.flowDesk.dto.workspace.response.WorkspaceResponse;
 import br.com.api.flowDesk.model.user.UserModel;
@@ -26,78 +25,63 @@ import jakarta.validation.Valid;
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class WorkspaceController {
 
-    @Autowired
-    private WorkspaceService workspaceService;
+        @Autowired
+        private WorkspaceService workspaceService;
 
-    @Autowired
-    private AuthTokenService authTokenService;
+        @Autowired
+        private AuthTokenService authTokenService;
 
-    @GetMapping
-    public ResponseEntity<List<WorkspaceResponse>> listWorkspaces(
-            @RequestHeader("Authorization") String authHeader) {
+        @GetMapping
+        public ResponseEntity<List<WorkspaceResponse>> listWorkspaces(
+                        @RequestHeader("Authorization") String authHeader) {
 
-        String token = authHeader.replace("Bearer ", "").trim();
-        UserModel user = authTokenService.requireUserByToken(token);
+                String token = authHeader.replace("Bearer ", "").trim();
+                UserModel user = authTokenService.requireUserByToken(token);
 
-        var workspaces = workspaceService.findAllSharedByUser(user.getId());
+                var workspaces = workspaceService.findAllSharedByUser(user.getId());
 
-        var response = workspaces.stream()
-                .map(ws -> new WorkspaceResponse(
-                        ws.getId(),
-                        ws.getName(),
-                        ws.getColor(),
-                        ws.getType()))
-                .toList();
+                var response = workspaces.stream()
+                                .map(ws -> new WorkspaceResponse(
+                                                ws.getId(),
+                                                ws.getName(),
+                                                ws.getColor(),
+                                                ws.getType()))
+                                .toList();
 
-        return ResponseEntity.ok(response);
-    }
+                return ResponseEntity.ok(response);
+        }
 
-    @PostMapping("/create")
-    public ResponseEntity<WorkspaceResponse> create(
-            @RequestBody @Valid CreateWorkspaceRequest dto,
-            @RequestHeader("Authorization") String authHeader) {
+        @PostMapping("/create")
+        public ResponseEntity<WorkspaceResponse> create(
+                        @RequestBody @Valid CreateWorkspaceRequest dto,
+                        @RequestHeader("Authorization") String authHeader) {
 
-        String token = authHeader.replace("Bearer ", "").trim();
-        UserModel user = authTokenService.requireUserByToken(token);
+                String token = authHeader.replace("Bearer ", "").trim();
+                UserModel user = authTokenService.requireUserByToken(token);
 
-        var created = workspaceService.create(dto, user);
+                var created = workspaceService.create(dto, user);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new WorkspaceResponse(
-                        created.getId(),
-                        created.getName(),
-                        created.getColor(),
-                        created.getType()));
-    }
+                return ResponseEntity.status(HttpStatus.CREATED)
+                                .body(new WorkspaceResponse(
+                                                created.getId(),
+                                                created.getName(),
+                                                created.getColor(),
+                                                created.getType()));
+        }
 
-    @PostMapping("/add-member")
-    public ResponseEntity<Void> addMember(
-            @RequestBody AddMemberRequest dto,
-            @RequestHeader("Authorization") String authHeader) {
+        @GetMapping("/personal")
+        public ResponseEntity<WorkspaceResponse> personal(
+                        @RequestHeader("Authorization") String authHeader) {
 
-        String token = authHeader.replace("Bearer ", "").trim();
-        UserModel user = authTokenService.requireUserByToken(token);
+                String token = authHeader.replace("Bearer ", "").trim();
+                UserModel user = authTokenService.requireUserByToken(token);
 
-        workspaceService.addMember(dto.getWorkspaceId(), dto.getEmailToAdd(), user);
+                var ws = workspaceService.getOrCreatePersonal(user);
 
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/personal")
-    public ResponseEntity<WorkspaceResponse> personal(@RequestHeader("Authorization") String authHeader) {
-
-        String token = authHeader.replace("Bearer ", "").trim();
-        UserModel user = authTokenService.requireUserByToken(token);
-
-        var ws = workspaceService.getOrCreatePersonal(user);
-
-        System.out.println(">>> workspace encontrado/criado: " + (ws != null ? ws.getId() : "NULL"));
-
-        return ResponseEntity.ok(new WorkspaceResponse(
-                ws.getId(),
-                ws.getName(),
-                ws.getColor(),
-                ws.getType()));
-    }
-
+                return ResponseEntity.ok(new WorkspaceResponse(
+                                ws.getId(),
+                                ws.getName(),
+                                ws.getColor(),
+                                ws.getType()));
+        }
 }

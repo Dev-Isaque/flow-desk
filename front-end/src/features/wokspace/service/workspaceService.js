@@ -4,7 +4,6 @@ export const getPersonalWorkspace = () => {
     return apiRequest("/workspaces/personal", { method: "GET" });
 };
 
-
 export const listWorkspaces = () => {
     return apiRequest("/workspaces", { method: "GET" });
 };
@@ -29,15 +28,19 @@ export const createWorkspace = (workspaceName, color, type = "SHARED") => {
             type: type
         }),
     });
-}
-
+};
 
 export const addMemberToWorkspace = (workspaceId, memberEmail) => {
-    return apiRequest("/workspaces/add-member", {
+    return apiRequest(`/workspaces/${workspaceId}/members`, {
         method: "POST",
         body: JSON.stringify({
-            workspaceId: workspaceId,
             emailToAdd: memberEmail
         }),
     });
-}
+};
+
+export const listWorkspaceMembers = (workspaceId) => {
+    return apiRequest(`/workspaces/${workspaceId}/members`, {
+        method: "GET"
+    });
+};

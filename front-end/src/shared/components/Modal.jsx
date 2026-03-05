@@ -25,23 +25,23 @@ export function Modal({
       aria-hidden="true"
     >
       <div className={dialogClass}>
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title" id={`${id}Label`}>
+        <div className="modal-content theme-modal-content border-0">
+          <div className="modal-header border-bottom-0">
+            <h5 className="modal-title fw-bold theme-text" id={`${id}Label`}>
               {title}
             </h5>
 
             <button
               type="button"
-              className="btn-close"
+              className="btn-close theme-btn-close"
               data-bs-dismiss="modal"
               aria-label="Close"
             />
           </div>
 
-          <div className="modal-body">{children}</div>
+          <div className="modal-body py-3 theme-text">{children}</div>
 
-          <div className="modal-footer">
+          <div className="modal-footer border-top-0">
             {footer ?? (
               <>
                 <Button

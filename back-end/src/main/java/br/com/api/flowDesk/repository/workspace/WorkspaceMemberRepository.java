@@ -1,5 +1,6 @@
 package br.com.api.flowDesk.repository.workspace;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,4 +13,6 @@ public interface WorkspaceMemberRepository extends JpaRepository<WorkspaceMember
     boolean existsByWorkspace_IdAndUser_Id(UUID workspaceId, UUID userId);
 
     Optional<WorkspaceMemberModel> findByWorkspace_IdAndUser_Id(UUID workspaceId, UUID userId);
+
+    List<WorkspaceMemberModel> findAllByWorkspace_Id(UUID workspaceId);
 }

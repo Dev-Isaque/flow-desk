@@ -60,13 +60,12 @@ export default function TaskDetails() {
 
   const [newTitle, setNewTitle] = useState("");
   const [saving, setSaving] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const canAdd = useMemo(
     () => newTitle.trim().length > 0 && !saving,
     [newTitle, saving],
   );
-
-  const [showEditModal, setShowEditModal] = useState(false);
 
   async function handleAdd() {
     if (!canAdd) return;
@@ -92,9 +91,7 @@ export default function TaskDetails() {
     if (!confirmed) return;
 
     const deleted = await deleteTask();
-    if (deleted) {
-      navigate("/personal");
-    }
+    if (deleted) navigate("/personal");
   }
 
   async function handleCompleteTask() {
@@ -103,31 +100,23 @@ export default function TaskDetails() {
         await updateTask({ status: "IN_PROGRESS" });
         return;
       }
-
       if (!allItemsDone) {
         alert("Complete todas as subtarefas antes de concluir.");
         return;
       }
-
       await updateTask({ status: "DONE" });
     } catch (error) {
       alert("Não foi possível atualizar a tarefa: " + error.message);
     }
   }
+
   function handleEdit() {
     setShowEditModal(true);
-
-    setTimeout(() => {
-      const el = document.getElementById("modalTask");
-      if (el && window.bootstrap) {
-        window.bootstrap.Modal.getOrCreateInstance(el).show();
-      }
-    }, 100);
   }
 
   if (taskLoading) {
     return (
-      <div className="container-fluid py-5 text-center">
+      <div className="container-fluid py-5 text-center theme-text-muted">
         <p>Carregando tarefa...</p>
       </div>
     );
@@ -135,7 +124,7 @@ export default function TaskDetails() {
 
   if (!initialTask) {
     return (
-      <div className="container-fluid py-5 text-center">
+      <div className="container-fluid py-5 text-center theme-text">
         <p>Tarefa não encontrada.</p>
       </div>
     );
@@ -146,20 +135,23 @@ export default function TaskDetails() {
       <div className="row">
         <div className="col-lg-8 col-xl-9">
           <div className="m-2">
-            <Button className="task-details__back" onClick={() => navigate(-1)}>
+            <Button
+              className="task-details__back theme-text-muted"
+              onClick={() => navigate(-1)}
+            >
               <ArrowLeft size={18} />
               <span className="ms-1">Voltar</span>
             </Button>
           </div>
 
           <div className="task-details__header">
-            <div className="task-hero">
+            <div className="task-hero theme-bg-card theme-border">
               <div className="task-hero__content">
                 <div className="task-hero__info">
-                  <h1 className="task-hero__title">
+                  <h1 className="task-hero__title theme-text">
                     {taskWithTags?.title || initialTask.title}
                   </h1>
-                  <div className="task-hero__meta">
+                  <div className="task-hero__meta theme-text-muted">
                     ID: {initialTask.id?.slice(0, 6)} • Criado em{" "}
                     {formatDate(initialTask.createdAt)}, por {initialTask?.name}
                   </div>
@@ -170,27 +162,31 @@ export default function TaskDetails() {
           </div>
 
           <div className="p-2 mb-3">
-            <div className="d-flex align-items-center gap-2 mb-4">
-              <FileText />
+            <div className="d-flex align-items-center gap-2 mb-4 theme-text">
+              <FileText size={20} />
               <span className="fw-semibold">Descrição</span>
             </div>
-            <TaskDescription description={initialTask.description} />
+            <div className="theme-text">
+              <TaskDescription description={initialTask.description} />
+            </div>
           </div>
 
           <div className="p-2 mb-4">
             <div className="task-section-header">
-              <div className="d-flex align-items-center gap-2">
+              <div className="d-flex align-items-center gap-2 theme-text">
                 <ListCheck size={20} />
                 <span className="fw-semibold">Sub-tarefas</span>
               </div>
-              <span className="task-remaining-badge">
+              <span className="task-remaining-badge theme-bg-secondary theme-text-primary">
                 {items.filter((i) => !i.done).length} Restantes
               </span>
             </div>
-            {itemsLoading && <p>Carregando...</p>}
+
+            {itemsLoading && <p className="theme-text-muted">Carregando...</p>}
             {error && <p className="auth-error">{error}</p>}
+
             {!itemsLoading && !error && (
-              <div className="task-details__card card p-3">
+              <div className="task-details__card theme-bg-card theme-border p-3">
                 <TaskItemsList
                   items={items}
                   onToggle={handleToggle}
@@ -198,20 +194,21 @@ export default function TaskDetails() {
                 />
               </div>
             )}
-            <div className="task-details__card p-4 d-flex gap-2 mt-4">
+
+            <div className="task-details__card theme-bg-card theme-border p-4 d-flex gap-2 mt-4">
               <input
-                className="form-control"
+                className="form-control theme-input"
                 placeholder="Novo item do checklist..."
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 disabled={saving}
               />
               <Button
-                className="btn-color"
+                className="btn-color px-4"
                 onClick={handleAdd}
                 disabled={!canAdd}
               >
-                Adicionar
+                {saving ? "..." : "Adicionar"}
               </Button>
             </div>
           </div>
@@ -248,19 +245,23 @@ export default function TaskDetails() {
                   : "Concluir Tarefa"}
               </span>
             </Button>
-            <Button className="btn-light w-100 p-2" onClick={handleEdit}>
-              Editar
-            </Button>
-
-            <Button className="btn-secondary w-100 p-2">
-              <Share2 size={20} />
-              <span className="ms-2">Compartilhar tarefa</span>
-            </Button>
-
-            <hr className="my-2" />
 
             <Button
-              className="btn-danger w-100 p-2"
+              className="btn btn-link theme-text-muted text-decoration-none border theme-border w-100 p-2"
+              onClick={handleEdit}
+            >
+              Editar Detalhes
+            </Button>
+
+            <Button className="btn btn-link theme-text-muted text-decoration-none border theme-border w-100 p-2">
+              <Share2 size={18} className="me-2" />
+              Compartilhar
+            </Button>
+
+            <hr className="my-2 theme-border" />
+
+            <Button
+              className="btn btn-danger w-100 p-2 opacity-75 hover-opacity-100"
               onClick={handleDelete}
               disabled={isDeleting}
             >
@@ -270,16 +271,15 @@ export default function TaskDetails() {
         </div>
       </div>
 
-      {showEditModal && (
-        <TaskModal
-          taskId={taskId}
-          projectId={initialTask.workspaceId}
-          onUpdated={() => {
-            setShowEditModal(false);
-            window.location.reload();
-          }}
-        />
-      )}
+      <TaskModal
+        show={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        projectId={initialTask.workspaceId}
+        onUpdated={() => {
+          setShowEditModal(false);
+          window.location.reload();
+        }}
+      />
     </div>
   );
 }
