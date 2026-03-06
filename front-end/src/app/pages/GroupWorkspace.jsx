@@ -1,19 +1,27 @@
 import { useState, useEffect } from "react";
-import { Plus, Users, Search, MoreVertical } from "lucide-react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { Plus, Users, Search } from "lucide-react";
 
 import "../../features/tasks/style/tasks.css";
 import "../../features/wokspace/style/wokspaces.css";
 
 import { Button } from "../../shared/components/Button";
 import { Topbar } from "../../shared/components/Topbar";
-import { Modal } from "../../shared/components/Modal";
+
 import { useSharedWorkspace } from "../../features/wokspace/hooks/useSharedWorkspace";
 import { useMe } from "../../features/user/hooks/useMe";
+
 import { WorkspaceBoard } from "../../features/wokspace/components/WorkspaceBoard";
 import { WorkspaceCard } from "../../features/wokspace/components/WorkspaceCard";
 
+import { CreateWorkspaceModal } from "../../features/wokspace/components/modals/CreateWorkspaceModal";
+import { AddMemberModal } from "../../features/wokspace/components/modals/AddMemberModal";
+
+import { WorkspaceSettings } from "../../features/wokspace/components/WorkspaceSettings";
+
 function GroupWorkspace() {
-  const { user, errorMe } = useMe();
+  const { errorMe } = useMe();
+
   const {
     workspaces,
     loading,
@@ -23,33 +31,21 @@ function GroupWorkspace() {
     fetchWorkspaces,
   } = useSharedWorkspace();
 
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+  const { workspaceId } = useParams();
+  const location = useLocation();
 
-  const [newMemberEmail, setNewMemberEmail] = useState("");
-  const [newGroupName, setNewGroupName] = useState("");
-  const [newGroupColor, setNewGroupColor] = useState("#14b8a6");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchWorkspaces();
   }, []);
 
-  const handleConfirmAddMember = async () => {
-    if (newMemberEmail.trim() === "") return;
+  const activeWorkspaceId = workspaceId || null;
 
-    await handleAddMember(activeWorkspaceId, newMemberEmail);
-
-    setNewMemberEmail("");
-  };
-
-  const handleConfirmCreateGroup = async () => {
-    if (newGroupName.trim() === "") return;
-
-    await handleCreateWorkspace(newGroupName, newGroupColor);
-
-    setNewGroupName("");
-    setNewGroupColor("#14b8a6");
-  };
+  const settingsWorkspaceId = location.pathname.includes("settings")
+    ? workspaceId
+    : null;
 
   const erroTela = errorMe || error;
 
@@ -63,22 +59,37 @@ function GroupWorkspace() {
       )
     : [];
 
-  const breadcrumb =
-    activeWorkspaceId && workspaceAtivo ? (
-      <span>
-        <span
-          onClick={() => setActiveWorkspaceId("")}
-          className="text-muted hover-primary"
-          style={{ cursor: "pointer", transition: "color 0.2s" }}
-        >
-          Grupos
-        </span>
-        <span className="mx-2 text-muted">{">"}</span>
-        <span className="theme-text">{workspaceAtivo.name}</span>
+  const breadcrumb = settingsWorkspaceId ? (
+    <span>
+      <span
+        onClick={() => navigate(`/groups/${workspaceId}`)}
+        className="text-muted hover-primary"
+        style={{ cursor: "pointer" }}
+      >
+        {workspaceAtivo?.name || "Grupo"}
       </span>
-    ) : (
-      <span className="theme-text">Grupos</span>
-    );
+
+      <span className="mx-2 text-muted">{">"}</span>
+
+      <span className="theme-text">Configurações</span>
+    </span>
+  ) : activeWorkspaceId && workspaceAtivo ? (
+    <span>
+      <span
+        onClick={() => navigate("/groups")}
+        className="text-muted hover-primary"
+        style={{ cursor: "pointer" }}
+      >
+        Grupos
+      </span>
+
+      <span className="mx-2 text-muted">{">"}</span>
+
+      <span className="theme-text">{workspaceAtivo.name}</span>
+    </span>
+  ) : (
+    <span className="theme-text">Grupos</span>
+  );
 
   return (
     <div className="tasks-page position-relative">
@@ -86,11 +97,19 @@ function GroupWorkspace() {
 
       {erroTela && <p className="auth-error">{erroTela}</p>}
 
-      {!activeWorkspaceId ? (
+      {settingsWorkspaceId && (
+        <WorkspaceSettings
+          workspaceId={settingsWorkspaceId}
+          onBack={() => navigate(`/groups/${workspaceId}`)}
+        />
+      )}
+
+      {!settingsWorkspaceId && !activeWorkspaceId && (
         <div className="workspace-dashboard">
           <div className="d-flex justify-content-between align-items-end mb-4">
             <div>
               <h1 className="mb-1 theme-text">Meus Grupos</h1>
+
               <p className="mb-0 theme-text-muted">
                 Gerencie suas equipes e colabore em projetos.
               </p>
@@ -101,7 +120,8 @@ function GroupWorkspace() {
               data-bs-toggle="modal"
               data-bs-target="#modalCriarGrupo"
             >
-              <Plus size={18} className="me-2" /> Criar Novo Grupo
+              <Plus size={18} className="me-2" />
+              Criar Novo Grupo
             </Button>
           </div>
 
@@ -131,7 +151,8 @@ function GroupWorkspace() {
                 <div className="col-12 col-md-6 col-lg-4" key={workspace.id}>
                   <WorkspaceCard
                     workspace={workspace}
-                    onOpen={setActiveWorkspaceId}
+                    onOpen={(id) => navigate(`/groups/${id}`)}
+                    onOpenSettings={(id) => navigate(`/groups/${id}/settings`)}
                   />
                 </div>
               ))}
@@ -159,106 +180,30 @@ function GroupWorkspace() {
             </div>
           )}
         </div>
-      ) : (
+      )}
+
+      {!settingsWorkspaceId && activeWorkspaceId && (
         <WorkspaceBoard
           workspaceId={activeWorkspaceId}
           loadingWorkspace={loading}
           title={workspaceAtivo?.name || "Grupo"}
-          onBack={() => setActiveWorkspaceId("")}
+          onBack={() => navigate("/groups")}
           extraHeaderActions={
             <Button
               className="btn-outline-primary"
               data-bs-toggle="modal"
               data-bs-target="#modalMembro"
             >
-              <Users size={18} className="me-2" /> Adicionar Membro
+              <Users size={18} className="me-2" />
+              Adicionar Membro
             </Button>
           }
         />
       )}
 
-      <Modal
-        id="modalMembro"
-        title="Adicionar Novo Membro"
-        footer={
-          <>
-            <button
-              className="btn btn-link theme-text-muted text-decoration-none"
-              data-bs-dismiss="modal"
-            >
-              Cancelar
-            </button>
+      <CreateWorkspaceModal onCreate={handleCreateWorkspace} />
 
-            <Button className="btn-color px-4" onClick={handleConfirmAddMember}>
-              Adicionar
-            </Button>
-          </>
-        }
-      >
-        <label className="form-label theme-text-muted fw-medium">
-          E-mail do usuário
-        </label>
-
-        <input
-          className="form-control theme-input"
-          value={newMemberEmail}
-          onChange={(e) => setNewMemberEmail(e.target.value)}
-          placeholder="exemplo@email.com"
-        />
-      </Modal>
-
-      <Modal
-        id="modalCriarGrupo"
-        title="Criar Novo Grupo"
-        footer={
-          <>
-            <button
-              className="btn btn-link theme-text-muted text-decoration-none"
-              data-bs-dismiss="modal"
-            >
-              Cancelar
-            </button>
-
-            <Button
-              className="btn-color px-4"
-              onClick={handleConfirmCreateGroup}
-            >
-              Criar Grupo
-            </Button>
-          </>
-        }
-      >
-        <div className="mb-3">
-          <label className="form-label theme-text-muted fw-medium">
-            Nome do Grupo
-          </label>
-
-          <input
-            className="form-control theme-input"
-            value={newGroupName}
-            onChange={(e) => setNewGroupName(e.target.value)}
-            placeholder="Nome da equipe"
-          />
-        </div>
-
-        <div className="d-flex gap-2">
-          {["#14b8a6", "#3b82f6", "#8b5cf6", "#f43f5e", "#f59e0b"].map((c) => (
-            <div
-              key={c}
-              onClick={() => setNewGroupColor(c)}
-              style={{
-                width: 30,
-                height: 30,
-                backgroundColor: c,
-                borderRadius: "50%",
-                cursor: "pointer",
-                border:
-                  newGroupColor === c ? "3px solid var(--text-color)" : "none",
-              }}
-            />
-          ))}
-        </div>
-      </Modal>
+      <AddMemberModal workspaceId={activeWorkspaceId} onAdd={handleAddMember} />
     </div>
   );
 }

@@ -26,9 +26,24 @@ function AppRoutes() {
         <Route element={<PrivateRoute />}>
           <Route element={<AppLayout />}>
             <Route path="/home" element={<Home />} />
-            <Route path="/personal" element={<PersonalWorkspace />} />
             <Route path="/calendar" element={<Calendar />} />
+
+            <Route path="/personal" element={<PersonalWorkspace />} />
+            <Route
+              path="/personal/project/:projectId"
+              element={<PersonalWorkspace />}
+            />
+
             <Route path="/groups" element={<GroupWorkspace />} />
+            <Route path="/groups/:workspaceId" element={<GroupWorkspace />} />
+            <Route
+              path="/groups/:workspaceId/project/:projectId"
+              element={<GroupWorkspace />}
+            />
+            <Route
+              path="/groups/:workspaceId/settings"
+              element={<GroupWorkspace />}
+            />
 
             <Route path="/tasks/:taskId" element={<TaskDetails />} />
           </Route>

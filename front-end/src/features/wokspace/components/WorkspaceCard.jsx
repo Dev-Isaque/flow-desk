@@ -1,6 +1,8 @@
 import { Users, MoreVertical } from "lucide-react";
 
-export function WorkspaceCard({ workspace, onOpen }) {
+import { Button } from "../../../shared/components/Button";
+
+export function WorkspaceCard({ workspace, onOpen, onOpenSettings }) {
   return (
     <div className="workspace-card" onClick={() => onOpen(workspace.id)}>
       <div className="d-flex justify-content-between align-items-start mb-3">
@@ -14,12 +16,44 @@ export function WorkspaceCard({ workspace, onOpen }) {
           Ativo
         </span>
 
-        <button
-          className="btn btn-sm p-0 theme-text-muted hover-primary"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <MoreVertical size={18} />
-        </button>
+        <div className="dropstart" onClick={(e) => e.stopPropagation()}>
+          <button
+            className="btn btn-sm p-0 theme-text-muted hover-primary"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            title="Mais opções"
+          >
+            <MoreVertical size={18} />
+          </button>
+
+          <ul className="dropdown-menu">
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenSettings(workspace.id);
+                }}
+              >
+                Configurações
+              </button>
+            </li>
+
+            <li>
+              <hr className="dropdown-divider" />
+            </li>
+
+            <li>
+              <button
+                className="dropdown-item text-danger"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Excluir
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
 
       <h4 className="workspace-card-title">{workspace.name}</h4>

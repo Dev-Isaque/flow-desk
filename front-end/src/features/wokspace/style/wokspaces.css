@@ -109,3 +109,17 @@
     background-color: var(--primary-color);
     color: var(--card-color);
 }
+
+/* Settings */
+
+.settings-tabs {
+    display: flex;
+    gap: 12px;
+    padding: 6px;
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+}
+
+.settings-tabs button:hover {
+    transform: translateY(-1px);
+}

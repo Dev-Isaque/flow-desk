@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { getMyProjects, createProject } from "../service/projectService";
 
-export function useProjects({ workspaceId }) {
+export function useProjects({ workspaceId, initialProjectId }) {
+
     const [projects, setProjects] = useState([]);
-    const [projectSelecionado, setProjectSelecionado] = useState("ALL");
-    const [loadingProjects, setLoadingProjects] = useState(true); 
+    const [projectSelecionado, setProjectSelecionado] = useState(initialProjectId || "ALL");
+    const [loadingProjects, setLoadingProjects] = useState(true);
     const [savingProject, setSavingProject] = useState(false);
     const [errorProjects, setErrorProjects] = useState("");
 
@@ -43,14 +44,18 @@ export function useProjects({ workspaceId }) {
         }
 
         if (!workspaceId) {
-            setErrorProjects("Workspace pessoal ainda não carregou.");
+            setErrorProjects("Workspace ainda não carregou.");
             return { ok: false };
         }
 
         setSavingProject(true);
 
         try {
-            const r = await createProject({ workspaceId, name: cleanName, description });
+            const r = await createProject({
+                workspaceId,
+                name: cleanName,
+                description
+            });
 
             if (!r?.sucesso) {
                 setErrorProjects(r?.mensagem || "Não foi possível criar o projeto");
@@ -80,6 +85,12 @@ export function useProjects({ workspaceId }) {
             aliveRef.current = false;
         };
     }, [workspaceId]);
+
+    useEffect(() => {
+        if (initialProjectId) {
+            setProjectSelecionado(initialProjectId);
+        }
+    }, [initialProjectId]);
 
     return {
         projects,

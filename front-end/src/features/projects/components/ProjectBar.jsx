@@ -1,11 +1,11 @@
 import { Plus } from "lucide-react";
 import { Button } from "../../../shared/components/Button";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../style/projectBar.css";
 
 export function ProjectBar({
   projects = [],
   projectSelecionado,
-  setProjectSelecionado,
   isCreatingProject,
   onOpenCreate,
   loadingWorkspace,
@@ -14,6 +14,27 @@ export function ProjectBar({
   savingProject,
   createSlot,
 }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isPersonal = location.pathname.startsWith("/personal");
+
+  function goToProject(projectId) {
+    if (isPersonal) {
+      if (projectId === "ALL") {
+        navigate("/personal");
+      } else {
+        navigate(`/personal/project/${projectId}`);
+      }
+    } else {
+      if (projectId === "ALL") {
+        navigate(`/groups/${workspaceId}`);
+      } else {
+        navigate(`/groups/${workspaceId}/project/${projectId}`);
+      }
+    }
+  }
+
   return (
     <div className="project-bar">
       <Button
@@ -21,7 +42,7 @@ export function ProjectBar({
         className={`project-tab ${
           projectSelecionado === "ALL" ? "project-tab--active" : ""
         }`}
-        onClick={() => setProjectSelecionado("ALL")}
+        onClick={() => goToProject("ALL")}
         disabled={savingProject}
       >
         Todas
@@ -39,7 +60,7 @@ export function ProjectBar({
             className={`project-tab ${
               projectSelecionado === p.id ? "project-tab--active" : ""
             }`}
-            onClick={() => setProjectSelecionado(p.id)}
+            onClick={() => goToProject(p.id)}
             disabled={savingProject || isCreatingProject}
           >
             {p.name}

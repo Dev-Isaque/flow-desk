@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import { Plus, ArrowLeft } from "lucide-react";
 
 import { ProjectBar } from "../../projects/components/ProjectBar";
@@ -18,6 +19,8 @@ export function WorkspaceBoard({
   loadingWorkspace,
   onBack,
 }) {
+  const { projectId } = useParams();
+
   const {
     projects,
     projectSelecionado,
@@ -26,7 +29,7 @@ export function WorkspaceBoard({
     savingProject,
     errorProjects,
     addProject,
-  } = useProjects({ workspaceId });
+  } = useProjects({ workspaceId, initialProjectId: projectId });
 
   const {
     tasks,
@@ -40,8 +43,12 @@ export function WorkspaceBoard({
 
   const { tags } = useWorkspaceTags(workspaceId);
 
-  function openCreateProject() { setIsCreatingProject(true); }
-  function cancelCreateProject() { if (!savingProject) setIsCreatingProject(false); }
+  function openCreateProject() {
+    setIsCreatingProject(true);
+  }
+  function cancelCreateProject() {
+    if (!savingProject) setIsCreatingProject(false);
+  }
 
   async function confirmCreateProject(name) {
     if (savingProject) return;
@@ -49,16 +56,23 @@ export function WorkspaceBoard({
     if (result?.ok) setIsCreatingProject(false);
   }
 
-  function handleCreatedTask(newTask) { setTasks((prev) => [newTask, ...prev]); }
+  function handleCreatedTask(newTask) {
+    setTasks((prev) => [newTask, ...prev]);
+  }
   function handleUpdatedTask(updatedTask) {
-    setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
+    setTasks((prev) =>
+      prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)),
+    );
     seteditingTaskId(null);
   }
-  function handleDeletedTask(taskId) { setTasks((prev) => prev.filter((t) => t.id !== taskId)); }
+  function handleDeletedTask(taskId) {
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+  }
   function handleEditTask(task) {
     seteditingTaskId(task.id);
     const el = document.getElementById("modalTask");
-    if (el && window.bootstrap) window.bootstrap.Modal.getOrCreateInstance(el).show();
+    if (el && window.bootstrap)
+      window.bootstrap.Modal.getOrCreateInstance(el).show();
   }
 
   const erroTela = errorProjects || errorTasks;
@@ -67,7 +81,10 @@ export function WorkspaceBoard({
   return (
     <>
       <div className="d-flex justify-content-between align-items-end mb-4 pb-2">
-        <div className="d-flex align-items-start gap-3" style={{ maxWidth: "600px" }}>
+        <div
+          className="d-flex align-items-start gap-3"
+          style={{ maxWidth: "600px" }}
+        >
           {onBack && (
             <button
               onClick={onBack}
@@ -80,10 +97,16 @@ export function WorkspaceBoard({
           )}
 
           <div>
-            <h1 className="fw-bold mb-2 theme-text" style={{ fontSize: "2.5rem" }}>
+            <h1
+              className="fw-bold mb-2 theme-text"
+              style={{ fontSize: "2.5rem" }}
+            >
               {workspaceName}
             </h1>
-            <p className="theme-text-muted mb-0" style={{ fontSize: "0.95rem", lineHeight: "1.5" }}>
+            <p
+              className="theme-text-muted mb-0"
+              style={{ fontSize: "0.95rem", lineHeight: "1.5" }}
+            >
               Central de gerenciamento de fluxo de trabalho.
             </p>
           </div>
