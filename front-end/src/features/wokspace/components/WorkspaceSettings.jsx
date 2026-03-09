@@ -7,14 +7,14 @@ import { WorkspacePermissions } from "./settings/WorkspacePermissions";
 
 import { Button } from "../../../shared/components/Button";
 
-export function WorkspaceSettings({ workspaceId, onBack }) {
+export function WorkspaceSettings({ workspace, onBack }) {
   const [activeTab, setActiveTab] = useState();
 
   const screnns = {
-    general: <WorkspaceGeneral workspaceId={workspaceId} />,
-    members: <WorkspaceMembers workspaceId={workspaceId} />,
-    tags: <WorkspaceTags workspaceId={workspaceId} />,
-    permissions: <WorkspacePermissions workspaceId={workspaceId} />,
+    general: <WorkspaceGeneral workspace={workspace} />,
+    members: <WorkspaceMembers workspace={workspace} />,
+    tags: <WorkspaceTags workspace={workspace} />,
+    permissions: <WorkspacePermissions workspace={workspace} />,
   };
 
   function handleRenderingView(screenName) {
@@ -58,32 +58,37 @@ export function WorkspaceSettings({ workspaceId, onBack }) {
 
       <div className="d-flex justify-content-center mb-4">
         <div className="settings-tabs">
-          <Button className="btn-color" onClick={() => handleRenderingView("general")}>Geral</Button>
+          <Button
+            className="btn-color"
+            onClick={() => handleRenderingView("general")}
+          >
+            Geral
+          </Button>
 
-          <Button className="btn-color" onClick={() => handleRenderingView("members")}>
+          <Button
+            className="btn-color"
+            onClick={() => handleRenderingView("members")}
+          >
             Membros
           </Button>
 
-          <Button className="btn-color" onClick={() => handleRenderingView("tags")}>
+          <Button
+            className="btn-color"
+            onClick={() => handleRenderingView("tags")}
+          >
             Tags/Etiquetas
           </Button>
 
-          <Button className="btn-color" onClick={() => handleRenderingView("permissions")}>
+          <Button
+            className="btn-color"
+            onClick={() => handleRenderingView("permissions")}
+          >
             Permissões
           </Button>
         </div>
       </div>
 
       <div className="conteudo-da-view">{screnns[activeTab]}</div>
-
-      {}
-
-      {/*       <Button
-        onClick={onBack}
-        className="btn btn-sm btn-outline-secondary mb-3"
-      >
-        Voltar
-      </Button> */}
     </div>
   );
 }

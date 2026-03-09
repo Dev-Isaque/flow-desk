@@ -99,7 +99,7 @@ function GroupWorkspace() {
 
       {settingsWorkspaceId && (
         <WorkspaceSettings
-          workspaceId={settingsWorkspaceId}
+          workspace={workspaceAtivo}
           onBack={() => navigate(`/groups/${workspaceId}`)}
         />
       )}

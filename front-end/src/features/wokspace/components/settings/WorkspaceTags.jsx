@@ -1,3 +1,3 @@
-export function WorkspaceTags({ workspaceId }) {
-  return <div className="workspace-settings">teste WorkspaceTags {workspaceId}</div>;
+export function WorkspaceTags({ workspace }) {
+  return <div className="workspace-settings">teste WorkspaceTags {workspace?.id}</div>;
 }

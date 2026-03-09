@@ -112,6 +112,8 @@
 
 /* Settings */
 
+.settings-card {}
+
 .settings-tabs {
     display: flex;
     gap: 12px;
