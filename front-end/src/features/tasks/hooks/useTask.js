@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
+import { useToast } from "../../../shared/utils/useToast";
+
 import {
     getTaskById,
     createTask as createTaskRequest,
@@ -7,6 +9,8 @@ import {
 } from "../services/taskService";
 
 export function useTask(taskId) {
+    const { showToast } = useToast();
+
     const [task, setTask] = useState(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -24,14 +28,19 @@ export function useTask(taskId) {
                 const data = await getTaskById(taskId);
                 setTask(data);
             } catch (e) {
-                setError(e.message);
+                console.error(e);
+
+                const msg = e.message || "Erro ao carregar tarefa.";
+                setError(msg);
+
+                showToast(msg, "error");
             } finally {
                 setLoading(false);
             }
         }
 
         load();
-    }, [taskId]);
+    }, [taskId, showToast]);
 
     const createTask = useCallback(async (payload) => {
         try {
@@ -40,14 +49,23 @@ export function useTask(taskId) {
 
             const created = await createTaskRequest(payload);
 
+            showToast("Tarefa criada com sucesso!", "success");
+
             return created;
         } catch (e) {
-            setError(e.message);
+            console.error(e);
+
+            const msg = e.message || "Erro ao criar tarefa.";
+            setError(msg);
+
+            showToast(msg, "error");
+
             throw e;
         } finally {
             setSaving(false);
         }
-    }, []);
+    }, [showToast]);
+
     const updateTask = useCallback(async (payload) => {
         if (!taskId) return null;
 
@@ -59,30 +77,49 @@ export function useTask(taskId) {
 
             setTask(updated);
 
+            showToast("Tarefa atualizada com sucesso!", "success");
+
             return updated;
         } catch (e) {
-            setError(e.message);
+            console.error(e);
+
+            const msg = e.message || "Erro ao atualizar tarefa.";
+            setError(msg);
+
+            showToast(msg, "error");
+
             throw e;
         } finally {
             setSaving(false);
         }
-    }, [taskId]);
+    }, [taskId, showToast]);
 
     const deleteTask = useCallback(async () => {
         if (!taskId) return false;
 
         try {
             setIsDeleting(true);
+
             await deleteTaskRequest(taskId);
+
             setTask(null);
+
+            showToast("Tarefa removida com sucesso!", "success");
+
             return true;
         } catch (e) {
-            setError(e.message);
+            console.error(e);
+
+            const msg = e.message || "Erro ao remover tarefa.";
+            setError(msg);
+
+            showToast(msg, "error");
+
             return false;
         } finally {
             setIsDeleting(false);
         }
-    }, [taskId]);
+    }, [taskId, showToast]);
 
     return {
         task,

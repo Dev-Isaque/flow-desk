@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
+import { useToast } from "../../../shared/utils/useToast";
+
 import {
     listAttachments,
     uploadAttachment,
@@ -8,6 +10,8 @@ import {
 } from "../services/attachmentService";
 
 export function useTaskAttachments(taskId) {
+    const { showToast } = useToast();
+
     const [attachments, setAttachments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
@@ -17,12 +21,18 @@ export function useTaskAttachments(taskId) {
 
         try {
             setLoading(true);
+
             const data = await listAttachments(taskId);
+
             setAttachments(data);
+        } catch (error) {
+            console.error(error);
+
+            showToast("Erro ao carregar anexos.", "error");
         } finally {
             setLoading(false);
         }
-    }, [taskId]);
+    }, [taskId, showToast]);
 
     useEffect(() => {
         loadAttachments();
@@ -31,27 +41,46 @@ export function useTaskAttachments(taskId) {
     const upload = async (file) => {
         try {
             setUploading(true);
+
             const newAttachment = await uploadAttachment(taskId, file);
+
             setAttachments((prev) => [...prev, newAttachment]);
+
+            showToast("Arquivo enviado com sucesso!", "success");
+
             return newAttachment;
+        } catch (error) {
+            console.error(error);
+
+            showToast("Erro ao enviar arquivo.", "error");
         } finally {
             setUploading(false);
         }
     };
 
     const remove = async (attachmentId) => {
-        await deleteAttachment(taskId, attachmentId);
-        setAttachments((prev) =>
-            prev.filter((a) => a.id !== attachmentId)
-        );
+        try {
+            await deleteAttachment(taskId, attachmentId);
+
+            setAttachments((prev) =>
+                prev.filter((a) => a.id !== attachmentId)
+            );
+
+            showToast("Arquivo removido com sucesso!", "success");
+        } catch (error) {
+            console.error(error);
+
+            showToast("Erro ao remover arquivo.", "error");
+        }
     };
 
     const download = async (attachmentId, originalFileName) => {
         try {
             await downloadAttachmentFile(taskId, attachmentId, originalFileName);
         } catch (error) {
-            console.error(error.message);
-            alert("Não foi possível fazer o download do arquivo.");
+            console.error(error);
+
+            showToast("Não foi possível fazer o download do arquivo.", "error");
         }
     };
 
@@ -59,8 +88,9 @@ export function useTaskAttachments(taskId) {
         try {
             await previewAttachmentFile(taskId, attachmentId);
         } catch (error) {
-            console.error(error.message);
-            alert("Não foi possível visualizar o arquivo.");
+            console.error(error);
+
+            showToast("Não foi possível visualizar o arquivo.", "error");
         }
     };
 

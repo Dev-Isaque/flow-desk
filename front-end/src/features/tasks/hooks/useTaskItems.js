@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
+import { useToast } from "../../../shared/utils/useToast";
+
 import {
     listTaskItems,
     createTaskItem,
@@ -7,6 +9,8 @@ import {
 } from "../services/taskItemService";
 
 export function useTaskItems(taskId) {
+    const { showToast } = useToast();
+
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -16,33 +20,71 @@ export function useTaskItems(taskId) {
             setItems([]);
             return;
         }
+
         try {
             setLoading(true);
             setError(null);
+
             const data = await listTaskItems(taskId);
+
             setItems(data ?? []);
         } catch (e) {
-            setError(e.message);
+            console.error(e);
+
+            const msg = e.message || "Erro ao carregar checklist.";
+
+            setError(msg);
+
+            showToast(msg, "error");
         } finally {
             setLoading(false);
         }
-    }, [taskId]);
+    }, [taskId, showToast]);
 
     async function addItem(payload) {
-        const created = await createTaskItem(taskId, payload);
-        setItems((prev) => [...prev, created]);
-        return created;
+        try {
+            const created = await createTaskItem(taskId, payload);
+
+            setItems((prev) => [...prev, created]);
+
+            showToast("Item criado com sucesso!", "success");
+
+            return created;
+        } catch (e) {
+            console.error(e);
+
+            showToast("Erro ao criar item.", "error");
+        }
     }
 
     async function toggleDone(itemId, done) {
-        const updated = await setTaskItemDone(itemId, done);
-        setItems((prev) => prev.map((x) => (x.id === itemId ? updated : x)));
-        return updated;
+        try {
+            const updated = await setTaskItemDone(itemId, done);
+
+            setItems((prev) =>
+                prev.map((x) => (x.id === itemId ? updated : x))
+            );
+
+            return updated;
+        } catch (e) {
+            console.error(e);
+
+            showToast("Erro ao atualizar item.", "error");
+        }
     }
 
     async function remove(itemId) {
-        await deleteTaskItem(itemId);
-        setItems((prev) => prev.filter((x) => x.id !== itemId));
+        try {
+            await deleteTaskItem(itemId);
+
+            setItems((prev) => prev.filter((x) => x.id !== itemId));
+
+            showToast("Item removido.", "success");
+        } catch (e) {
+            console.error(e);
+
+            showToast("Erro ao remover item.", "error");
+        }
     }
 
     const allItemsDone = useMemo(() => {
@@ -55,7 +97,13 @@ export function useTaskItems(taskId) {
     }, [load]);
 
     return {
-        items, loading, error, reload: load, addItem, toggleDone, remove,
+        items,
+        loading,
+        error,
+        reload: load,
+        addItem,
+        toggleDone,
+        remove,
         allItemsDone,
     };
 }
