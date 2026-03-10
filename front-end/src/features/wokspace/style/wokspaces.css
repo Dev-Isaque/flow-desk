@@ -11,8 +11,6 @@
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px var(--secondary-color);
-    background-color: var(--card-color);
-    color: var(--text-color);
 }
 
 .workspace-search-input::placeholder {
@@ -110,18 +108,225 @@
     color: var(--card-color);
 }
 
-/* Settings */
+.workspace-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
 
-.settings-card {}
+.settings-card {
+    background-color: var(--card-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+}
+
+.settings-title {
+    color: var(--text-color);
+    font-weight: 600;
+    margin-bottom: 20px;
+}
 
 .settings-tabs {
     display: flex;
-    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
     padding: 6px;
     border-radius: 10px;
     backdrop-filter: blur(4px);
 }
 
+.settings-tabs button {
+    flex: 1 1 auto;
+    min-width: 120px;
+}
+
 .settings-tabs button:hover {
     transform: translateY(-1px);
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+}
+
+.settings-logo-upload {
+    width: 100%;
+    height: 160px;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    background-color: var(--bg-color);
+}
+
+.settings-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.settings-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.settings-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* =========================
+   MEMBERS TABLE
+========================= */
+
+.members-table {
+    background: transparent;
+}
+
+.members-table thead,
+.members-table tbody,
+.members-table tr,
+.members-table th,
+.members-table td {
+    background: transparent !important;
+}
+
+.members-table thead {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.members-table th {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.members-table td {
+    color: var(--text-color);
+    vertical-align: middle;
+}
+
+.member-row {
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s ease;
+}
+
+.member-row:hover {
+    background: var(--secondary-color);
+}
+
+.member-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), #0aa2c0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.member-name {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.member-email {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.role-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.role-owner {
+    background: rgba(var(--primary-rgb), 0.15);
+    color: var(--primary-color);
+}
+
+.role-admin {
+    background: rgba(13, 202, 240, 0.15);
+    color: #0dcaf0;
+}
+
+.role-member {
+    background: rgba(108, 117, 125, 0.2);
+    color: var(--text-muted);
+}
+
+.role-viewer {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+}
+
+.status-active {
+    color: #20c997;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-pending {
+    color: #ffc107;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.members-table .form-select {
+    background-color: var(--card-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+}
+
+.members-table .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--secondary-color);
+}
+
+@media (max-width: 768px) {
+
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-logo-upload {
+        height: 140px;
+    }
+
+    .members-table thead {
+        display: none;
+    }
+
+    .members-table tr {
+        display: block;
+        margin-bottom: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 12px;
+    }
+
+    .members-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+    }
+
 }

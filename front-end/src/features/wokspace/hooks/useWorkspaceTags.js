@@ -1,10 +1,15 @@
 import { useEffect, useState, useCallback } from "react";
+import { useToast } from "../../../shared/utils/useToast";
+
 import {
     getWorkspaceTags,
     createWorkspaceTag,
 } from "../service/workspaceService";
 
 export function useWorkspaceTags(workspaceId) {
+
+    const { showToast } = useToast();
+
     const [tags, setTags] = useState([]);
     const [loadingTags, setLoadingTags] = useState(true);
     const [errorTags, setErrorTags] = useState("");
@@ -20,24 +25,32 @@ export function useWorkspaceTags(workspaceId) {
             const r = await getWorkspaceTags(workspaceId);
 
             if (!r?.sucesso) {
-                setErrorTags(
-                    r?.mensagem || "Não foi possível carregar as tags do workspace"
-                );
+                const msg =
+                    r?.mensagem || "Não foi possível carregar as tags do workspace";
+
+                setErrorTags(msg);
+                showToast(msg, "error");
                 return;
             }
 
             setTags(r.dados || []);
+
         } catch (err) {
 
             console.error(err);
-            setErrorTags("Erro inesperado ao carregar tags.");
+
+            const msg = "Erro inesperado ao carregar tags.";
+            setErrorTags(msg);
+            showToast(msg, "error");
+
         } finally {
             setLoadingTags(false);
         }
-    }, [workspaceId]);
+    }, [workspaceId, showToast]);
 
     const createTag = useCallback(
         async (tagName) => {
+
             if (!tagName?.trim()) return null;
 
             setCreatingTag(true);
@@ -47,7 +60,12 @@ export function useWorkspaceTags(workspaceId) {
                 const r = await createWorkspaceTag(workspaceId, tagName.trim());
 
                 if (!r?.sucesso) {
-                    setErrorTags(r?.mensagem || "Não foi possível criar a tag.");
+
+                    const msg = r?.mensagem || "Não foi possível criar a tag.";
+
+                    setErrorTags(msg);
+                    showToast(msg, "error");
+
                     return null;
                 }
 
@@ -55,16 +73,26 @@ export function useWorkspaceTags(workspaceId) {
 
                 setTags((prev) => [...prev, newTag]);
 
+                showToast("Tag criada com sucesso!", "success");
+
                 return newTag;
+
             } catch (err) {
+
                 console.error(err);
-                setErrorTags("Erro inesperado ao criar tag.");
+
+                const msg = "Erro inesperado ao criar tag.";
+
+                setErrorTags(msg);
+                showToast(msg, "error");
+
                 return null;
+
             } finally {
                 setCreatingTag(false);
             }
         },
-        [workspaceId]
+        [workspaceId, showToast]
     );
 
     useEffect(() => {

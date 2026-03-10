@@ -51,36 +51,6 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public void addMember(UUID workspaceId, String emailToAdd, UserModel loggedUser) {
-
-        WorkspaceModel workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new RuntimeException("Workspace não encontrado"));
-
-        WorkspaceMemberModel loggedMember = workspaceMemberRepository
-                .findByWorkspace_IdAndUser_Id(workspaceId, loggedUser.getId())
-                .orElseThrow(() -> new RuntimeException("Você não pertence a esse workspace"));
-
-        if (loggedMember.getRole() == WorkspaceRole.MEMBER ||
-                loggedMember.getRole() == WorkspaceRole.VIEWER) {
-            throw new RuntimeException("Sem permissão para adicionar membros");
-        }
-
-        UserModel userToAdd = userRepository.findByEmail(emailToAdd)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-        if (workspaceMemberRepository.existsByWorkspace_IdAndUser_Id(workspaceId, userToAdd.getId())) {
-            throw new RuntimeException("Usuário já é membro");
-        }
-
-        WorkspaceMemberModel newMember = new WorkspaceMemberModel();
-        newMember.setWorkspace(workspace);
-        newMember.setUser(userToAdd);
-        newMember.setRole(WorkspaceRole.MEMBER);
-
-        workspaceMemberRepository.save(newMember);
-    }
-
-    @Transactional
     public WorkspaceModel getOrCreatePersonal(UserModel user) {
 
         return workspaceRepository

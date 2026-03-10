@@ -7,12 +7,27 @@ import { WorkspacePermissions } from "./settings/WorkspacePermissions";
 
 import { Button } from "../../../shared/components/Button";
 
-export function WorkspaceSettings({ workspace, onBack }) {
-  const [activeTab, setActiveTab] = useState();
+export function WorkspaceSettings({
+  workspace,
+  members,
+  fetchMembers,
+  onBack,
+  handleUpdateMember,
+  handleDeleteMember,
+}) {
+  const [activeTab, setActiveTab] = useState("general");
 
   const screnns = {
     general: <WorkspaceGeneral workspace={workspace} />,
-    members: <WorkspaceMembers workspace={workspace} />,
+    members: (
+      <WorkspaceMembers
+        workspace={workspace}
+        members={members}
+        fetchMembers={fetchMembers}
+        handleUpdateMember={handleUpdateMember}
+        handleDeleteMember={handleDeleteMember}
+      />
+    ),
     tags: <WorkspaceTags workspace={workspace} />,
     permissions: <WorkspacePermissions workspace={workspace} />,
   };

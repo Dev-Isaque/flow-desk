@@ -24,11 +24,15 @@ function GroupWorkspace() {
 
   const {
     workspaces,
+    members,
     loading,
     error,
+    fetchMembers,
     handleAddMember,
     handleCreateWorkspace,
     fetchWorkspaces,
+    handleUpdateMember,
+    handleDeleteMember,
   } = useSharedWorkspace();
 
   const navigate = useNavigate();
@@ -100,6 +104,10 @@ function GroupWorkspace() {
       {settingsWorkspaceId && (
         <WorkspaceSettings
           workspace={workspaceAtivo}
+          members={members}
+          fetchMembers={fetchMembers}
+          handleUpdateMember={handleUpdateMember}
+          handleDeleteMember={handleDeleteMember}
           onBack={() => navigate(`/groups/${workspaceId}`)}
         />
       )}

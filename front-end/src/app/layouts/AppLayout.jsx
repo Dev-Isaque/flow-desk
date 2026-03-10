@@ -4,9 +4,14 @@ import { Menu, X } from "lucide-react";
 
 import { Sidebar } from "../../shared/components/Sidebar";
 import { Button } from "../../shared/components/Button";
+import { ToastNotification } from "../../shared/components/ToastNotification";
+
+import { useToast } from "../../shared/utils/useToast";
 
 export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const { toast, closeToast } = useToast();
 
   function openSidebar() {
     setSidebarOpen(true);
@@ -55,6 +60,8 @@ export function AppLayout() {
           <Outlet />
         </div>
       </main>
+
+      <ToastNotification toast={toast} onClose={closeToast} />
     </div>
   );
 }

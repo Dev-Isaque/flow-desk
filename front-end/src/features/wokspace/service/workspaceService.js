@@ -39,6 +39,21 @@ export const addMemberToWorkspace = (workspaceId, memberEmail) => {
     });
 };
 
+export const updateWorkspaceMember = (workspaceId, memberId, role) => {
+    return apiRequest(`/workspaces/${workspaceId}/members/${memberId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+            role: role
+        })
+    });
+};
+
+export const removedMemberWorkspace = (workspaceId, memberId) => {
+    return apiRequest(`/workspaces/${workspaceId}/members/${memberId}`, {
+        method: "DELETE"
+    });
+}
+
 export const listWorkspaceMembers = (workspaceId) => {
     return apiRequest(`/workspaces/${workspaceId}/members`, {
         method: "GET"
