@@ -66,12 +66,13 @@ public class WorkspaceMemberController {
     }
 
     @PatchMapping("/{memberId}")
-    public ResponseEntity<Void> editMember(@PathVariable UUID workspaceId,
+    public ResponseEntity<Void> editMember(
+            @PathVariable UUID workspaceId,
             @PathVariable UUID memberId,
             @RequestBody UpdateMemberRoleRequest dto,
             @RequestHeader("Authorization") String authHeader) {
 
-        String token = authHeader.replace("Bearer", "").trim();
+        String token = authHeader.replace("Bearer ", "").trim();
 
         UserModel user = authTokenService.requireUserByToken(token);
 

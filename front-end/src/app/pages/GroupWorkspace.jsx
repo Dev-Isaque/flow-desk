@@ -41,6 +41,11 @@ function GroupWorkspace() {
 
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [showCreateWorkspaceModal, setShowCreateWorkspaceModal] =
+    useState(false);
+
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+
   useEffect(() => {
     fetchWorkspaces();
   }, []);
@@ -106,6 +111,7 @@ function GroupWorkspace() {
           workspace={workspaceAtivo}
           members={members}
           fetchMembers={fetchMembers}
+          handleAddMember={handleAddMember}
           handleUpdateMember={handleUpdateMember}
           handleDeleteMember={handleDeleteMember}
           onBack={() => navigate(`/groups/${workspaceId}`)}
@@ -125,8 +131,7 @@ function GroupWorkspace() {
 
             <Button
               className="btn-color px-4"
-              data-bs-toggle="modal"
-              data-bs-target="#modalCriarGrupo"
+              onClick={() => setShowCreateWorkspaceModal(true)}
             >
               <Plus size={18} className="me-2" />
               Criar Novo Grupo
@@ -168,8 +173,7 @@ function GroupWorkspace() {
               <div className="col-12 col-md-6 col-lg-4">
                 <div
                   className="workspace-new-card"
-                  data-bs-toggle="modal"
-                  data-bs-target="#modalCriarGrupo"
+                  onClick={() => setShowCreateWorkspaceModal(true)}
                 >
                   <div className="workspace-new-icon-wrapper">
                     <Plus size={24} />
@@ -198,9 +202,8 @@ function GroupWorkspace() {
           onBack={() => navigate("/groups")}
           extraHeaderActions={
             <Button
-              className="btn-outline-primary"
-              data-bs-toggle="modal"
-              data-bs-target="#modalMembro"
+              className="btn-color"
+              onClick={() => setShowAddMemberModal(true)}
             >
               <Users size={18} className="me-2" />
               Adicionar Membro
@@ -209,9 +212,18 @@ function GroupWorkspace() {
         />
       )}
 
-      <CreateWorkspaceModal onCreate={handleCreateWorkspace} />
+      <CreateWorkspaceModal
+        show={showCreateWorkspaceModal}
+        onCreate={handleCreateWorkspace}
+        onClose={() => setShowCreateWorkspaceModal(false)}
+      />
 
-      <AddMemberModal workspaceId={activeWorkspaceId} onAdd={handleAddMember} />
+      <AddMemberModal
+        show={showAddMemberModal}
+        workspaceId={activeWorkspaceId}
+        onAdd={handleAddMember}
+        onClose={() => setShowAddMemberModal(false)}
+      />
     </div>
   );
 }

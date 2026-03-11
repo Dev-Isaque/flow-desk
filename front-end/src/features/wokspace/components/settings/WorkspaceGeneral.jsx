@@ -35,40 +35,6 @@ export function WorkspaceGeneral({ workspace }) {
           </div>
         </div>
       </div>
-      <div className="settings-card">
-        <h4 className="settings-title mb-4">Membros da Equipe</h4>
-
-        <div className="row g-4 align-items-start">
-          <div className="col-12 col-md-4 col-lg-3">
-            <label className="settings-label mb-2">Logo do Workspace</label>
-
-            <div className="settings-logo-upload w-100">
-              <span>512x512px recomendado</span>
-            </div>
-          </div>
-
-          <div className="col-12 col-md-8 col-lg-9">
-            <div className="settings-fields">
-              <div className="settings-field mb-3">
-                <label className="settings-label">Nome do Workspace</label>
-                <input
-                  className="form-control workspace-search-input"
-                  defaultValue={workspace?.name}
-                />
-              </div>
-
-              <div className="settings-field">
-                <label className="settings-label">Descrição</label>
-                <textarea
-                  className="form-control workspace-search-input"
-                  rows={3}
-                  defaultValue={workspace?.description}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

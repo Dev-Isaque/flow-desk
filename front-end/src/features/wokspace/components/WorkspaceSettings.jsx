@@ -3,7 +3,6 @@ import { useState } from "react";
 import { WorkspaceGeneral } from "./settings/WorkspaceGeneral";
 import { WorkspaceMembers } from "./settings/WorkspaceMembers";
 import { WorkspaceTags } from "./settings/WorkspaceTags";
-import { WorkspacePermissions } from "./settings/WorkspacePermissions";
 
 import { Button } from "../../../shared/components/Button";
 
@@ -12,6 +11,7 @@ export function WorkspaceSettings({
   members,
   fetchMembers,
   onBack,
+  handleAddMember,
   handleUpdateMember,
   handleDeleteMember,
 }) {
@@ -24,12 +24,12 @@ export function WorkspaceSettings({
         workspace={workspace}
         members={members}
         fetchMembers={fetchMembers}
+        handleAddMember={handleAddMember}
         handleUpdateMember={handleUpdateMember}
         handleDeleteMember={handleDeleteMember}
       />
     ),
     tags: <WorkspaceTags workspace={workspace} />,
-    permissions: <WorkspacePermissions workspace={workspace} />,
   };
 
   function handleRenderingView(screenName) {
@@ -94,12 +94,6 @@ export function WorkspaceSettings({
             Tags/Etiquetas
           </Button>
 
-          <Button
-            className="btn-color"
-            onClick={() => handleRenderingView("permissions")}
-          >
-            Permissões
-          </Button>
         </div>
       </div>
 
