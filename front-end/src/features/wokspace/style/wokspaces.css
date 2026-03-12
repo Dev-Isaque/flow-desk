@@ -188,23 +188,23 @@
    MEMBERS TABLE
 ========================= */
 
-.members-table {
+.settings-table {
     background: transparent;
 }
 
-.members-table thead,
-.members-table tbody,
-.members-table tr,
-.members-table th,
-.members-table td {
+.settings-table thead,
+.settings-table tbody,
+.settings-table tr,
+.settings-table th,
+.settings-table td {
     background: transparent !important;
 }
 
-.members-table thead {
+.settings-table thead {
     border-bottom: 1px solid var(--border-color);
 }
 
-.members-table th {
+.settings-table th {
     color: var(--text-muted);
     font-weight: 500;
     font-size: 0.85rem;
@@ -212,7 +212,7 @@
     letter-spacing: 0.04em;
 }
 
-.members-table td {
+.settings-table td {
     color: var(--text-color);
     vertical-align: middle;
 }
@@ -289,14 +289,14 @@
     font-weight: 500;
 }
 
-.members-table .form-select {
+.settings-table .form-select {
     background-color: var(--card-color);
     color: var(--text-color);
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
 }
 
-.members-table .form-select:focus {
+.settings-table .form-select:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px var(--secondary-color);
 }
@@ -311,11 +311,11 @@
         height: 140px;
     }
 
-    .members-table thead {
+    .settings-table thead {
         display: none;
     }
 
-    .members-table tr {
+    .settings-table tr {
         display: block;
         margin-bottom: 12px;
         border: 1px solid var(--border-color);
@@ -323,7 +323,7 @@
         padding: 12px;
     }
 
-    .members-table td {
+    .settings-table td {
         display: flex;
         justify-content: space-between;
         padding: 6px 0;

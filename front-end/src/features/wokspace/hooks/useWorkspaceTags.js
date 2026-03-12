@@ -50,20 +50,29 @@ export function useWorkspaceTags(workspaceId) {
     }, [workspaceId, showToast]);
 
     const createTag = useCallback(
-        async (tagName) => {
-            if (!tagName?.trim()) return null;
+        async (data) => {
+
+            const name = data?.name?.trim();
+
+            if (!name) return null;
 
             setCreatingTag(true);
             setErrorTags("");
 
             try {
-                const r = await createWorkspaceTag(workspaceId, tagName.trim());
+
+                const r = await createWorkspaceTag(workspaceId, {
+                    name,
+                    color: data.color
+                });
 
                 if (!r?.sucesso) {
+
                     const msg = r?.mensagem || "Não foi possível criar a tag.";
 
                     setErrorTags(msg);
                     showToast(msg, "error");
+
                     return null;
                 }
 
@@ -74,16 +83,22 @@ export function useWorkspaceTags(workspaceId) {
                 showToast("Tag criada com sucesso!", "success");
 
                 return newTag;
+
             } catch (err) {
+
                 console.error(err);
 
                 const msg = "Erro inesperado ao criar tag.";
+
                 setErrorTags(msg);
                 showToast(msg, "error");
 
                 return null;
+
             } finally {
+
                 setCreatingTag(false);
+
             }
         },
         [workspaceId, showToast]

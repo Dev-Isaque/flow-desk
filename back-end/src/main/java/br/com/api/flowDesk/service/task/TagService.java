@@ -1,16 +1,22 @@
 package br.com.api.flowDesk.service.task;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import br.com.api.flowDesk.dto.task.TagDTO;
 import br.com.api.flowDesk.dto.task.request.CreateTagRequest;
 import br.com.api.flowDesk.dto.task.request.UpdateTagRequest;
 import br.com.api.flowDesk.model.task.TagModel;
+import br.com.api.flowDesk.model.task.TaskModel;
 import br.com.api.flowDesk.model.task.WorkspaceModel;
 import br.com.api.flowDesk.repository.task.TagRepository;
 import br.com.api.flowDesk.repository.workspace.WorkspaceRepository;
@@ -20,8 +26,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TagService {
 
-    private final TagRepository tagRepository;
-    private final WorkspaceRepository workspaceRepository;
+    @Autowired
+    private TagRepository tagRepository;
+
+    @Autowired
+    private WorkspaceRepository workspaceRepository;
 
     public List<TagDTO> listByWorkspace(UUID workspaceId) {
 
@@ -105,11 +114,15 @@ public class TagService {
     public void delete(UUID workspaceId, UUID tagId) {
 
         TagModel tag = tagRepository.findById(tagId)
-                .orElseThrow(() -> new RuntimeException("Tag não encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag não encontrada"));
 
-        if (!tag.getWorkspace().getId().equals(workspaceId)) {
-            throw new RuntimeException("Tag não pertence a este workspace");
+        Set<TaskModel> tasks = new HashSet<>(tag.getTasks());
+
+        for (TaskModel task : tasks) {
+            task.getTags().remove(tag);
         }
+
+        tag.getTasks().clear();
 
         tagRepository.delete(tag);
     }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "../../../../shared/components/Button";
+import { Input } from "../../../../shared/components/Input";
 import { useWorkspace } from "../../context/useWorkspace";
 
 const COLORS = [
@@ -16,12 +17,17 @@ const COLORS = [
   "#06b6d4",
 ];
 
+const DEFAULT_COLOR = "#64748b";
+
 export function WorkspaceTags() {
   const { tags, createTag, updateTag, deleteTag, loadingTags, creatingTag } =
     useWorkspace();
 
   const [selectedTag, setSelectedTag] = useState(null);
+
   const [newTagName, setNewTagName] = useState("");
+  const [newTagColor, setNewTagColor] = useState(DEFAULT_COLOR);
+
   const [creatingMode, setCreatingMode] = useState(false);
 
   function handleSelectTag(tag) {
@@ -53,6 +59,7 @@ export function WorkspaceTags() {
 
     await updateTag(selectedTag.id, {
       name: selectedTag.name,
+      color: selectedTag.color,
     });
   }
 
@@ -60,6 +67,7 @@ export function WorkspaceTags() {
     setCreatingMode(true);
     setSelectedTag(null);
     setNewTagName("");
+    setNewTagColor(DEFAULT_COLOR);
   }
 
   async function handleCreate() {
@@ -79,12 +87,15 @@ export function WorkspaceTags() {
       return;
     }
 
-    const newTag = await createTag(name);
+    const newTag = await createTag({
+      name,
+      color: newTagColor,
+    });
 
     if (newTag) {
       setCreatingMode(false);
       setNewTagName("");
-      setSelectedTag({ ...newTag, color: "#64748b" });
+      setSelectedTag(newTag);
     }
   }
 
@@ -99,6 +110,13 @@ export function WorkspaceTags() {
 
     await deleteTag(selectedTag.id);
     setSelectedTag(null);
+  }
+
+  function handleCancel() {
+    setCreatingMode(false);
+    setSelectedTag(null);
+    setNewTagName("");
+    setNewTagColor(DEFAULT_COLOR);
   }
 
   if (loadingTags) {
@@ -130,39 +148,64 @@ export function WorkspaceTags() {
           </Button>
         </div>
 
-        {/* CAMPO DE CRIAÇÃO */}
         {creatingMode && (
           <div className="mb-4">
             <label className="form-label">Nome da nova tag</label>
 
-            <div className="d-flex gap-2">
-              <input
-                className="form-control"
-                value={newTagName}
-                onChange={(e) => setNewTagName(e.target.value)}
-                placeholder="Digite o nome da tag"
-              />
+            <Input
+              className="mb-3"
+              value={newTagName}
+              onChange={(e) => setNewTagName(e.target.value)}
+              placeholder="Digite o nome da tag"
+            />
 
+            <label className="form-label">Escolher Cor</label>
+
+            <div className="d-flex flex-wrap gap-2 mb-3">
+              {COLORS.map((color) => (
+                <div
+                  key={color}
+                  onClick={() => setNewTagColor(color)}
+                  style={{
+                    width: "30px",
+                    height: "30px",
+                    borderRadius: "50%",
+                    background: color,
+                    cursor: "pointer",
+                    border:
+                      newTagColor === color
+                        ? "3px solid #22d3ee"
+                        : "2px solid transparent",
+                  }}
+                />
+              ))}
+            </div>
+
+            <div className="d-flex justify-content-end gap-2">
               <Button
                 className="btn-color"
                 onClick={handleCreate}
                 disabled={creatingTag}
               >
-                Criar
+                Criar Tag
+              </Button>
+
+              <Button className="btn-outline-secondary" onClick={handleCancel}>
+                Cancelar
               </Button>
             </div>
           </div>
         )}
 
         <div className="row g-4">
-          {/* LISTA DE TAGS */}
           <div className="col-lg-8">
             <div className="table-responsive">
-              <table className="table table-borderless align-middle tags-table">
+              <table className="table table-borderless table-hover align-middle settings-table">
                 <thead>
                   <tr className="theme-text-muted">
                     <th>COR</th>
                     <th>NOME DA TAG</th>
+                    <th>USO</th>
                     <th>AÇÕES</th>
                   </tr>
                 </thead>
@@ -176,7 +219,7 @@ export function WorkspaceTags() {
                             width: "18px",
                             height: "18px",
                             borderRadius: "50%",
-                            background: tag.color || "#64748b",
+                            background: tag.color || DEFAULT_COLOR,
                           }}
                         />
                       </td>
@@ -184,12 +227,18 @@ export function WorkspaceTags() {
                       <td className="fw-medium">{tag.name}</td>
 
                       <td>
+                        <span className="badge bg-secondary">
+                          {tag.usage ?? 0} tarefas
+                        </span>
+                      </td>
+
+                      <td>
                         <button
                           className="btn btn-link text-info"
                           onClick={() =>
                             handleSelectTag({
                               ...tag,
-                              color: tag.color || "#64748b",
+                              color: tag.color || DEFAULT_COLOR,
                             })
                           }
                         >
@@ -203,7 +252,6 @@ export function WorkspaceTags() {
             </div>
           </div>
 
-          {/* EDITOR */}
           <div className="col-lg-4">
             {selectedTag && (
               <div className="tag-editor-card">
@@ -244,10 +292,17 @@ export function WorkspaceTags() {
                 </Button>
 
                 <Button
-                  className="btn-outline-danger w-100"
+                  className="btn-outline-danger w-100 mb-2"
                   onClick={handleDelete}
                 >
                   Excluir Tag
+                </Button>
+
+                <Button
+                  className="btn-outline-secondary w-100"
+                  onClick={handleCancel}
+                >
+                  Cancelar
                 </Button>
               </div>
             )}

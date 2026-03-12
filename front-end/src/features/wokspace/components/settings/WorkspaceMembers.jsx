@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { Button } from "../../../../shared/components/Button";
+import { Input } from "../../../../shared/components/Input";
 
 import { AddMemberModal } from "../../components/modals/AddMemberModal";
 
@@ -94,20 +95,17 @@ export function WorkspaceMembers({
 
         <div className="d-flex gap-3 mb-4">
           <div className="input-group">
-            <span className="input-group-text">
-              <Search size={16} />
-            </span>
-
-            <input
+            <Input
               type="text"
-              className="form-control"
               placeholder="Buscar por nome ou email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              className="border-start-0"
             />
           </div>
 
           <select
+            as="select"
             className="form-select"
             style={{ maxWidth: "180px" }}
             value={roleFilter}
@@ -121,7 +119,7 @@ export function WorkspaceMembers({
         </div>
 
         <div className="table-responsive">
-          <table className="table table-borderless table-hover align-middle members-table">
+          <table className="table table-borderless table-hover align-middle settings-table">
             <thead>
               <tr className="theme-text-muted">
                 <th>Membro</th>

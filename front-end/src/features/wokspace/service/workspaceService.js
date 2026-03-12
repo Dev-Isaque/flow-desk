@@ -12,19 +12,17 @@ export const getWorkspaceTags = (workspaceId) => {
     return apiRequest(`/workspace/${workspaceId}/tags`, { method: "GET" });
 };
 
-export const createWorkspaceTag = (workspaceId, tagName) => {
+export const createWorkspaceTag = (workspaceId, data) => {
     return apiRequest(`/workspace/${workspaceId}/tags`, {
         method: "POST",
-        body: JSON.stringify({ name: tagName }),
+        body: JSON.stringify(data),
     });
 };
 
 export const updateWorkspaceTag = (workspaceId, tagId, data) => {
     return apiRequest(`/workspace/${workspaceId}/tags/${tagId}`, {
         method: "PUT",
-        body: JSON.stringify({
-            name: data.name,
-        }),
+        body: JSON.stringify(data),
     });
 };
 
