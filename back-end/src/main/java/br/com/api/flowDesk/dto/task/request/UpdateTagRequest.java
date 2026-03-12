@@ -6,9 +6,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateTagRequest {
-    @NotBlank
+public class UpdateTagRequest {
+
+    @NotBlank(message = "Nome da tag é obrigatório")
     private String name;
 
     private String color;
+
 }

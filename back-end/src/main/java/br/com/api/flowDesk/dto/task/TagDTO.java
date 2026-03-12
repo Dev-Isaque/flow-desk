@@ -11,5 +11,6 @@ public class TagDTO {
 
     private UUID id;
     private String name;
-
+    private String color;
+    private long usage;
 }

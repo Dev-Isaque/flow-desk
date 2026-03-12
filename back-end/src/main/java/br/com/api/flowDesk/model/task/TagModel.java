@@ -38,6 +38,9 @@ public class TagModel {
     @Column(nullable = false)
     private String name;
 
+    @Column(length = 20)
+    private String color;
+
     @ManyToMany(mappedBy = "tags")
     private Set<TaskModel> tasks = new HashSet<>();
 }

@@ -19,13 +19,28 @@ export const createWorkspaceTag = (workspaceId, tagName) => {
     });
 };
 
+export const updateWorkspaceTag = (workspaceId, tagId, data) => {
+    return apiRequest(`/workspace/${workspaceId}/tags/${tagId}`, {
+        method: "PUT",
+        body: JSON.stringify({
+            name: data.name,
+        }),
+    });
+};
+
+export const deleteWorkspaceTag = (workspaceId, tagId) => {
+    return apiRequest(`/workspace/${workspaceId}/tags/${tagId}`, {
+        method: "DELETE",
+    });
+};
+
 export const createWorkspace = (workspaceName, color, type = "SHARED") => {
     return apiRequest("/workspaces/create", {
         method: "POST",
         body: JSON.stringify({
             name: workspaceName,
             color: color,
-            type: type
+            type: type,
         }),
     });
 };
@@ -34,7 +49,7 @@ export const addMemberToWorkspace = (workspaceId, memberEmail) => {
     return apiRequest(`/workspaces/${workspaceId}/members`, {
         method: "POST",
         body: JSON.stringify({
-            emailToAdd: memberEmail
+            emailToAdd: memberEmail,
         }),
     });
 };
@@ -43,19 +58,19 @@ export const updateWorkspaceMember = (workspaceId, memberId, role) => {
     return apiRequest(`/workspaces/${workspaceId}/members/${memberId}`, {
         method: "PATCH",
         body: JSON.stringify({
-            role: role
-        })
+            role: role,
+        }),
     });
 };
 
 export const removedMemberWorkspace = (workspaceId, memberId) => {
     return apiRequest(`/workspaces/${workspaceId}/members/${memberId}`, {
-        method: "DELETE"
+        method: "DELETE",
     });
-}
+};
 
 export const listWorkspaceMembers = (workspaceId) => {
     return apiRequest(`/workspaces/${workspaceId}/members`, {
-        method: "GET"
+        method: "GET",
     });
 };

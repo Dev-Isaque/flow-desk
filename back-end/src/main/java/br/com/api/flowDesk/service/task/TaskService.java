@@ -87,7 +87,9 @@ public class TaskService {
                 .stream()
                 .map(tag -> new TagDTO(
                         tag.getId(),
-                        tag.getName()))
+                        tag.getName(),
+                        tag.getColor(),
+                        0))
                 .toList();
 
         return new TaskDTO(

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "../../../../shared/components/Button";
+import { useWorkspace } from "../../context/useWorkspace";
 
 const COLORS = [
   "#ef4444",
@@ -15,33 +16,98 @@ const COLORS = [
   "#06b6d4",
 ];
 
-export function WorkspaceTags({ workspace }) {
-  const [tags, setTags] = useState([
-    { id: 1, name: "Urgente", color: "#ef4444", usage: 42 },
-    { id: 2, name: "Em Revisão", color: "#f59e0b", usage: 18 },
-    { id: 3, name: "Aguardando", color: "#3b82f6", usage: 25 },
-    { id: 4, name: "Concluído", color: "#10b981", usage: 156 },
-  ]);
+export function WorkspaceTags() {
+  const { tags, createTag, updateTag, deleteTag, loadingTags, creatingTag } =
+    useWorkspace();
 
   const [selectedTag, setSelectedTag] = useState(null);
+  const [newTagName, setNewTagName] = useState("");
+  const [creatingMode, setCreatingMode] = useState(false);
 
-  const handleSelectTag = (tag) => {
+  function handleSelectTag(tag) {
     setSelectedTag(tag);
-  };
+    setCreatingMode(false);
+  }
 
-  const handleChangeName = (name) => {
-    setSelectedTag({ ...selectedTag, name });
-  };
+  function handleChangeName(name) {
+    setSelectedTag((prev) => (prev ? { ...prev, name } : prev));
+  }
 
-  const handleChangeColor = (color) => {
-    setSelectedTag({ ...selectedTag, color });
-  };
+  function handleChangeColor(color) {
+    setSelectedTag((prev) => (prev ? { ...prev, color } : prev));
+  }
 
-  const handleSave = () => {
-    setTags((prev) =>
-      prev.map((t) => (t.id === selectedTag.id ? selectedTag : t)),
+  async function handleSave() {
+    if (!selectedTag) return;
+
+    const alreadyExists = tags.some(
+      (t) =>
+        t.name.toLowerCase() === selectedTag.name.toLowerCase() &&
+        t.id !== selectedTag.id,
     );
-  };
+
+    if (alreadyExists) {
+      alert("Já existe uma tag com esse nome.");
+      return;
+    }
+
+    await updateTag(selectedTag.id, {
+      name: selectedTag.name,
+    });
+  }
+
+  function handleStartCreate() {
+    setCreatingMode(true);
+    setSelectedTag(null);
+    setNewTagName("");
+  }
+
+  async function handleCreate() {
+    const name = newTagName.trim();
+
+    if (!name) {
+      alert("Digite um nome para a tag.");
+      return;
+    }
+
+    const alreadyExists = tags.some(
+      (t) => t.name.toLowerCase() === name.toLowerCase(),
+    );
+
+    if (alreadyExists) {
+      alert("Já existe uma tag com esse nome.");
+      return;
+    }
+
+    const newTag = await createTag(name);
+
+    if (newTag) {
+      setCreatingMode(false);
+      setNewTagName("");
+      setSelectedTag({ ...newTag, color: "#64748b" });
+    }
+  }
+
+  async function handleDelete() {
+    if (!selectedTag) return;
+
+    const confirmDelete = window.confirm(
+      "Tem certeza que deseja excluir esta tag?",
+    );
+
+    if (!confirmDelete) return;
+
+    await deleteTag(selectedTag.id);
+    setSelectedTag(null);
+  }
+
+  if (loadingTags) {
+    return (
+      <div className="workspace-settings">
+        <p className="theme-text-muted">Carregando tags...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="workspace-settings">
@@ -54,11 +120,39 @@ export function WorkspaceTags({ workspace }) {
             </small>
           </div>
 
-          <Button className="btn-color">
+          <Button
+            className="btn-color"
+            onClick={handleStartCreate}
+            disabled={creatingTag || creatingMode}
+          >
             <Plus size={18} className="me-2" />
             Adicionar Nova Tag
           </Button>
         </div>
+
+        {/* CAMPO DE CRIAÇÃO */}
+        {creatingMode && (
+          <div className="mb-4">
+            <label className="form-label">Nome da nova tag</label>
+
+            <div className="d-flex gap-2">
+              <input
+                className="form-control"
+                value={newTagName}
+                onChange={(e) => setNewTagName(e.target.value)}
+                placeholder="Digite o nome da tag"
+              />
+
+              <Button
+                className="btn-color"
+                onClick={handleCreate}
+                disabled={creatingTag}
+              >
+                Criar
+              </Button>
+            </div>
+          </div>
+        )}
 
         <div className="row g-4">
           {/* LISTA DE TAGS */}
@@ -69,7 +163,6 @@ export function WorkspaceTags({ workspace }) {
                   <tr className="theme-text-muted">
                     <th>COR</th>
                     <th>NOME DA TAG</th>
-                    <th>USO</th>
                     <th>AÇÕES</th>
                   </tr>
                 </thead>
@@ -83,7 +176,7 @@ export function WorkspaceTags({ workspace }) {
                             width: "18px",
                             height: "18px",
                             borderRadius: "50%",
-                            background: tag.color,
+                            background: tag.color || "#64748b",
                           }}
                         />
                       </td>
@@ -91,15 +184,14 @@ export function WorkspaceTags({ workspace }) {
                       <td className="fw-medium">{tag.name}</td>
 
                       <td>
-                        <span className="badge bg-secondary">
-                          {tag.usage} tarefas
-                        </span>
-                      </td>
-
-                      <td>
                         <button
                           className="btn btn-link text-info"
-                          onClick={() => handleSelectTag(tag)}
+                          onClick={() =>
+                            handleSelectTag({
+                              ...tag,
+                              color: tag.color || "#64748b",
+                            })
+                          }
                         >
                           Editar
                         </button>
@@ -115,7 +207,7 @@ export function WorkspaceTags({ workspace }) {
           <div className="col-lg-4">
             {selectedTag && (
               <div className="tag-editor-card">
-                <h5 className="mb-3">Editar Tag Selecionada</h5>
+                <h5 className="mb-3">Editar Tag</h5>
 
                 <label className="form-label">Nome da Tag</label>
 
@@ -151,7 +243,10 @@ export function WorkspaceTags({ workspace }) {
                   Salvar Alterações
                 </Button>
 
-                <Button className="btn-outline-danger w-100">
+                <Button
+                  className="btn-outline-danger w-100"
+                  onClick={handleDelete}
+                >
                   Excluir Tag
                 </Button>
               </div>

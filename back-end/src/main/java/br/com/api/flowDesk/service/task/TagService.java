@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.com.api.flowDesk.dto.task.TagDTO;
 import br.com.api.flowDesk.dto.task.request.CreateTagRequest;
+import br.com.api.flowDesk.dto.task.request.UpdateTagRequest;
 import br.com.api.flowDesk.model.task.TagModel;
 import br.com.api.flowDesk.model.task.WorkspaceModel;
 import br.com.api.flowDesk.repository.task.TagRepository;
@@ -23,7 +24,16 @@ public class TagService {
     private final WorkspaceRepository workspaceRepository;
 
     public List<TagDTO> listByWorkspace(UUID workspaceId) {
-        return tagRepository.findByWorkspace_Id(workspaceId);
+
+        List<TagModel> tags = tagRepository.findByWorkspace_Id(workspaceId);
+
+        return tags.stream()
+                .map(tag -> new TagDTO(
+                        tag.getId(),
+                        tag.getName(),
+                        tag.getColor(),
+                        tag.getTasks().size()))
+                .toList();
     }
 
     @Transactional
@@ -34,8 +44,14 @@ public class TagService {
         Optional<TagModel> existingTag = tagRepository.findByWorkspaceIdAndNameIgnoreCase(workspaceId, cleanedName);
 
         if (existingTag.isPresent()) {
+
             TagModel tag = existingTag.get();
-            return new TagDTO(tag.getId(), tag.getName());
+
+            return new TagDTO(
+                    tag.getId(),
+                    tag.getName(),
+                    tag.getColor(),
+                    tag.getTasks().size());
         }
 
         WorkspaceModel workspace = workspaceRepository.findById(workspaceId)
@@ -43,10 +59,58 @@ public class TagService {
 
         TagModel newTag = new TagModel();
         newTag.setName(cleanedName);
+        newTag.setColor(dto.getColor());
         newTag.setWorkspace(workspace);
 
         tagRepository.save(newTag);
 
-        return new TagDTO(newTag.getId(), newTag.getName());
+        return new TagDTO(
+                newTag.getId(),
+                newTag.getName(),
+                newTag.getColor(),
+                0);
+    }
+
+    @Transactional
+    public TagDTO update(UUID workspaceId, UUID tagId, UpdateTagRequest dto) {
+
+        TagModel tag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new RuntimeException("Tag não encontrada"));
+
+        if (!tag.getWorkspace().getId().equals(workspaceId)) {
+            throw new RuntimeException("Tag não pertence a este workspace");
+        }
+
+        String cleanedName = dto.getName().trim();
+
+        Optional<TagModel> existingTag = tagRepository.findByWorkspaceIdAndNameIgnoreCase(workspaceId, cleanedName);
+
+        if (existingTag.isPresent() && !existingTag.get().getId().equals(tagId)) {
+            throw new RuntimeException("Já existe uma tag com esse nome");
+        }
+
+        tag.setName(cleanedName);
+        tag.setColor(dto.getColor());
+
+        tagRepository.save(tag);
+
+        return new TagDTO(
+                tag.getId(),
+                tag.getName(),
+                tag.getColor(),
+                tag.getTasks().size());
+    }
+
+    @Transactional
+    public void delete(UUID workspaceId, UUID tagId) {
+
+        TagModel tag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new RuntimeException("Tag não encontrada"));
+
+        if (!tag.getWorkspace().getId().equals(workspaceId)) {
+            throw new RuntimeException("Tag não pertence a este workspace");
+        }
+
+        tagRepository.delete(tag);
     }
 }

@@ -7,16 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.api.flowDesk.dto.task.TagDTO;
 import br.com.api.flowDesk.dto.task.request.CreateTagRequest;
+import br.com.api.flowDesk.dto.task.request.UpdateTagRequest;
 import br.com.api.flowDesk.service.auth.AuthTokenService;
 import br.com.api.flowDesk.service.task.TagService;
 import jakarta.validation.Valid;
@@ -46,5 +48,25 @@ public class TagController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(tagService.create(workspaceId, dto));
+    }
+
+    @PutMapping("/{workspaceId}/tags/{tagId}")
+    public ResponseEntity<TagDTO> update(
+            @PathVariable UUID workspaceId,
+            @PathVariable UUID tagId,
+            @RequestBody @Valid UpdateTagRequest dto) {
+
+        return ResponseEntity.ok(
+                tagService.update(workspaceId, tagId, dto));
+    }
+
+    @DeleteMapping("/{workspaceId}/tags/{tagId}")
+    public ResponseEntity<Void> delete(
+            @PathVariable UUID workspaceId,
+            @PathVariable UUID tagId) {
+
+        tagService.delete(workspaceId, tagId);
+
+        return ResponseEntity.noContent().build();
     }
 }

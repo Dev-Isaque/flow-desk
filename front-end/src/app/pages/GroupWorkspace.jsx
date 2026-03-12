@@ -18,21 +18,18 @@ import { CreateWorkspaceModal } from "../../features/wokspace/components/modals/
 import { AddMemberModal } from "../../features/wokspace/components/modals/AddMemberModal";
 
 import { WorkspaceSettings } from "../../features/wokspace/components/WorkspaceSettings";
+import { WorkspaceProvider } from "../../features/wokspace/context/WorkspaceProvider";
 
 function GroupWorkspace() {
   const { errorMe } = useMe();
 
   const {
     workspaces,
-    members,
     loading,
     error,
-    fetchMembers,
     handleAddMember,
     handleCreateWorkspace,
     fetchWorkspaces,
-    handleUpdateMember,
-    handleDeleteMember,
   } = useSharedWorkspace();
 
   const navigate = useNavigate();
@@ -40,10 +37,8 @@ function GroupWorkspace() {
   const location = useLocation();
 
   const [searchTerm, setSearchTerm] = useState("");
-
   const [showCreateWorkspaceModal, setShowCreateWorkspaceModal] =
     useState(false);
-
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
 
   useEffect(() => {
@@ -106,19 +101,7 @@ function GroupWorkspace() {
 
       {erroTela && <p className="auth-error">{erroTela}</p>}
 
-      {settingsWorkspaceId && (
-        <WorkspaceSettings
-          workspace={workspaceAtivo}
-          members={members}
-          fetchMembers={fetchMembers}
-          handleAddMember={handleAddMember}
-          handleUpdateMember={handleUpdateMember}
-          handleDeleteMember={handleDeleteMember}
-          onBack={() => navigate(`/groups/${workspaceId}`)}
-        />
-      )}
-
-      {!settingsWorkspaceId && !activeWorkspaceId && (
+      {!activeWorkspaceId && (
         <div className="workspace-dashboard">
           <div className="d-flex justify-content-between align-items-end mb-4">
             <div>
@@ -194,22 +177,32 @@ function GroupWorkspace() {
         </div>
       )}
 
-      {!settingsWorkspaceId && activeWorkspaceId && (
-        <WorkspaceBoard
-          workspaceId={activeWorkspaceId}
-          loadingWorkspace={loading}
-          title={workspaceAtivo?.name || "Grupo"}
-          onBack={() => navigate("/groups")}
-          extraHeaderActions={
-            <Button
-              className="btn-color"
-              onClick={() => setShowAddMemberModal(true)}
-            >
-              <Users size={18} className="me-2" />
-              Adicionar Membro
-            </Button>
-          }
-        />
+      {/* AREA DO WORKSPACE */}
+      {activeWorkspaceId && (
+        <WorkspaceProvider workspaceId={activeWorkspaceId}>
+          {settingsWorkspaceId ? (
+            <WorkspaceSettings
+              workspace={workspaceAtivo}
+              onBack={() => navigate(`/groups/${workspaceId}`)}
+            />
+          ) : (
+            <WorkspaceBoard
+              workspaceId={activeWorkspaceId}
+              loadingWorkspace={loading}
+              title={workspaceAtivo?.name || "Grupo"}
+              onBack={() => navigate("/groups")}
+              extraHeaderActions={
+                <Button
+                  className="btn-color"
+                  onClick={() => setShowAddMemberModal(true)}
+                >
+                  <Users size={18} className="me-2" />
+                  Adicionar Membro
+                </Button>
+              }
+            />
+          )}
+        </WorkspaceProvider>
       )}
 
       <CreateWorkspaceModal

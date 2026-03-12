@@ -5,20 +5,22 @@ import { WorkspaceMembers } from "./settings/WorkspaceMembers";
 import { WorkspaceTags } from "./settings/WorkspaceTags";
 
 import { Button } from "../../../shared/components/Button";
+import { useWorkspace } from "../context/useWorkspace";
 
-export function WorkspaceSettings({
-  workspace,
-  members,
-  fetchMembers,
-  onBack,
-  handleAddMember,
-  handleUpdateMember,
-  handleDeleteMember,
-}) {
+export function WorkspaceSettings({ workspace, onBack }) {
+  const {
+    members,
+    fetchMembers,
+    handleAddMember,
+    handleUpdateMember,
+    handleDeleteMember,
+  } = useWorkspace();
+
   const [activeTab, setActiveTab] = useState("general");
 
-  const screnns = {
+  const screens = {
     general: <WorkspaceGeneral workspace={workspace} />,
+
     members: (
       <WorkspaceMembers
         workspace={workspace}
@@ -29,6 +31,7 @@ export function WorkspaceSettings({
         handleDeleteMember={handleDeleteMember}
       />
     ),
+
     tags: <WorkspaceTags workspace={workspace} />,
   };
 
@@ -49,7 +52,7 @@ export function WorkspaceSettings({
               className="btn btn-link theme-text-muted p-0 border-0 hover-primary mt-2"
               style={{ transition: "color 0.2s" }}
               title="Voltar"
-            ></Button>
+            />
           )}
 
           <div>
@@ -59,6 +62,7 @@ export function WorkspaceSettings({
             >
               Configurações do Workspace
             </h1>
+
             <p
               className="theme-text-muted mb-0"
               style={{ fontSize: "0.95rem", lineHeight: "1.5" }}
@@ -93,11 +97,10 @@ export function WorkspaceSettings({
           >
             Tags/Etiquetas
           </Button>
-
         </div>
       </div>
 
-      <div className="conteudo-da-view">{screnns[activeTab]}</div>
+      <div className="conteudo-da-view">{screens[activeTab]}</div>
     </div>
   );
 }
