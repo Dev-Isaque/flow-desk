@@ -106,7 +106,7 @@ export function WorkspaceMembers({
 
           <select
             as="select"
-            className="form-select"
+            className="form-select theme-input"
             style={{ maxWidth: "180px" }}
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}

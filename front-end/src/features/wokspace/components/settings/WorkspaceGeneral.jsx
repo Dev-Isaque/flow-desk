@@ -1,3 +1,5 @@
+import { Input } from "../../../../shared/components/Input";
+
 export function WorkspaceGeneral({ workspace }) {
   return (
     <div className="workspace-settings">
@@ -17,8 +19,8 @@ export function WorkspaceGeneral({ workspace }) {
             <div className="settings-fields">
               <div className="settings-field mb-3">
                 <label className="settings-label">Nome do Workspace</label>
-                <input
-                  className="form-control workspace-search-input"
+                <Input
+                  className="workspace-search-input"
                   defaultValue={workspace?.name}
                 />
               </div>
@@ -26,7 +28,7 @@ export function WorkspaceGeneral({ workspace }) {
               <div className="settings-field">
                 <label className="settings-label">Descrição</label>
                 <textarea
-                  className="form-control workspace-search-input"
+                  className="workspace-search-input p-2"
                   rows={3}
                   defaultValue={workspace?.description}
                 />

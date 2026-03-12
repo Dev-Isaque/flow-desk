@@ -259,8 +259,8 @@ export function WorkspaceTags() {
 
                 <label className="form-label">Nome da Tag</label>
 
-                <input
-                  className="form-control mb-3"
+                <Input
+                  className="mb-3"
                   value={selectedTag.name}
                   onChange={(e) => handleChangeName(e.target.value)}
                 />

@@ -32,12 +32,6 @@ export function Modal({
               <h5 className="modal-title fw-bold theme-text" id={`${id}Label`}>
                 {title}
               </h5>
-
-              <button
-                type="button"
-                className="btn-close theme-btn-close"
-                aria-label="Close"
-              />
             </div>
 
             <div className="modal-body py-3 theme-text">{children}</div>
