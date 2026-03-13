@@ -43,6 +43,19 @@ export const createWorkspace = (workspaceName, color, type = "SHARED") => {
     });
 };
 
+export const updateWorkspace = (workspaceId, data) => {
+    return apiRequest(`/workspaces/${workspaceId}`, {
+        method: "PATCH",
+        body: JSON.stringify(data)
+    })
+}
+
+export const deleteWorkspace = (workspaceId) => {
+    return apiRequest(`/workspaces/${workspaceId}`, {
+        method: "DELETE"
+    })
+}
+
 export const addMemberToWorkspace = (workspaceId, memberEmail) => {
     return apiRequest(`/workspaces/${workspaceId}/members`, {
         method: "POST",

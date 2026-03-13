@@ -1,6 +1,8 @@
 import { Input } from "../../../../shared/components/Input";
 
 export function WorkspaceGeneral({ workspace }) {
+  console.log(workspace?.id);
+
   return (
     <div className="workspace-settings">
       <div className="settings-card">
@@ -18,17 +20,16 @@ export function WorkspaceGeneral({ workspace }) {
           <div className="col-12 col-md-8 col-lg-9">
             <div className="settings-fields">
               <div className="settings-field mb-3">
-                <label className="settings-label">Nome do Workspace</label>
                 <Input
-                  className="workspace-search-input"
+                  label="Nome do Workspace"
                   defaultValue={workspace?.name}
                 />
               </div>
 
               <div className="settings-field">
-                <label className="settings-label">Descrição</label>
-                <textarea
-                  className="workspace-search-input p-2"
+                <Input
+                  label="Descrição"
+                  as="textarea"
                   rows={3}
                   defaultValue={workspace?.description}
                 />

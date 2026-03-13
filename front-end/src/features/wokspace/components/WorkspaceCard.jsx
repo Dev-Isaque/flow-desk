@@ -2,7 +2,13 @@ import { Users, MoreVertical } from "lucide-react";
 
 import { Button } from "../../../shared/components/Button";
 
-export function WorkspaceCard({ workspace, onOpen, onOpenSettings }) {
+export function WorkspaceCard({
+  workspace,
+  onOpen,
+  onOpenSettings,
+  onDelete,
+  onLeave,
+}) {
   return (
     <div className="workspace-card" onClick={() => onOpen(workspace.id)}>
       <div className="d-flex justify-content-between align-items-start mb-3">
@@ -45,12 +51,27 @@ export function WorkspaceCard({ workspace, onOpen, onOpenSettings }) {
             </li>
 
             <li>
-              <button
-                className="dropdown-item text-danger"
-                onClick={(e) => e.stopPropagation()}
-              >
-                Excluir
-              </button>
+              {workspace.role === "OWNER" ? (
+                <button
+                  className="dropdown-item text-danger"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(workspace.id);
+                  }}
+                >
+                  Excluir
+                </button>
+              ) : (
+                <button
+                  className="dropdown-item text-warning"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onLeave(workspace.id);
+                  }}
+                >
+                  Sair do grupo
+                </button>
+              )}
             </li>
           </ul>
         </div>

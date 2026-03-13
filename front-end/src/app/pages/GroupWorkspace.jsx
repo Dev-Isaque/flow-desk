@@ -29,6 +29,8 @@ function GroupWorkspace() {
     error,
     handleAddMember,
     handleCreateWorkspace,
+    handleDeleteWorkspace,
+    handleLeaveWorkspace,
     fetchWorkspaces,
   } = useSharedWorkspace();
 
@@ -149,6 +151,24 @@ function GroupWorkspace() {
                     workspace={workspace}
                     onOpen={(id) => navigate(`/groups/${id}`)}
                     onOpenSettings={(id) => navigate(`/groups/${id}/settings`)}
+                    onDelete={(id) => {
+                      if (
+                        window.confirm(
+                          "Tem certeza que deseja excluir este workspace?",
+                        )
+                      ) {
+                        handleDeleteWorkspace(id);
+                      }
+                    }}
+                    onLeave={(id) => {
+                      if (
+                        window.confirm(
+                          "Tem certeza que deseja excluir este workspace?",
+                        )
+                      ) {
+                        handleLeaveWorkspace(id);
+                      }
+                    }}
                   />
                 </div>
               ))}
@@ -177,7 +197,6 @@ function GroupWorkspace() {
         </div>
       )}
 
-      {/* AREA DO WORKSPACE */}
       {activeWorkspaceId && (
         <WorkspaceProvider workspaceId={activeWorkspaceId}>
           {settingsWorkspaceId ? (

@@ -4,6 +4,8 @@ import { useToast } from "../../../shared/utils/useToast";
 import {
     listWorkspaces,
     createWorkspace,
+    updateWorkspace,
+    deleteWorkspace,
     addMemberToWorkspace,
     listWorkspaceMembers,
     updateWorkspaceMember,
@@ -69,6 +71,36 @@ export function useSharedWorkspace() {
         }
     };
 
+    const handleUpdateWorkspace = async (workspaceId, data) => {
+        try {
+            await updateWorkspace(workspaceId, data);
+
+            await fetchWorkspaces();
+
+            showToast("Workspace atualizado com sucesso!", "success");
+
+        } catch (err) {
+            console.error("Falha na requisição:", err);
+            setError("Erro ao atualizar workspace.");
+            showToast("Erro ao atualizar o workspace. Tente novamente.", "error");
+        }
+    };
+
+    const handleDeleteWorkspace = async (workspaceId) => {
+        try {
+            await deleteWorkspace(workspaceId);
+
+            await fetchWorkspaces();
+
+            showToast("Workspace removido com sucesso!", "success");
+
+        } catch (err) {
+            console.error("Falha na requisição:", err);
+            setError("Erro ao remover workspace.");
+            showToast("Erro ao remover o workspace. Tente novamente.", "error");
+        }
+    };
+
     const handleAddMember = async (workspaceId, email) => {
         try {
             await addMemberToWorkspace(workspaceId, email);
@@ -122,6 +154,22 @@ export function useSharedWorkspace() {
         }
     };
 
+    const handleLeaveWorkspace = async (workspaceId, memberId) => {
+        try {
+            await removedMemberWorkspace(workspaceId, memberId);
+
+            setWorkspaces((prev) =>
+                prev.filter((w) => w.id !== workspaceId)
+            );
+
+            showToast("Você saiu do workspace", "success");
+
+        } catch (err) {
+            console.error(err);
+            showToast("Erro ao sair do workspace", "error");
+        }
+    };
+
     return {
         workspaces,
         members,
@@ -130,8 +178,11 @@ export function useSharedWorkspace() {
         fetchWorkspaces,
         fetchMembers,
         handleCreateWorkspace,
+        handleUpdateWorkspace,
+        handleDeleteWorkspace,
         handleAddMember,
         handleUpdateMember,
-        handleDeleteMember
+        handleDeleteMember,
+        handleLeaveWorkspace
     };
 }

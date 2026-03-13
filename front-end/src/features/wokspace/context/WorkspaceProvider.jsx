@@ -6,6 +6,8 @@ export function WorkspaceProvider({ workspaceId, children }) {
   const {
     members,
     fetchMembers,
+    handleUpdateWorkspace,
+    handleDeleteWorkspace,
     handleAddMember,
     handleUpdateMember,
     handleDeleteMember,
@@ -30,6 +32,10 @@ export function WorkspaceProvider({ workspaceId, children }) {
     handleAddMember,
     handleUpdateMember,
     handleDeleteMember,
+
+    handleUpdateWorkspace,
+    handleDeleteWorkspace,
+
     tags,
     loadingTags,
     createTag,
