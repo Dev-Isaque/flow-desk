@@ -95,4 +95,17 @@ public class WorkspaceMemberController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/leave")
+    public ResponseEntity<Void> leaveWorkspace(
+            @PathVariable UUID workspaceId,
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.replace("Bearer", "").trim();
+        UserModel loggedUser = authTokenService.requireUserByToken(token);
+
+        workspaceMemberService.leaveWorkspace(workspaceId, loggedUser);
+
+        return ResponseEntity.noContent().build();
+    }
+
 }

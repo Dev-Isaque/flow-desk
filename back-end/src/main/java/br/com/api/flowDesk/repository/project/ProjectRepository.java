@@ -1,4 +1,4 @@
-package br.com.api.flowDesk.repository.task;
+package br.com.api.flowDesk.repository.project;
 
 import java.util.List;
 import java.util.UUID;
@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-import br.com.api.flowDesk.model.task.ProjectModel;
+import br.com.api.flowDesk.model.project.ProjectModel;
 
 public interface ProjectRepository extends JpaRepository<ProjectModel, UUID> {
 

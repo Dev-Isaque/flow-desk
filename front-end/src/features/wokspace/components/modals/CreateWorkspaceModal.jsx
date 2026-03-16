@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Modal } from "../../../../shared/components/Modal";
 import { Button } from "../../../../shared/components/Button";
 
-export function CreateWorkspaceModal({ onCreate }) {
+export function CreateWorkspaceModal({ show, onCreate, onClose }) {
   const [name, setName] = useState("");
   const [color, setColor] = useState("#14b8a6");
 
@@ -10,19 +10,23 @@ export function CreateWorkspaceModal({ onCreate }) {
     if (!name.trim()) return;
 
     await onCreate(name, color);
+
     setName("");
     setColor("#14b8a6");
+
+    onClose();
   }
 
   return (
     <Modal
       id="modalCriarGrupo"
       title="Criar Novo Grupo"
+      show={show}
       footer={
         <>
           <button
             className="btn btn-link theme-text-muted text-decoration-none"
-            data-bs-dismiss="modal"
+            onClick={onClose}
           >
             Cancelar
           </button>

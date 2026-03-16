@@ -17,7 +17,7 @@ import br.com.api.flowDesk.dto.task.request.CreateTagRequest;
 import br.com.api.flowDesk.dto.task.request.UpdateTagRequest;
 import br.com.api.flowDesk.model.task.TagModel;
 import br.com.api.flowDesk.model.task.TaskModel;
-import br.com.api.flowDesk.model.task.WorkspaceModel;
+import br.com.api.flowDesk.model.workspace.WorkspaceModel;
 import br.com.api.flowDesk.repository.task.TagRepository;
 import br.com.api.flowDesk.repository.workspace.WorkspaceRepository;
 import lombok.RequiredArgsConstructor;

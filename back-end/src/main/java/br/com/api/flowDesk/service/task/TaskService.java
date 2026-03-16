@@ -24,7 +24,7 @@ import br.com.api.flowDesk.enums.task.TaskStatus;
 import br.com.api.flowDesk.model.task.TagModel;
 import br.com.api.flowDesk.model.task.TaskModel;
 import br.com.api.flowDesk.model.user.UserModel;
-import br.com.api.flowDesk.repository.task.ProjectRepository;
+import br.com.api.flowDesk.repository.project.ProjectRepository;
 import br.com.api.flowDesk.repository.task.TagRepository;
 import br.com.api.flowDesk.repository.task.TaskItemRepository;
 import br.com.api.flowDesk.repository.task.TaskRepository;

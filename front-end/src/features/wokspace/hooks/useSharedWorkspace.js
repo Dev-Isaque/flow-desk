@@ -9,7 +9,8 @@ import {
     addMemberToWorkspace,
     listWorkspaceMembers,
     updateWorkspaceMember,
-    removedMemberWorkspace
+    removedMemberWorkspace,
+    leaveWorkspace
 } from "../service/workspaceService";
 
 export function useSharedWorkspace() {
@@ -154,9 +155,9 @@ export function useSharedWorkspace() {
         }
     };
 
-    const handleLeaveWorkspace = async (workspaceId, memberId) => {
+    const handleLeaveWorkspace = async (workspaceId) => {
         try {
-            await removedMemberWorkspace(workspaceId, memberId);
+            await leaveWorkspace(workspaceId);
 
             setWorkspaces((prev) =>
                 prev.filter((w) => w.id !== workspaceId)

@@ -80,6 +80,12 @@ export const removedMemberWorkspace = (workspaceId, memberId) => {
     });
 };
 
+export const leaveWorkspace = (workspaceId) => {
+    return apiRequest(`/workspaces/${workspaceId}/members/leave`, {
+        method: "DELETE",
+    });
+};
+
 export const listWorkspaceMembers = (workspaceId) => {
     return apiRequest(`/workspaces/${workspaceId}/members`, {
         method: "GET",

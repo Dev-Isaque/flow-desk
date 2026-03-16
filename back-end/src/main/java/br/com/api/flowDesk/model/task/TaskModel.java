@@ -14,6 +14,7 @@ import org.hibernate.annotations.UuidGenerator;
 
 import br.com.api.flowDesk.enums.task.TaskPriority;
 import br.com.api.flowDesk.enums.task.TaskStatus;
+import br.com.api.flowDesk.model.project.ProjectModel;
 import br.com.api.flowDesk.model.user.UserModel;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

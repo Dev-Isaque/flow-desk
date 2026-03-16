@@ -9,9 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.com.api.flowDesk.dto.workspace.dto.WorkspaceMemberDTO;
 import br.com.api.flowDesk.enums.workspace.WorkspaceRole;
-import br.com.api.flowDesk.model.task.WorkspaceMemberModel;
-import br.com.api.flowDesk.model.task.WorkspaceModel;
 import br.com.api.flowDesk.model.user.UserModel;
+import br.com.api.flowDesk.model.workspace.WorkspaceMemberModel;
+import br.com.api.flowDesk.model.workspace.WorkspaceModel;
 import br.com.api.flowDesk.repository.user.UserRepository;
 import br.com.api.flowDesk.repository.workspace.WorkspaceMemberRepository;
 import br.com.api.flowDesk.repository.workspace.WorkspaceRepository;
@@ -103,5 +103,15 @@ public class WorkspaceMemberService {
                                 .orElseThrow(() -> new RuntimeException("Membro não encontrado neste workspace"));
 
                 workspaceMemberRepository.delete(workspaceMember);
+        }
+
+        @Transactional
+        public void leaveWorkspace(UUID workspaceId, UserModel user) {
+
+                WorkspaceMemberModel member = workspaceMemberRepository
+                                .findByWorkspace_IdAndUser_Id(workspaceId, user.getId())
+                                .orElseThrow(() -> new RuntimeException("Usuário não é membro deste workspace"));
+
+                workspaceMemberRepository.delete(member);
         }
 }

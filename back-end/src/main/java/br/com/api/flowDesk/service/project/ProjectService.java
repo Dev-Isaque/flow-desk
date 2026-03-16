@@ -1,4 +1,4 @@
-package br.com.api.flowDesk.service.task;
+package br.com.api.flowDesk.service.project;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -7,9 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import br.com.api.flowDesk.dto.task.request.CreateProjectRequest;
-import br.com.api.flowDesk.model.task.ProjectModel;
+import br.com.api.flowDesk.model.project.ProjectModel;
 import br.com.api.flowDesk.model.user.UserModel;
-import br.com.api.flowDesk.repository.task.ProjectRepository;
+import br.com.api.flowDesk.repository.project.ProjectRepository;
 import br.com.api.flowDesk.repository.workspace.WorkspaceMemberRepository;
 import br.com.api.flowDesk.repository.workspace.WorkspaceRepository;
 

@@ -1,4 +1,4 @@
-package br.com.api.flowDesk.model.task;
+package br.com.api.flowDesk.model.workspace;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

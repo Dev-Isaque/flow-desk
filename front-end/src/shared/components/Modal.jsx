@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Button } from "./Button";
 
 export function Modal({
@@ -8,6 +9,7 @@ export function Modal({
   size,
   centered = true,
   show = false,
+  onClose,
 }) {
   const dialogClass = [
     "modal-dialog",
@@ -17,14 +19,38 @@ export function Modal({
     .filter(Boolean)
     .join(" ");
 
+  useEffect(() => {
+    function handleEsc(e) {
+      if (e.key === "Escape" && show) {
+        document.activeElement?.blur();
+        onClose?.();
+      }
+    }
+
+    document.addEventListener("keydown", handleEsc);
+
+    return () => {
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [show, onClose]);
+
+  useEffect(() => {
+    if (!show) {
+      document.activeElement?.blur();
+    }
+  }, [show]);
+
+  if (!show) return null;
+
   return (
     <>
       <div
-        className={`modal ${show ? "show d-block" : "fade"}`}
+        className="modal fade show d-block"
         id={id}
         tabIndex={-1}
         aria-labelledby={`${id}Label`}
         aria-hidden={!show}
+        role="dialog"
       >
         <div className={dialogClass}>
           <div className="modal-content theme-modal-content border-0">
@@ -39,9 +65,14 @@ export function Modal({
             <div className="modal-footer border-top-0">
               {footer ?? (
                 <>
-                  <Button type="button" className="btn btn-secondary">
+                  <Button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={onClose}
+                  >
                     Cancelar
                   </Button>
+
                   <Button type="button" className="btn btn-primary">
                     Ok
                   </Button>
@@ -52,7 +83,7 @@ export function Modal({
         </div>
       </div>
 
-      {show && <div className="modal-backdrop fade show"></div>}
+      <div className="modal-backdrop fade show" onClick={onClose} />
     </>
   );
 }

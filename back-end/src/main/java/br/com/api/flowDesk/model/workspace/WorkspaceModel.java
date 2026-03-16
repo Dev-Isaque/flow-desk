@@ -1,4 +1,4 @@
-package br.com.api.flowDesk.model.task;
+package br.com.api.flowDesk.model.workspace;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -8,6 +8,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import br.com.api.flowDesk.enums.workspace.WorkspaceType;
+import br.com.api.flowDesk.model.project.ProjectModel;
+import br.com.api.flowDesk.model.task.TagModel;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

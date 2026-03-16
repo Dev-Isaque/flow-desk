@@ -1,4 +1,4 @@
-package br.com.api.flowDesk.controller.task;
+package br.com.api.flowDesk.controller.project;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.api.flowDesk.dto.task.request.CreateProjectRequest;
 import br.com.api.flowDesk.dto.task.response.ProjectResponse;
-import br.com.api.flowDesk.model.task.ProjectModel;
+import br.com.api.flowDesk.model.project.ProjectModel;
 import br.com.api.flowDesk.model.user.UserModel;
-import br.com.api.flowDesk.repository.task.ProjectRepository;
+import br.com.api.flowDesk.repository.project.ProjectRepository;
 import br.com.api.flowDesk.service.auth.AuthTokenService;
-import br.com.api.flowDesk.service.task.ProjectService;
+import br.com.api.flowDesk.service.project.ProjectService;
 import jakarta.validation.Valid;
 
 @RestController

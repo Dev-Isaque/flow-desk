@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import br.com.api.flowDesk.model.task.WorkspaceMemberModel;
+import br.com.api.flowDesk.model.workspace.WorkspaceMemberModel;
 
 public interface WorkspaceMemberRepository extends JpaRepository<WorkspaceMemberModel, UUID> {
 

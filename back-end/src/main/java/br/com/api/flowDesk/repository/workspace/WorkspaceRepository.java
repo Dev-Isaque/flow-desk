@@ -8,21 +8,21 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import br.com.api.flowDesk.enums.workspace.WorkspaceType;
-import br.com.api.flowDesk.model.task.WorkspaceModel;
+import br.com.api.flowDesk.model.workspace.WorkspaceModel;
 
 public interface WorkspaceRepository extends JpaRepository<WorkspaceModel, UUID> {
 
-    @Query("""
-                select w
-                from WorkspaceModel w
-                join w.members m
-                where w.type = :type
-                  and m.user.id = :userId
-            """)
-    Optional<WorkspaceModel> findByTypeAndMemberUserId(WorkspaceType type, UUID userId);
+  @Query("""
+          select w
+          from WorkspaceModel w
+          join w.members m
+          where w.type = :type
+            and m.user.id = :userId
+      """)
+  Optional<WorkspaceModel> findByTypeAndMemberUserId(WorkspaceType type, UUID userId);
 
-    List<WorkspaceModel> findDistinctByMembers_User_IdAndType(
-            UUID userId,
-            WorkspaceType type);
+  List<WorkspaceModel> findDistinctByMembers_User_IdAndType(
+      UUID userId,
+      WorkspaceType type);
 
 }
