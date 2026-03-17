@@ -17,7 +17,7 @@ import br.com.api.flowDesk.service.workspace.WorkspaceService;
 public class UserService {
 
     @Autowired
-    private UserRepository ur;
+    private UserRepository userRepository;
 
     @Autowired
     private WorkspaceService workspaceService;
@@ -26,16 +26,16 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public List<UserModel> findAll() {
-        return ur.findAll();
+        return userRepository.findAll();
     }
 
     public UserModel findById(UUID id) {
-        return ur.findById(id)
+        return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 
     public UserModel findByEmail(String email) {
-        return ur.findByEmail(email)
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 
@@ -46,7 +46,7 @@ public class UserService {
             throw new RuntimeException("As senhas não conferem");
         }
 
-        if (ur.findByEmail(dto.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new RuntimeException("Esse email já está cadastrado.");
         }
 
@@ -55,7 +55,7 @@ public class UserService {
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
-        user = ur.save(user);
+        user = userRepository.save(user);
 
         workspaceService.getOrCreatePersonal(user);
 
@@ -64,7 +64,7 @@ public class UserService {
 
     public UserModel update(UUID id, UserDTO dto) {
 
-        UserModel user = ur.findById(id)
+        UserModel user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário Não Encontrado"));
 
         user.setName(dto.getName());
@@ -76,6 +76,6 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
-        return ur.save(user);
+        return userRepository.save(user);
     }
 }

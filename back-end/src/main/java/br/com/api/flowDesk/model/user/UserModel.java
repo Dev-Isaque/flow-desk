@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
+import br.com.api.flowDesk.model.project.ProjectMemberModel;
 import br.com.api.flowDesk.model.workspace.WorkspaceMemberModel;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -48,4 +49,6 @@ public class UserModel {
     @OneToMany(mappedBy = "user")
     private List<WorkspaceMemberModel> workspaceMemberships;
 
+    @OneToMany(mappedBy = "user")
+    private List<ProjectMemberModel> projectMemberships;
 }

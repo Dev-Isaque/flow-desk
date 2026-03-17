@@ -35,6 +35,14 @@ export function ProjectBar({
     }
   }
 
+  function canManageProject(role) {
+    return role === "ADMIN" || role === "OWNER";
+  }
+
+  console.log(workspaceId);
+
+  const canCreateProject = projects.some((p) => canManageProject(p.role));
+
   return (
     <div className="project-bar">
       <Button
@@ -62,6 +70,7 @@ export function ProjectBar({
             }`}
             onClick={() => goToProject(p.id)}
             disabled={savingProject || isCreatingProject}
+            title={`Permissão: ${p.role}`}
           >
             {p.name}
           </Button>
@@ -73,9 +82,19 @@ export function ProjectBar({
           className="project-add-button"
           onClick={onOpenCreate}
           disabled={
-            loadingWorkspace || !workspaceId || loadingProjects || savingProject
+            loadingWorkspace ||
+            !workspaceId ||
+            loadingProjects ||
+            savingProject ||
+            !canCreateProject
           }
-          title={!workspaceId ? "Carregando workspace..." : "Criar projeto"}
+          title={
+            !workspaceId
+              ? "Carregando workspace..."
+              : !canCreateProject
+                ? "Você não tem permissão para criar projetos"
+                : "Criar projeto"
+          }
         >
           <Plus size={18} />
         </Button>

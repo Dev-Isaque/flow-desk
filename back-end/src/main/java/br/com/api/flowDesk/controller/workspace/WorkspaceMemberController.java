@@ -16,13 +16,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.api.flowDesk.dto.workspace.dto.WorkspaceMemberDTO;
+import br.com.api.flowDesk.dto.workspace.WorkspaceMemberDTO;
 import br.com.api.flowDesk.dto.workspace.request.AddMemberRequest;
 import br.com.api.flowDesk.dto.workspace.request.UpdateMemberRoleRequest;
 import br.com.api.flowDesk.model.user.UserModel;
 import br.com.api.flowDesk.service.auth.AuthTokenService;
 import br.com.api.flowDesk.service.workspace.WorkspaceMemberService;
-import br.com.api.flowDesk.service.workspace.WorkspaceService;
 
 @RestController
 @RequestMapping("/workspaces/{workspaceId}/members")
@@ -31,9 +30,6 @@ public class WorkspaceMemberController {
 
     @Autowired
     private WorkspaceMemberService workspaceMemberService;
-
-    @Autowired
-    private WorkspaceService workspaceService;
 
     @Autowired
     private AuthTokenService authTokenService;

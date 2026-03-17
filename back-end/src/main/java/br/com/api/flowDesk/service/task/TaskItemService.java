@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import br.com.api.flowDesk.dto.taskitem.CreateTaskItemRequest;
 import br.com.api.flowDesk.dto.taskitem.TaskItemDTO;
+import br.com.api.flowDesk.dto.taskitem.request.CreateTaskItemRequest;
 import br.com.api.flowDesk.model.task.TaskItemModel;
 import br.com.api.flowDesk.repository.task.TaskItemRepository;
 import br.com.api.flowDesk.repository.task.TaskRepository;

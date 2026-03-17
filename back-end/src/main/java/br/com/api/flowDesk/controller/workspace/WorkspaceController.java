@@ -6,20 +6,12 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import br.com.api.flowDesk.dto.workspace.request.CreateWorkspaceRequest;
 import br.com.api.flowDesk.dto.workspace.request.UpdateWorkspaceRequest;
 import br.com.api.flowDesk.dto.workspace.response.WorkspaceResponse;
+import br.com.api.flowDesk.enums.workspace.WorkspaceRole;
 import br.com.api.flowDesk.model.user.UserModel;
 import br.com.api.flowDesk.model.workspace.WorkspaceModel;
 import br.com.api.flowDesk.service.auth.AuthTokenService;
@@ -44,18 +36,9 @@ public class WorkspaceController {
                 String token = authHeader.replace("Bearer ", "").trim();
                 UserModel user = authTokenService.requireUserByToken(token);
 
-                var workspaces = workspaceService.findAllSharedByUser(user.getId());
-
-                var response = workspaces.stream()
-                                .map(ws -> new WorkspaceResponse(
-                                                ws.getId(),
-                                                ws.getName(),
-                                                ws.getColor(),
-                                                ws.getType(),
-                                                ws.getMemberCount()))
-                                .toList();
-
-                return ResponseEntity.ok(response);
+                // 🔥 AGORA O SERVICE JÁ RETORNA PRONTO
+                return ResponseEntity.ok(
+                                workspaceService.findAllSharedByUser(user.getId()));
         }
 
         @PostMapping("/create")
@@ -73,7 +56,9 @@ public class WorkspaceController {
                                                 created.getId(),
                                                 created.getName(),
                                                 created.getColor(),
-                                                created.getType()));
+                                                created.getType(),
+                                                1, // 👈 creator
+                                                WorkspaceRole.OWNER));
         }
 
         @PatchMapping("/{workspaceId}")
@@ -83,17 +68,19 @@ public class WorkspaceController {
                         @RequestHeader("Authorization") String authHeader) {
 
                 String token = authHeader.replace("Bearer ", "").trim();
-
                 UserModel user = authTokenService.requireUserByToken(token);
 
                 WorkspaceModel workspace = workspaceService.update(workspaceId, dto, user);
+
+                var member = workspaceService.getMemberOrThrow(workspaceId, user.getId());
 
                 WorkspaceResponse response = new WorkspaceResponse(
                                 workspace.getId(),
                                 workspace.getName(),
                                 workspace.getColor(),
                                 workspace.getType(),
-                                workspace.getMembers().size());
+                                workspace.getMembers().size(),
+                                member.getRole());
 
                 return ResponseEntity.ok(response);
         }
@@ -124,6 +111,8 @@ public class WorkspaceController {
                                 ws.getId(),
                                 ws.getName(),
                                 ws.getColor(),
-                                ws.getType()));
+                                ws.getType(),
+                                ws.getMembers().size(),
+                                WorkspaceRole.OWNER));
         }
 }

@@ -1,4 +1,4 @@
-package br.com.api.flowDesk.dto.taskitem;
+package br.com.api.flowDesk.dto.taskitem.request;
 
 import lombok.Getter;
 import lombok.Setter;

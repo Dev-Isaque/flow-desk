@@ -7,7 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.com.api.flowDesk.dto.workspace.dto.WorkspaceMemberDTO;
+import br.com.api.flowDesk.dto.workspace.WorkspaceMemberDTO;
+import br.com.api.flowDesk.enums.workspace.WorkspacePermission;
 import br.com.api.flowDesk.enums.workspace.WorkspaceRole;
 import br.com.api.flowDesk.model.user.UserModel;
 import br.com.api.flowDesk.model.workspace.WorkspaceMemberModel;
@@ -15,6 +16,7 @@ import br.com.api.flowDesk.model.workspace.WorkspaceModel;
 import br.com.api.flowDesk.repository.user.UserRepository;
 import br.com.api.flowDesk.repository.workspace.WorkspaceMemberRepository;
 import br.com.api.flowDesk.repository.workspace.WorkspaceRepository;
+import br.com.api.flowDesk.service.permission.PermissionService;
 
 @Service
 public class WorkspaceMemberService {
@@ -47,14 +49,9 @@ public class WorkspaceMemberService {
                 WorkspaceModel workspace = workspaceRepository.findById(workspaceId)
                                 .orElseThrow(() -> new RuntimeException("Workspace não encontrado"));
 
-                WorkspaceMemberModel loggedMember = workspaceMemberRepository
-                                .findByWorkspace_IdAndUser_Id(workspaceId, loggedUser.getId())
-                                .orElseThrow(() -> new RuntimeException("Você não pertence a esse workspace"));
+                WorkspaceMemberModel loggedMember = getMemberOrThrow(workspaceId, loggedUser.getId());
 
-                if (loggedMember.getRole() == WorkspaceRole.MEMBER ||
-                                loggedMember.getRole() == WorkspaceRole.VIEWER) {
-                        throw new RuntimeException("Sem permissão para adicionar membros");
-                }
+                PermissionService.checkWorkspace(loggedMember.getRole(), WorkspacePermission.ADD_MEMBER);
 
                 UserModel userToAdd = userRepository.findByEmail(emailToAdd)
                                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
@@ -74,18 +71,16 @@ public class WorkspaceMemberService {
         @Transactional
         public void updateMember(UUID workspaceId, UUID memberId, WorkspaceRole newRole, UserModel loggedUser) {
 
-                WorkspaceMemberModel loggedMember = workspaceMemberRepository
-                                .findByWorkspace_IdAndUser_Id(workspaceId, loggedUser.getId())
-                                .orElseThrow(() -> new RuntimeException("Você não pertence a esse workspace"));
+                WorkspaceMemberModel loggedMember = getMemberOrThrow(workspaceId, loggedUser.getId());
 
-                if (loggedMember.getRole() == WorkspaceRole.MEMBER ||
-                                loggedMember.getRole() == WorkspaceRole.VIEWER) {
-                        throw new RuntimeException("Sem permissão para alterar permissões");
-                }
+                PermissionService.checkWorkspace(loggedMember.getRole(), WorkspacePermission.UPDATE_MEMBER_ROLE);
 
-                WorkspaceMemberModel member = workspaceMemberRepository
-                                .findById(memberId)
+                WorkspaceMemberModel member = workspaceMemberRepository.findById(memberId)
                                 .orElseThrow(() -> new RuntimeException("Membro não encontrado"));
+
+                if (member.getRole() == WorkspaceRole.OWNER) {
+                        throw new RuntimeException("Não é permitido alterar o OWNER");
+                }
 
                 member.setRole(newRole);
 
@@ -95,23 +90,36 @@ public class WorkspaceMemberService {
         @Transactional
         public void removedMember(UUID workspaceId, UUID memberId, UserModel loggedUser) {
 
-                WorkspaceModel workspace = workspaceRepository.findById(workspaceId)
-                                .orElseThrow(() -> new RuntimeException("Workspace não encontrado"));
+                WorkspaceMemberModel loggedMember = getMemberOrThrow(workspaceId, loggedUser.getId());
 
-                WorkspaceMemberModel workspaceMember = workspaceMemberRepository
+                PermissionService.checkWorkspace(loggedMember.getRole(), WorkspacePermission.REMOVE_MEMBER);
+
+                WorkspaceMemberModel memberToRemove = workspaceMemberRepository
                                 .findByWorkspace_IdAndUser_Id(workspaceId, memberId)
                                 .orElseThrow(() -> new RuntimeException("Membro não encontrado neste workspace"));
 
-                workspaceMemberRepository.delete(workspaceMember);
+                if (memberToRemove.getRole() == WorkspaceRole.OWNER) {
+                        throw new RuntimeException("Não é permitido remover o OWNER");
+                }
+
+                workspaceMemberRepository.delete(memberToRemove);
         }
 
         @Transactional
         public void leaveWorkspace(UUID workspaceId, UserModel user) {
 
-                WorkspaceMemberModel member = workspaceMemberRepository
-                                .findByWorkspace_IdAndUser_Id(workspaceId, user.getId())
-                                .orElseThrow(() -> new RuntimeException("Usuário não é membro deste workspace"));
+                WorkspaceMemberModel member = getMemberOrThrow(workspaceId, user.getId());
+
+                if (member.getRole() == WorkspaceRole.OWNER) {
+                        throw new RuntimeException("OWNER não pode sair do workspace");
+                }
 
                 workspaceMemberRepository.delete(member);
+        }
+
+        private WorkspaceMemberModel getMemberOrThrow(UUID workspaceId, UUID userId) {
+                return workspaceMemberRepository
+                                .findByWorkspace_IdAndUser_Id(workspaceId, userId)
+                                .orElseThrow(() -> new RuntimeException("Você não pertence a esse workspace"));
         }
 }

@@ -6,7 +6,9 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import br.com.api.flowDesk.dto.project.response.ProjectResponse;
 import br.com.api.flowDesk.model.project.ProjectModel;
 
 public interface ProjectRepository extends JpaRepository<ProjectModel, UUID> {
@@ -20,6 +22,22 @@ public interface ProjectRepository extends JpaRepository<ProjectModel, UUID> {
         order by p.createdAt desc
       """)
   List<ProjectModel> findProjectsByUser(UUID userId);
+
+  @Query("""
+          SELECT new br.com.api.flowDesk.dto.project.response.ProjectResponse(
+              p.id,
+              p.name,
+              p.description,
+              pm.role
+          )
+          FROM ProjectModel p
+          JOIN ProjectMemberModel pm ON pm.project.id = p.id
+          WHERE pm.user.id = :userId
+            AND p.workspace.id = :workspaceId
+      """)
+  List<ProjectResponse> findProjectsWithRole(
+      @Param("workspaceId") UUID workspaceId,
+      @Param("userId") UUID userId);
 
   @Query("""
         select distinct p

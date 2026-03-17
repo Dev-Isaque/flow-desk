@@ -1,4 +1,4 @@
-package br.com.api.flowDesk.dto.workspace.dto;
+package br.com.api.flowDesk.dto.workspace;
 
 import java.util.UUID;
 

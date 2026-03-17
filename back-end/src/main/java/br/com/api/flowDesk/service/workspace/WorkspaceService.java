@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import br.com.api.flowDesk.dto.workspace.request.CreateWorkspaceRequest;
 import br.com.api.flowDesk.dto.workspace.request.UpdateWorkspaceRequest;
 import br.com.api.flowDesk.dto.workspace.response.WorkspaceResponse;
+import br.com.api.flowDesk.enums.workspace.WorkspacePermission;
 import br.com.api.flowDesk.enums.workspace.WorkspaceRole;
 import br.com.api.flowDesk.enums.workspace.WorkspaceType;
 import br.com.api.flowDesk.model.user.UserModel;
@@ -20,6 +21,7 @@ import br.com.api.flowDesk.repository.task.TaskRepository;
 import br.com.api.flowDesk.repository.user.UserRepository;
 import br.com.api.flowDesk.repository.workspace.WorkspaceMemberRepository;
 import br.com.api.flowDesk.repository.workspace.WorkspaceRepository;
+import br.com.api.flowDesk.service.permission.PermissionService;
 import br.com.api.flowDesk.service.task.TaskService;
 
 @Service
@@ -69,13 +71,9 @@ public class WorkspaceService {
         WorkspaceModel workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new RuntimeException("Workspace não encontrado"));
 
-        WorkspaceMemberModel member = workspaceMemberRepository
-                .findByWorkspace_IdAndUser_Id(workspaceId, user.getId())
-                .orElseThrow(() -> new RuntimeException("Usuário não pertence a este workspace"));
+        WorkspaceMemberModel member = getMemberOrThrow(workspaceId, user.getId());
 
-        if (member.getRole() != WorkspaceRole.OWNER && member.getRole() != WorkspaceRole.ADMIN) {
-            throw new RuntimeException("Sem permissão para atualizar o workspace");
-        }
+        PermissionService.checkWorkspace(member.getRole(), WorkspacePermission.UPDATE_WORKSPACE);
 
         if (dto.getName() != null && !dto.getName().isBlank()) {
             workspace.setName(dto.getName());
@@ -98,13 +96,9 @@ public class WorkspaceService {
             throw new RuntimeException("Workspace pessoal não pode ser removido");
         }
 
-        WorkspaceMemberModel member = workspaceMemberRepository
-                .findByWorkspace_IdAndUser_Id(workspaceId, user.getId())
-                .orElseThrow(() -> new RuntimeException("Usuário não pertence ao workspace"));
+        WorkspaceMemberModel member = getMemberOrThrow(workspaceId, user.getId());
 
-        if (member.getRole() != WorkspaceRole.OWNER) {
-            throw new RuntimeException("Apenas o OWNER pode deletar o workspace");
-        }
+        PermissionService.checkWorkspace(member.getRole(), WorkspacePermission.DELETE_WORKSPACE);
 
         var tasks = taskRepository.findByProject_Workspace_Id(workspaceId);
 
@@ -127,7 +121,7 @@ public class WorkspaceService {
                 .orElseGet(() -> {
                     WorkspaceModel ws = new WorkspaceModel();
                     ws.setName("Pessoal");
-                    ws.setColor("#4f46e5");
+                    ws.setColor("");
                     ws.setType(WorkspaceType.PERSONAL);
                     ws = workspaceRepository.save(ws);
 
@@ -135,7 +129,7 @@ public class WorkspaceService {
                     member.setWorkspace(ws);
                     member.setUser(user);
                     member.setRole(WorkspaceRole.OWNER);
-                    ;
+
                     workspaceMemberRepository.save(member);
 
                     return ws;
@@ -148,12 +142,27 @@ public class WorkspaceService {
                 .findDistinctByMembers_User_IdAndType(userId, WorkspaceType.SHARED);
 
         return workspaces.stream()
-                .map(ws -> new WorkspaceResponse(
-                        ws.getId(),
-                        ws.getName(),
-                        ws.getColor(),
-                        ws.getType(),
-                        ws.getMembers().size()))
+                .map(ws -> {
+
+                    var member = ws.getMembers().stream()
+                            .filter(m -> m.getUser().getId().equals(userId))
+                            .findFirst()
+                            .orElseThrow(() -> new RuntimeException("Membro não encontrado"));
+
+                    return new WorkspaceResponse(
+                            ws.getId(),
+                            ws.getName(),
+                            ws.getColor(),
+                            ws.getType(),
+                            ws.getMembers().size(),
+                            member.getRole());
+                })
                 .toList();
+    }
+
+    public WorkspaceMemberModel getMemberOrThrow(UUID workspaceId, UUID userId) {
+        return workspaceMemberRepository
+                .findByWorkspace_IdAndUser_Id(workspaceId, userId)
+                .orElseThrow(() -> new RuntimeException("Usuário não pertence ao workspace"));
     }
 }

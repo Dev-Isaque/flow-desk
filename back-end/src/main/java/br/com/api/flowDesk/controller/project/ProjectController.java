@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.api.flowDesk.dto.task.request.CreateProjectRequest;
-import br.com.api.flowDesk.dto.task.response.ProjectResponse;
+import br.com.api.flowDesk.dto.project.request.CreateProjectRequest;
+import br.com.api.flowDesk.dto.project.response.ProjectResponse;
 import br.com.api.flowDesk.model.project.ProjectModel;
 import br.com.api.flowDesk.model.user.UserModel;
 import br.com.api.flowDesk.repository.project.ProjectRepository;
@@ -66,14 +66,7 @@ public class ProjectController {
         String token = authHeader.replace("Bearer ", "").trim();
         UserModel user = authTokenService.requireUserByToken(token);
 
-        var projects = projectRepository
-                .findProjectsByWorkspaceAndUser(workspaceId, user.getId())
-                .stream()
-                .map(p -> new ProjectResponse(
-                        p.getId(),
-                        p.getName(),
-                        p.getDescription()))
-                .toList();
+        var projects = projectService.findProjectsByWorkspace(workspaceId, user);
 
         return ResponseEntity.ok(projects);
     }

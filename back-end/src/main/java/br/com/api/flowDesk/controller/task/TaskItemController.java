@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.api.flowDesk.dto.taskitem.CreateTaskItemRequest;
 import br.com.api.flowDesk.dto.taskitem.TaskItemDTO;
-import br.com.api.flowDesk.dto.taskitem.UpdateTaskItemDoneRequest;
+import br.com.api.flowDesk.dto.taskitem.request.CreateTaskItemRequest;
+import br.com.api.flowDesk.dto.taskitem.request.UpdateTaskItemDoneRequest;
 import br.com.api.flowDesk.service.auth.AuthTokenService;
 import br.com.api.flowDesk.service.task.TaskItemService;
 import jakarta.validation.Valid;
