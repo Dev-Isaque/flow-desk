@@ -3,7 +3,6 @@ import { useAuth } from "../hooks/useAuth";
 import { useState } from "react";
 
 import { AuthLayout } from "../../../app/layouts/AuthLayout";
-
 import { Button } from "../../../shared/components/Button";
 import { Spinner } from "../../../shared/components/Spinner";
 import { Input } from "../../../shared/components/Input";
@@ -29,14 +28,11 @@ function Login() {
 
     setLoading(true);
 
-    const r = await login();
+    const r = await login(user.email, user.password);
 
     setTimeout(() => {
       setLoading(false);
-
-      if (!r.sucesso) {
-        setMensagem(r.mensagem);
-      }
+      if (!r.sucesso) setMensagem(r.mensagem);
     }, 800);
   }
 

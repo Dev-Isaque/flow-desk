@@ -14,6 +14,7 @@ import { useWorkspaceTags } from "../../wokspace/hooks/useWorkspaceTags";
 
 export function WorkspaceBoard({
   workspaceId,
+  workspace,
   title,
   extraHeaderActions,
   loadingWorkspace,
@@ -77,7 +78,7 @@ export function WorkspaceBoard({
 
   const erroTela = errorProjects || errorTasks;
   const workspaceName = typeof title === "string" ? title : "Workspace";
-
+  
   return (
     <>
       <div className="d-flex justify-content-between align-items-end mb-4 pb-2">
@@ -119,6 +120,7 @@ export function WorkspaceBoard({
 
       <ProjectBar
         projects={projects}
+        workspaceRole={workspace.role}
         projectSelecionado={projectSelecionado}
         setProjectSelecionado={setProjectSelecionado}
         isCreatingProject={isCreatingProject}

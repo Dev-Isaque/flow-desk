@@ -50,6 +50,14 @@ public interface ProjectRepository extends JpaRepository<ProjectModel, UUID> {
       """)
   List<ProjectModel> findProjectsByWorkspaceAndUser(UUID workspaceId, UUID userId);
 
+  @Query("""
+          select p
+          from ProjectModel p
+          where p.workspace.id = :workspaceId
+          order by p.createdAt desc
+      """)
+  List<ProjectModel> findAllByWorkspaceId(@Param("workspaceId") UUID workspaceId);
+
   @Modifying
   @Query("DELETE FROM ProjectModel p WHERE p.workspace.id = :workspaceId")
   void deleteByWorkspaceId(UUID workspaceId);

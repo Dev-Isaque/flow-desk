@@ -26,6 +26,7 @@ function PersonalWorkspace() {
         <WorkspaceProvider workspaceId={workspace.id}>
           <WorkspaceBoard
             workspaceId={workspace.id}
+            workspace={workspace}
             loadingWorkspace={loadingWorkspace}
             title={`Tarefas de ${usuario ? usuario.name : "..."}`}
           />

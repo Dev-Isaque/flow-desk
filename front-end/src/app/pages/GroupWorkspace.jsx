@@ -197,7 +197,7 @@ function GroupWorkspace() {
         </div>
       )}
 
-      {activeWorkspaceId && (
+      {activeWorkspaceId && workspaceAtivo && (
         <WorkspaceProvider workspaceId={activeWorkspaceId}>
           {settingsWorkspaceId ? (
             <WorkspaceSettings
@@ -207,6 +207,7 @@ function GroupWorkspace() {
           ) : (
             <WorkspaceBoard
               workspaceId={activeWorkspaceId}
+              workspace={workspaceAtivo}
               loadingWorkspace={loading}
               title={workspaceAtivo?.name || "Grupo"}
               onBack={() => navigate("/groups")}
@@ -223,7 +224,7 @@ function GroupWorkspace() {
           )}
         </WorkspaceProvider>
       )}
-
+      
       <CreateWorkspaceModal
         show={showCreateWorkspaceModal}
         onCreate={handleCreateWorkspace}

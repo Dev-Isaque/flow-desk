@@ -13,6 +13,7 @@ import br.com.api.flowDesk.dto.project.request.CreateProjectRequest;
 import br.com.api.flowDesk.dto.project.response.ProjectResponse;
 import br.com.api.flowDesk.enums.project.ProjectRole;
 import br.com.api.flowDesk.enums.workspace.WorkspacePermission;
+import br.com.api.flowDesk.enums.workspace.WorkspaceRole;
 import br.com.api.flowDesk.model.project.ProjectMemberModel;
 import br.com.api.flowDesk.model.project.ProjectModel;
 import br.com.api.flowDesk.model.user.UserModel;
@@ -73,6 +74,25 @@ public class ProjectService {
                 .findByWorkspace_IdAndUser_Id(workspaceId, user.getId())
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.FORBIDDEN, "Você não pertence ao workspace"));
+
+        if (member.getRole() == WorkspaceRole.OWNER ||
+                member.getRole() == WorkspaceRole.ADMIN) {
+
+            var projects = projectRepository.findAllByWorkspaceId(workspaceId);
+
+            return projects.stream().map(p -> {
+                var role = projectMemberRepository
+                        .findByProject_IdAndUser_Id(p.getId(), user.getId())
+                        .map(pm -> pm.getRole())
+                        .orElse(null);
+
+                return new ProjectResponse(
+                        p.getId(),
+                        p.getName(),
+                        p.getDescription(),
+                        role);
+            }).toList();
+        }
 
         return projectRepository.findProjectsWithRole(workspaceId, user.getId());
     }

@@ -5,6 +5,7 @@ import "../style/projectBar.css";
 
 export function ProjectBar({
   projects = [],
+  workspaceRole,
   projectSelecionado,
   isCreatingProject,
   onOpenCreate,
@@ -35,13 +36,8 @@ export function ProjectBar({
     }
   }
 
-  function canManageProject(role) {
-    return role === "ADMIN" || role === "OWNER";
-  }
-
-  console.log(workspaceId);
-
-  const canCreateProject = projects.some((p) => canManageProject(p.role));
+  const canCreateProject =
+    workspaceRole === "OWNER" || workspaceRole === "ADMIN";
 
   return (
     <div className="project-bar">
