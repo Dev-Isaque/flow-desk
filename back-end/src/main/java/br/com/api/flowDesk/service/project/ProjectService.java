@@ -26,74 +26,109 @@ import br.com.api.flowDesk.service.permission.PermissionService;
 @Service
 public class ProjectService {
 
-    @Autowired
-    private ProjectRepository projectRepository;
+        @Autowired
+        private ProjectRepository projectRepository;
 
-    @Autowired
-    private ProjectMemberRepository projectMemberRepository;
+        @Autowired
+        private ProjectMemberRepository projectMemberRepository;
 
-    @Autowired
-    private WorkspaceRepository workspaceRepository;
+        @Autowired
+        private WorkspaceRepository workspaceRepository;
 
-    @Autowired
-    private WorkspaceMemberRepository workspaceMemberRepository;
+        @Autowired
+        private WorkspaceMemberRepository workspaceMemberRepository;
 
-    @Transactional
-    public ProjectModel create(CreateProjectRequest dto, UserModel user) {
+        @Transactional
+        public ProjectModel create(CreateProjectRequest dto, UserModel user) {
 
-        var workspace = workspaceRepository.findById(dto.getWorkspaceId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Workspace não encontrado"));
+                var workspace = workspaceRepository.findById(dto.getWorkspaceId())
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Workspace não encontrado"));
 
-        var member = workspaceMemberRepository
-                .findByWorkspace_IdAndUser_Id(workspace.getId(), user.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não pertence ao workspace"));
+                var member = workspaceMemberRepository
+                                .findByWorkspace_IdAndUser_Id(workspace.getId(), user.getId())
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
+                                                "Você não pertence ao workspace"));
 
-        PermissionService.checkWorkspace(member.getRole(), WorkspacePermission.CREATE_PROJECT);
+                PermissionService.checkWorkspace(member.getRole(), WorkspacePermission.CREATE_PROJECT);
 
-        var project = new ProjectModel();
-        project.setWorkspace(workspace);
-        project.setName(dto.getName());
-        project.setDescription(dto.getDescription());
+                var project = new ProjectModel();
+                project.setWorkspace(workspace);
+                project.setName(dto.getName());
+                project.setDescription(dto.getDescription());
 
-        var savedProject = projectRepository.save(project);
+                var savedProject = projectRepository.save(project);
 
-        var projectMember = new ProjectMemberModel();
-        projectMember.setProject(savedProject);
-        projectMember.setUser(user);
-        projectMember.setRole(ProjectRole.MANAGER);
+                var projectMember = new ProjectMemberModel();
+                projectMember.setProject(savedProject);
+                projectMember.setUser(user);
+                projectMember.setRole(ProjectRole.MANAGER);
 
-        projectMemberRepository.save(projectMember);
+                projectMemberRepository.save(projectMember);
 
-        return savedProject;
-    }
-
-    @Transactional(readOnly = true)
-    public List<ProjectResponse> findProjectsByWorkspace(UUID workspaceId, UserModel user) {
-
-        var member = workspaceMemberRepository
-                .findByWorkspace_IdAndUser_Id(workspaceId, user.getId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.FORBIDDEN, "Você não pertence ao workspace"));
-
-        if (member.getRole() == WorkspaceRole.OWNER ||
-                member.getRole() == WorkspaceRole.ADMIN) {
-
-            var projects = projectRepository.findAllByWorkspaceId(workspaceId);
-
-            return projects.stream().map(p -> {
-                var role = projectMemberRepository
-                        .findByProject_IdAndUser_Id(p.getId(), user.getId())
-                        .map(pm -> pm.getRole())
-                        .orElse(null);
-
-                return new ProjectResponse(
-                        p.getId(),
-                        p.getName(),
-                        p.getDescription(),
-                        role);
-            }).toList();
+                return savedProject;
         }
 
-        return projectRepository.findProjectsWithRole(workspaceId, user.getId());
-    }
+        @Transactional(readOnly = true)
+        public List<ProjectResponse> findProjectsByWorkspace(UUID workspaceId, UserModel user) {
+
+                var member = workspaceMemberRepository
+                                .findByWorkspace_IdAndUser_Id(workspaceId, user.getId())
+                                .orElseThrow(() -> new ResponseStatusException(
+                                                HttpStatus.FORBIDDEN, "Você não pertence ao workspace"));
+
+                if (member.getRole() == WorkspaceRole.OWNER ||
+                                member.getRole() == WorkspaceRole.ADMIN) {
+
+                        var projects = projectRepository.findAllByWorkspaceId(workspaceId);
+
+                        return projects.stream().map(p -> {
+                                var role = projectMemberRepository
+                                                .findByProject_IdAndUser_Id(p.getId(), user.getId())
+                                                .map(pm -> pm.getRole())
+                                                .orElse(null);
+
+                                return new ProjectResponse(
+                                                p.getId(),
+                                                p.getName(),
+                                                p.getDescription(),
+                                                role);
+                        }).toList();
+                }
+
+                return projectRepository.findProjectsWithRole(workspaceId, user.getId());
+        }
+
+        @Transactional(readOnly = true)
+        public List<ProjectResponse> getProjectsByMember(UUID workspaceId, UUID memberId, UserModel loggedUser) {
+
+                var requester = workspaceMemberRepository
+                                .findByWorkspace_IdAndUser_Id(workspaceId, loggedUser.getId())
+                                .orElseThrow(() -> new RuntimeException("Você não pertence ao workspace"));
+
+                // 🔐 Segurança
+                if (requester.getRole() != WorkspaceRole.ADMIN &&
+                                requester.getRole() != WorkspaceRole.OWNER) {
+                        throw new RuntimeException("Sem permissão");
+                }
+
+                var projects = projectRepository.findAllByWorkspaceId(workspaceId);
+
+                return projects.stream().map(project -> {
+
+                        System.out.println("Project: " + project.getId() + " | memberId: " + memberId);
+
+                        var role = projectMemberRepository
+                                        .findByProject_IdAndUser_Id(project.getId(), memberId)
+                                        .map(pm -> pm.getRole())
+                                        .orElse(null);
+
+                        return new ProjectResponse(
+                                        project.getId(),
+                                        project.getName(),
+                                        project.getDescription(),
+                                        role);
+
+                }).toList();
+        }
 }

@@ -36,12 +36,12 @@ public class ProjectMemberService {
         private WorkspaceMemberRepository workspaceMemberRepository;
 
         public List<ProjectMemberDTO> listMembers(UUID projectId) {
-
                 var members = projectMemberRepository.findAllByProject_Id(projectId);
 
                 return members.stream()
                                 .map(member -> new ProjectMemberDTO(
                                                 member.getId(),
+                                                member.getUser().getId(),
                                                 member.getUser().getName(),
                                                 member.getUser().getEmail(),
                                                 member.getRole()))
@@ -49,7 +49,7 @@ public class ProjectMemberService {
         }
 
         @Transactional
-        public void addMember(UUID projectId, String emailToAdd, UserModel loggedUser) {
+        public void addMember(UUID projectId, UUID memberId, ProjectRole role, UserModel loggedUser) {
 
                 ProjectModel project = projectRepository.findById(projectId)
                                 .orElseThrow(() -> new RuntimeException("Projeto não encontrado"));
@@ -64,12 +64,9 @@ public class ProjectMemberService {
                                 .map(m -> m.getRole())
                                 .orElse(null);
 
-                PermissionService.checkProject(
-                                workspaceRole,
-                                projectRole,
-                                ProjectPermission.ADD_MEMBER);
+                PermissionService.checkProject(workspaceRole, projectRole, ProjectPermission.ADD_MEMBER);
 
-                UserModel userToAdd = userRepository.findByEmail(emailToAdd)
+                UserModel userToAdd = userRepository.findById(memberId)
                                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
                 if (projectMemberRepository.existsByProject_IdAndUser_Id(projectId, userToAdd.getId())) {
@@ -79,8 +76,44 @@ public class ProjectMemberService {
                 ProjectMemberModel newMember = new ProjectMemberModel();
                 newMember.setProject(project);
                 newMember.setUser(userToAdd);
-                newMember.setRole(ProjectRole.VIEWER);
+                newMember.setRole(role != null ? role : ProjectRole.VIEWER);
 
                 projectMemberRepository.save(newMember);
+        }
+
+        @Transactional
+        public void updateMemberRole(UUID projectId, UUID memberId, ProjectRole role, UserModel loggedUser) {
+
+                ProjectMemberModel member = projectMemberRepository
+                                .findByProject_IdAndUser_Id(projectId, memberId)
+                                .orElseThrow(() -> new RuntimeException("Membro não encontrado"));
+
+                member.setRole(role);
+
+                projectMemberRepository.save(member);
+        }
+
+        @Transactional
+        public void removeMember(UUID projectId, UUID memberId, UserModel loggedUser) {
+
+                ProjectMemberModel member = projectMemberRepository
+                                .findByProject_IdAndUser_Id(projectId, memberId)
+                                .orElseThrow(() -> new RuntimeException("Membro não encontrado"));
+
+                ProjectModel project = member.getProject();
+
+                WorkspaceRole workspaceRole = workspaceMemberRepository
+                                .findByWorkspace_IdAndUser_Id(project.getWorkspace().getId(), loggedUser.getId())
+                                .map(m -> m.getRole())
+                                .orElseThrow(() -> new RuntimeException("Você não pertence ao workspace"));
+
+                ProjectRole projectRole = projectMemberRepository
+                                .findByProject_IdAndUser_Id(projectId, loggedUser.getId())
+                                .map(m -> m.getRole())
+                                .orElse(null);
+
+                PermissionService.checkProject(workspaceRole, projectRole, ProjectPermission.REMOVE_MEMBER);
+
+                projectMemberRepository.delete(member);
         }
 }

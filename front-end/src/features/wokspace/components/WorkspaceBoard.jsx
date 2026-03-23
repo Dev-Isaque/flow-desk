@@ -22,6 +22,9 @@ export function WorkspaceBoard({
 }) {
   const { projectId } = useParams();
 
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [editingTaskId, seteditingTaskId] = useState(null);
+
   const {
     projects,
     projectSelecionado,
@@ -39,7 +42,6 @@ export function WorkspaceBoard({
     setTasks,
   } = useProjectTasks(projectSelecionado);
 
-  const [editingTaskId, seteditingTaskId] = useState(null);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
 
   const { tags } = useWorkspaceTags(workspaceId);
@@ -47,6 +49,7 @@ export function WorkspaceBoard({
   function openCreateProject() {
     setIsCreatingProject(true);
   }
+
   function cancelCreateProject() {
     if (!savingProject) setIsCreatingProject(false);
   }
@@ -60,25 +63,26 @@ export function WorkspaceBoard({
   function handleCreatedTask(newTask) {
     setTasks((prev) => [newTask, ...prev]);
   }
+
   function handleUpdatedTask(updatedTask) {
     setTasks((prev) =>
       prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)),
     );
     seteditingTaskId(null);
   }
+
   function handleDeletedTask(taskId) {
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
   }
+
   function handleEditTask(task) {
     seteditingTaskId(task.id);
-    const el = document.getElementById("modalTask");
-    if (el && window.bootstrap)
-      window.bootstrap.Modal.getOrCreateInstance(el).show();
+    setShowTaskModal(true);
   }
 
   const erroTela = errorProjects || errorTasks;
   const workspaceName = typeof title === "string" ? title : "Workspace";
-  
+
   return (
     <>
       <div className="d-flex justify-content-between align-items-end mb-4 pb-2">
@@ -104,6 +108,7 @@ export function WorkspaceBoard({
             >
               {workspaceName}
             </h1>
+
             <p
               className="theme-text-muted mb-0"
               style={{ fontSize: "0.95rem", lineHeight: "1.5" }}
@@ -158,15 +163,21 @@ export function WorkspaceBoard({
       <Button
         type="button"
         className="floating-btn btn-color"
-        data-bs-toggle="modal"
-        data-bs-target="#modalTask"
-        onClick={() => seteditingTaskId(null)}
+        onClick={() => {
+          seteditingTaskId(null);
+          setShowTaskModal(true);
+        }}
         disabled={projectSelecionado === "ALL" || !projectSelecionado}
       >
         <Plus /> Nova Tarefa
       </Button>
 
       <TaskModal
+        show={showTaskModal}
+        onClose={() => {
+          setShowTaskModal(false);
+          seteditingTaskId(null);
+        }}
         projectId={projectSelecionado}
         taskId={editingTaskId}
         onCreated={handleCreatedTask}

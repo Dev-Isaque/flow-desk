@@ -37,6 +37,7 @@ public class WorkspaceMemberService {
                 return members.stream()
                                 .map(member -> new WorkspaceMemberDTO(
                                                 member.getId(),
+                                                member.getUser().getId(),
                                                 member.getUser().getName(),
                                                 member.getUser().getEmail(),
                                                 member.getRole()))

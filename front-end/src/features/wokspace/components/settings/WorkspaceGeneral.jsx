@@ -1,8 +1,6 @@
 import { Input } from "../../../../shared/components/Input";
 
 export function WorkspaceGeneral({ workspace }) {
-  console.log(workspace?.id);
-
   return (
     <div className="workspace-settings">
       <div className="settings-card">

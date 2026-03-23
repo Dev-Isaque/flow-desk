@@ -71,4 +71,18 @@ public class ProjectController {
         return ResponseEntity.ok(projects);
     }
 
+    @GetMapping("/workspace/{workspaceId}/member/{memberId}")
+    public ResponseEntity<List<ProjectResponse>> getProjectsByMember(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable UUID workspaceId,
+            @PathVariable UUID memberId) {
+
+        String token = authHeader.replace("Bearer ", "").trim();
+        UserModel user = authTokenService.requireUserByToken(token);
+
+        var projects = projectService.getProjectsByMember(workspaceId, memberId, user);
+
+        return ResponseEntity.ok(projects);
+    }
+
 }

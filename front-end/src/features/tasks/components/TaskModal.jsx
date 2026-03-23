@@ -7,9 +7,15 @@ import { useTaskEnums } from "../hooks/useTaskEnums";
 
 import "../style/modal.css";
 
-export function TaskModal({ projectId, taskId, onCreated, onUpdated }) {
+export function TaskModal({
+  show,
+  onClose,
+  projectId,
+  taskId,
+  onCreated,
+  onUpdated,
+}) {
   const { task, createTask, updateTask, saving, error } = useTask(taskId);
-
   const { statuses, priorities, loading } = useTaskEnums();
 
   const isEditing = !!taskId;
@@ -33,6 +39,17 @@ export function TaskModal({ projectId, taskId, onCreated, onUpdated }) {
       setEstimatedTime(task.estimatedTime || "");
     }
   }, [isEditing, task]);
+
+  useEffect(() => {
+    if (!show) {
+      setTitle("");
+      setDescription("");
+      setPriority("MEDIUM");
+      setStatus("BACKLOG");
+      setDueDate("");
+      setEstimatedTime("");
+    }
+  }, [show]);
 
   const canSave = useMemo(() => {
     return (
@@ -62,40 +79,32 @@ export function TaskModal({ projectId, taskId, onCreated, onUpdated }) {
 
       if (isEditing) {
         result = await updateTask(payload);
-        if (onUpdated) onUpdated(result);
+        onUpdated?.(result);
       } else {
         result = await createTask(payload);
-        if (onCreated) onCreated(result);
+        onCreated?.(result);
       }
 
-      const el = document.getElementById("modalTask");
-      if (el && window.bootstrap) {
-        window.bootstrap.Modal.getOrCreateInstance(el).hide();
-      }
-
-      if (!isEditing) {
-        setTitle("");
-        setDescription("");
-        setPriority("MEDIUM");
-        setStatus("BACKLOG");
-        setDueDate("");
-        setEstimatedTime("");
-      }
+      onClose?.();
     } catch (e) {
       console.error("Erro ao salvar tarefa:", e);
     }
   }
 
+  if (!show) return null;
+
   return (
     <Modal
       id="modalTask"
       title={isEditing ? "Editar Tarefa" : "Nova Tarefa"}
+      show={show}
+      onClose={onClose}
       footer={
         <>
           <Button
             type="button"
             className="btn btn-light"
-            data-bs-dismiss="modal"
+            onClick={onClose}
             disabled={saving}
           >
             Cancelar

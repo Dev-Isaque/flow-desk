@@ -12,6 +12,7 @@ import { Button } from "../../../../shared/components/Button";
 import { Input } from "../../../../shared/components/Input";
 
 import { AddMemberModal } from "../../components/modals/AddMemberModal";
+import { MemberPermissionsModal } from "../../components/modals/MemberPermissionsModal";
 
 export function WorkspaceMembers({
   workspace,
@@ -29,6 +30,9 @@ export function WorkspaceMembers({
   const [page, setPage] = useState(1);
 
   const [showAddModal, setShowAddModal] = useState(false);
+
+  const [showPermissionsModal, setShowPermissionsModal] = useState(false);
+  const [selectedMember, setSelectedMember] = useState(null);
 
   const pageSize = 6;
 
@@ -73,6 +77,11 @@ export function WorkspaceMembers({
     setSelectedRole("");
   };
 
+  function openPermissionsModal(member) {
+    setSelectedMember(member);
+    setShowPermissionsModal(true);
+  }
+
   return (
     <div className="workspace-settings">
       <div className="settings-card">
@@ -92,7 +101,6 @@ export function WorkspaceMembers({
             Convidar Membro
           </Button>
         </div>
-
         <div className="d-flex gap-3 mb-4">
           <div className="input-group">
             <Input
@@ -117,7 +125,6 @@ export function WorkspaceMembers({
             <option value="VIEWER">Viewer</option>
           </select>
         </div>
-
         <div className="table-responsive">
           <table className="table table-borderless table-hover align-middle settings-table">
             <thead>
@@ -211,6 +218,13 @@ export function WorkspaceMembers({
                           <UserRoundMinus size={18} />
                         </Button>
                       )}
+
+                      <Button
+                        className="btn-outline-primary border-0"
+                        onClick={() => openPermissionsModal(member)}
+                      >
+                        Gerenciar Acesso
+                      </Button>
                     </td>
                   </tr>
                 );
@@ -218,7 +232,6 @@ export function WorkspaceMembers({
             </tbody>
           </table>
         </div>
-
         <div className="d-flex justify-content-between align-items-center mt-4">
           <small className="theme-text-muted">
             Mostrando {paginatedMembers.length} de {filteredMembers.length}{" "}
@@ -238,13 +251,23 @@ export function WorkspaceMembers({
             </Button>
           </div>
         </div>
-
         <AddMemberModal
           show={showAddModal}
           workspaceId={workspace?.id}
           onAdd={handleAddMember}
           onClose={() => setShowAddModal(false)}
         />
+        {selectedMember && (
+          <MemberPermissionsModal
+            show={showPermissionsModal}
+            member={selectedMember}
+            workspaceId={workspace?.id}
+            onClose={() => {
+              setShowPermissionsModal(false);
+              setSelectedMember(null);
+            }}
+          />
+        )}
       </div>
     </div>
   );
