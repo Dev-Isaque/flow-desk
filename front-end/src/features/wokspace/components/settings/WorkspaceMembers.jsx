@@ -3,10 +3,10 @@ import {
   SquarePen,
   Check,
   X,
-  Search,
-  Filter,
   UserPlus,
+  UserCog ,
 } from "lucide-react";
+
 import { useEffect, useState, useMemo } from "react";
 import { Button } from "../../../../shared/components/Button";
 import { Input } from "../../../../shared/components/Input";
@@ -132,7 +132,7 @@ export function WorkspaceMembers({
                 <th>Membro</th>
                 <th>Função</th>
                 <th>Status</th>
-                <th style={{ width: "200px" }}>Ações</th>
+                <th style={{ width: "300px" }}>Ações</th>
               </tr>
             </thead>
 
@@ -223,7 +223,7 @@ export function WorkspaceMembers({
                         className="btn-outline-primary border-0"
                         onClick={() => openPermissionsModal(member)}
                       >
-                        Gerenciar Acesso
+                        <UserCog size={18}/>
                       </Button>
                     </td>
                   </tr>

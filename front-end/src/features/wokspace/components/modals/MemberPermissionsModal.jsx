@@ -1,4 +1,3 @@
-// MemberPermissionsModal.jsx
 import { Modal } from "../../../../shared/components/Modal";
 import { Button } from "../../../../shared/components/Button";
 import { useProjects } from "../../../projects/hooks/useProjects";
@@ -40,9 +39,9 @@ export function MemberPermissionsModal({ show, onClose, member, workspaceId }) {
         </>
       }
     >
-      <div className="d-flex flex-column gap-3">
+      <div className="d-flex flex-column gap-4">
         {(loadingProjects || loadingPermissions) && (
-          <p className="theme-text-muted">Carregando...</p>
+          <p className="theme-text-muted">Carregando permissões...</p>
         )}
 
         {!loadingProjects &&
@@ -51,46 +50,49 @@ export function MemberPermissionsModal({ show, onClose, member, workspaceId }) {
             const role = memberProjects[project.id];
 
             return (
-              <div
-                key={project.id}
-                className="d-flex justify-content-between align-items-center border rounded p-3"
-              >
-                <div>
-                  <div className="fw-semibold">{project.name}</div>
-                  <small className="theme-text-muted">
-                    {role ? `Tem acesso (${role})` : "Sem acesso"}
-                  </small>
-                </div>
+              <div key={project.id}>
+                <div className="d-flex justify-content-between align-items-center">
+                  <div className="d-flex flex-column">
+                    <div className="fw-semibold">{project.name}</div>
+                    <small className="theme-text-muted">
+                      {role ? `Acesso: ${role}` : "Sem acesso"}
+                    </small>
+                  </div>
 
-                <div className="d-flex align-items-center gap-2">
-                  {role ? (
-                    <>
-                      <select
-                        className="form-select form-select-sm"
-                        value={role}
-                        onChange={(e) => changeRole(project.id, e.target.value)}
-                      >
-                        <option value="MANAGER">Manager</option>
-                        <option value="CONTRIBUTOR">Contributor</option>
-                        <option value="VIEWER">Viewer</option>
-                      </select>
+                  <div className="d-flex align-items-center gap-2">
+                    {role ? (
+                      <>
+                        <select
+                          className="form-select form-select-sm theme-input"
+                          value={role}
+                          onChange={(e) =>
+                            changeRole(project.id, e.target.value)
+                          }
+                        >
+                          <option value="MANAGER">Manager</option>
+                          <option value="CONTRIBUTOR">Contributor</option>
+                          <option value="VIEWER">Viewer</option>
+                        </select>
 
+                        <Button
+                          className="btn-outline-danger btn-sm"
+                          onClick={() => removeAccess(project.id)}
+                        >
+                          Remover
+                        </Button>
+                      </>
+                    ) : (
                       <Button
-                        className="btn-outline-danger btn-sm"
-                        onClick={() => removeAccess(project.id)}
+                        className="btn-outline-primary btn-sm"
+                        onClick={() => grantAccess(project.id, "VIEWER")}
                       >
-                        Remover
+                        Dar acesso
                       </Button>
-                    </>
-                  ) : (
-                    <Button
-                      className="btn-outline-primary btn-sm"
-                      onClick={() => grantAccess(project.id, "VIEWER")}
-                    >
-                      Dar acesso
-                    </Button>
-                  )}
+                    )}
+                  </div>
                 </div>
+
+                <hr className="my-3 opacity-25" />
               </div>
             );
           })}

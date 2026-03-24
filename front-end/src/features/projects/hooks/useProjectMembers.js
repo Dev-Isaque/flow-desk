@@ -1,4 +1,3 @@
-// useProjectMembers.js
 import { useEffect, useState } from "react";
 import {
     getMemberProjects,
@@ -19,8 +18,14 @@ export function useProjectMembers(member, workspaceId) {
         async function load() {
             setLoading(true);
             try {
-                const response = await getMemberProjects(workspaceId, member.userId);
-                const projects = Array.isArray(response?.dados) ? response.dados : [];
+                const response = await getMemberProjects(
+                    workspaceId,
+                    member.userId
+                );
+
+                const projects = Array.isArray(response?.dados)
+                    ? response.dados
+                    : [];
 
                 const map = {};
                 projects.forEach((p) => {
@@ -40,11 +45,17 @@ export function useProjectMembers(member, workspaceId) {
     }, [member, workspaceId]);
 
     const changeRole = (projectId, role) => {
-        setMemberProjects((prev) => ({ ...prev, [projectId]: role }));
+        setMemberProjects((prev) => ({
+            ...prev,
+            [projectId]: role,
+        }));
     };
 
     const grantAccess = (projectId, role = "VIEWER") => {
-        setMemberProjects((prev) => ({ ...prev, [projectId]: role }));
+        setMemberProjects((prev) => ({
+            ...prev,
+            [projectId]: role,
+        }));
     };
 
     const removeAccess = (projectId) => {
@@ -57,23 +68,35 @@ export function useProjectMembers(member, workspaceId) {
 
     const save = async () => {
         setSaving(true);
+
         try {
             for (const projectId in memberProjects) {
                 const role = memberProjects[projectId];
-                const existed = originalProjects.hasOwnProperty(projectId);
+                const existed = projectId in originalProjects;
 
                 if (existed) {
                     if (originalProjects[projectId] !== role) {
-                        await updateProjectMemberRole(projectId, member.userId, role);
+                        await updateProjectMemberRole(
+                            projectId,
+                            member.userId,
+                            role
+                        );
                     }
                 } else {
-                    await addProjectMember(projectId, member.userId, role);
+                    await addProjectMember(
+                        projectId,
+                        member.userId,
+                        role
+                    );
                 }
             }
 
             for (const projectId in originalProjects) {
-                if (!memberProjects.hasOwnProperty(projectId)) {
-                    await removeProjectMember(projectId, member.userId);
+                if (!(projectId in memberProjects)) {
+                    await removeProjectMember(
+                        projectId,
+                        member.userId
+                    );
                 }
             }
 
