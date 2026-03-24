@@ -11,5 +11,6 @@ public class UpdateWorkspaceRequest {
     @NotBlank(message = "name é obrigatório")
     private String name;
 
+    private String description;
     private String color;
 }

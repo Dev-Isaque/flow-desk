@@ -9,19 +9,34 @@ export function WorkspaceGeneral({ workspace, onDelete, onSave }) {
     description: workspace?.description || "",
   });
 
+  function startEditing() {
+    setForm({
+      name: workspace?.name || "",
+      description: workspace?.description || "",
+    });
+    setIsEditing(true);
+  }
+
   function handleChange(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
   function handleCancel() {
-    setForm({
-      name: workspace?.name || "",
-      description: workspace?.description || "",
-    });
     setIsEditing(false);
   }
 
   async function handleSave() {
+    if (!workspace?.id) return;
+    if (!form.name.trim()) return;
+
+    if (
+      form.name === workspace?.name &&
+      form.description === workspace?.description
+    ) {
+      setIsEditing(false);
+      return;
+    }
+
     await onSave?.(workspace.id, form);
     setIsEditing(false);
   }
@@ -35,7 +50,7 @@ export function WorkspaceGeneral({ workspace, onDelete, onSave }) {
           {!isEditing && (
             <Button
               className="btn-outline-primary btn-sm"
-              onClick={() => setIsEditing(true)}
+              onClick={startEditing}
             >
               Editar
             </Button>
@@ -46,7 +61,7 @@ export function WorkspaceGeneral({ workspace, onDelete, onSave }) {
           <div className="settings-field mb-3">
             <Input
               label="Nome do Workspace"
-              value={form.name}
+              value={isEditing ? form.name : workspace?.name || ""}
               onChange={(e) => handleChange("name", e.target.value)}
               disabled={!isEditing}
             />
@@ -57,7 +72,9 @@ export function WorkspaceGeneral({ workspace, onDelete, onSave }) {
               label="Descrição"
               as="textarea"
               rows={3}
-              value={form.description}
+              value={
+                isEditing ? form.description : workspace?.description || ""
+              }
               onChange={(e) => handleChange("description", e.target.value)}
               disabled={!isEditing}
             />
@@ -73,7 +90,11 @@ export function WorkspaceGeneral({ workspace, onDelete, onSave }) {
               Cancelar
             </button>
 
-            <Button className="btn-color px-4" onClick={handleSave}>
+            <Button
+              className="btn-color px-4"
+              onClick={handleSave}
+              disabled={!form.name.trim()}
+            >
               Salvar
             </Button>
           </div>
@@ -90,7 +111,11 @@ export function WorkspaceGeneral({ workspace, onDelete, onSave }) {
 
         <Button
           className="btn-danger"
-          onClick={() => onDelete?.(workspace?.id)}
+          onClick={() => {
+            if (confirm("Tem certeza que deseja excluir este workspace?")) {
+              onDelete?.(workspace?.id);
+            }
+          }}
         >
           Excluir Workspace
         </Button>

@@ -14,12 +14,20 @@ export function WorkspaceSettings({ workspace, onBack }) {
     handleAddMember,
     handleUpdateMember,
     handleDeleteMember,
+    handleUpdateWorkspace,
+    handleDeleteWorkspace,
   } = useWorkspace();
 
   const [activeTab, setActiveTab] = useState("general");
 
   const screens = {
-    general: <WorkspaceGeneral workspace={workspace} />,
+    general: (
+      <WorkspaceGeneral
+        workspace={workspace}
+        onSave={handleUpdateWorkspace}
+        onDelete={handleDeleteWorkspace}
+      />
+    ),
 
     members: (
       <WorkspaceMembers

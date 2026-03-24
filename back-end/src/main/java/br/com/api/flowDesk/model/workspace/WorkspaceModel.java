@@ -34,6 +34,10 @@ public class WorkspaceModel {
     private UUID id;
 
     private String name;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     private String color;
 
     @Enumerated(EnumType.STRING)

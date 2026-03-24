@@ -63,9 +63,11 @@ public class WorkspaceController {
                                 .body(new WorkspaceResponse(
                                                 created.getId(),
                                                 created.getName(),
+                                                created.getDescription(),
+                                                created.getCreatedAt(),
                                                 created.getColor(),
                                                 created.getType(),
-                                                1, // 👈 creator
+                                                1,
                                                 WorkspaceRole.OWNER));
         }
 
@@ -85,6 +87,8 @@ public class WorkspaceController {
                 WorkspaceResponse response = new WorkspaceResponse(
                                 workspace.getId(),
                                 workspace.getName(),
+                                workspace.getDescription(),
+                                workspace.getCreatedAt(),
                                 workspace.getColor(),
                                 workspace.getType(),
                                 workspace.getMembers().size(),
@@ -113,14 +117,16 @@ public class WorkspaceController {
                 String token = authHeader.replace("Bearer ", "").trim();
                 UserModel user = authTokenService.requireUserByToken(token);
 
-                var ws = workspaceService.getOrCreatePersonal(user);
+                var workspace = workspaceService.getOrCreatePersonal(user);
 
                 return ResponseEntity.ok(new WorkspaceResponse(
-                                ws.getId(),
-                                ws.getName(),
-                                ws.getColor(),
-                                ws.getType(),
-                                ws.getMembers().size(),
+                                workspace.getId(),
+                                workspace.getName(),
+                                workspace.getDescription(),
+                                workspace.getCreatedAt(),
+                                workspace.getColor(),
+                                workspace.getType(),
+                                workspace.getMembers().size(),
                                 WorkspaceRole.OWNER));
         }
 }

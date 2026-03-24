@@ -77,9 +77,8 @@ export function useSharedWorkspace() {
             await updateWorkspace(workspaceId, data);
 
             await fetchWorkspaces();
-
+            
             showToast("Workspace atualizado com sucesso!", "success");
-
         } catch (err) {
             console.error("Falha na requisição:", err);
             setError("Erro ao atualizar workspace.");

@@ -16,6 +16,7 @@ import br.com.api.flowDesk.enums.workspace.WorkspaceType;
 import br.com.api.flowDesk.model.user.UserModel;
 import br.com.api.flowDesk.model.workspace.WorkspaceMemberModel;
 import br.com.api.flowDesk.model.workspace.WorkspaceModel;
+import br.com.api.flowDesk.repository.project.ProjectMemberRepository;
 import br.com.api.flowDesk.repository.project.ProjectRepository;
 import br.com.api.flowDesk.repository.task.TaskRepository;
 import br.com.api.flowDesk.repository.user.UserRepository;
@@ -35,6 +36,9 @@ public class WorkspaceService {
 
     @Autowired
     private ProjectRepository projectRepository;
+
+    @Autowired
+    private ProjectMemberRepository projectMemberRepository;
 
     @Autowired
     private TaskRepository taskRepository;
@@ -79,6 +83,10 @@ public class WorkspaceService {
             workspace.setName(dto.getName());
         }
 
+        if (dto.getDescription() != null) {
+            workspace.setDescription(dto.getDescription());
+        }
+
         if (dto.getColor() != null && !dto.getColor().isBlank()) {
             workspace.setColor(dto.getColor());
         }
@@ -106,7 +114,12 @@ public class WorkspaceService {
             taskService.delete(task.getId(), user);
         }
 
-        projectRepository.deleteByWorkspaceId(workspaceId);
+        var projects = projectRepository.findAllByWorkspaceId(workspaceId);
+
+        for (var project : projects) {
+            projectMemberRepository.deleteAll(project.getMembers());
+            projectRepository.delete(project);
+        }
 
         workspaceMemberRepository.deleteAll(workspace.getMembers());
 
@@ -152,6 +165,8 @@ public class WorkspaceService {
                     return new WorkspaceResponse(
                             ws.getId(),
                             ws.getName(),
+                            ws.getDescription(),
+                            ws.getCreatedAt(),
                             ws.getColor(),
                             ws.getType(),
                             ws.getMembers().size(),

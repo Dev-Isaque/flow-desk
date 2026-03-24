@@ -1,34 +1,23 @@
 package br.com.api.flowDesk.dto.workspace.response;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import br.com.api.flowDesk.enums.workspace.WorkspaceRole;
 import br.com.api.flowDesk.enums.workspace.WorkspaceType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class WorkspaceResponse {
 
     private UUID id;
     private String name;
+    private String description;
+    private LocalDateTime createdAt;
     private String color;
     private WorkspaceType type;
     private Integer memberCount;
     private WorkspaceRole role;
-
-    public WorkspaceResponse(
-            UUID id,
-            String name,
-            String color,
-            WorkspaceType type,
-            Integer memberCount,
-            WorkspaceRole role) {
-
-        this.id = id;
-        this.name = name;
-        this.color = color;
-        this.type = type;
-        this.memberCount = memberCount;
-        this.role = role;
-    }
 }

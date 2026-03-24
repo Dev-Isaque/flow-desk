@@ -1,6 +1,6 @@
 import { Users, MoreVertical } from "lucide-react";
 
-import { Button } from "../../../shared/components/Button";
+import { formatDate } from "../../../shared/utils/formatDate";
 
 export function WorkspaceCard({
   workspace,
@@ -103,7 +103,7 @@ export function WorkspaceCard({
             {workspace.memberCount || 1}
           </div>
 
-          <span>Criado recentemente</span>
+          <span>Criado em {formatDate(workspace.createdAt)}</span>
         </div>
       </div>
     </div>
