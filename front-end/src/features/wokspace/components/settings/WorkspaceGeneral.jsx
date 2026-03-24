@@ -1,13 +1,16 @@
 import { useState } from "react";
+
 import { Input } from "../../../../shared/components/Input";
 import { Button } from "../../../../shared/components/Button";
 
-export function WorkspaceGeneral({ workspace, onDelete, onSave }) {
+export function WorkspaceGeneral({ workspace, onSave, onDelete }) {
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
     name: workspace?.name || "",
     description: workspace?.description || "",
   });
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   function startEditing() {
     setForm({
@@ -23,6 +26,10 @@ export function WorkspaceGeneral({ workspace, onDelete, onSave }) {
 
   function handleCancel() {
     setIsEditing(false);
+    setForm({
+      name: workspace?.name || "",
+      description: workspace?.description || "",
+    });
   }
 
   async function handleSave() {
@@ -37,8 +44,33 @@ export function WorkspaceGeneral({ workspace, onDelete, onSave }) {
       return;
     }
 
-    await onSave?.(workspace.id, form);
-    setIsEditing(false);
+    try {
+      setSaving(true);
+      await onSave?.(workspace.id, form);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Erro ao salvar workspace:", err);
+      alert("Erro ao salvar workspace. Tente novamente.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!workspace?.id) return;
+    if (!confirm("Tem certeza que deseja excluir este workspace?")) return;
+
+    try {
+      setDeleting(true);
+      await onDelete?.(workspace.id);
+
+      window.location.href = "/groups";
+    } catch (err) {
+      console.error("Erro ao deletar workspace:", err);
+      alert("Erro ao excluir workspace. Tente novamente.");
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -63,7 +95,7 @@ export function WorkspaceGeneral({ workspace, onDelete, onSave }) {
               label="Nome do Workspace"
               value={isEditing ? form.name : workspace?.name || ""}
               onChange={(e) => handleChange("name", e.target.value)}
-              disabled={!isEditing}
+              disabled={!isEditing || saving}
             />
           </div>
 
@@ -76,7 +108,7 @@ export function WorkspaceGeneral({ workspace, onDelete, onSave }) {
                 isEditing ? form.description : workspace?.description || ""
               }
               onChange={(e) => handleChange("description", e.target.value)}
-              disabled={!isEditing}
+              disabled={!isEditing || saving}
             />
           </div>
         </div>
@@ -86,6 +118,7 @@ export function WorkspaceGeneral({ workspace, onDelete, onSave }) {
             <button
               className="btn btn-link theme-text-muted text-decoration-none"
               onClick={handleCancel}
+              disabled={saving}
             >
               Cancelar
             </button>
@@ -93,9 +126,9 @@ export function WorkspaceGeneral({ workspace, onDelete, onSave }) {
             <Button
               className="btn-color px-4"
               onClick={handleSave}
-              disabled={!form.name.trim()}
+              disabled={!form.name.trim() || saving}
             >
-              Salvar
+              {saving ? "Salvando..." : "Salvar"}
             </Button>
           </div>
         )}
@@ -111,13 +144,10 @@ export function WorkspaceGeneral({ workspace, onDelete, onSave }) {
 
         <Button
           className="btn-danger"
-          onClick={() => {
-            if (confirm("Tem certeza que deseja excluir este workspace?")) {
-              onDelete?.(workspace?.id);
-            }
-          }}
+          onClick={handleDelete}
+          disabled={deleting}
         >
-          Excluir Workspace
+          {deleting ? "Excluindo..." : "Excluir Workspace"}
         </Button>
       </div>
     </div>

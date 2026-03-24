@@ -59,6 +59,9 @@ function GroupWorkspace() {
     ? workspaces.find((w) => w.id === activeWorkspaceId)
     : null;
 
+  const workspaceRole = workspaceAtivo?.role;
+  const canAddMember = workspaceRole === "OWNER" || workspaceRole === "ADMIN";
+
   const filteredWorkspaces = Array.isArray(workspaces)
     ? workspaces.filter((workspace) =>
         workspace.name.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -163,7 +166,7 @@ function GroupWorkspace() {
                     onLeave={(id) => {
                       if (
                         window.confirm(
-                          "Tem certeza que deseja excluir este workspace?",
+                          "Tem certeza que deseja sair deste workspace?",
                         )
                       ) {
                         handleLeaveWorkspace(id);
@@ -212,19 +215,21 @@ function GroupWorkspace() {
               title={workspaceAtivo?.name || "Grupo"}
               onBack={() => navigate("/groups")}
               extraHeaderActions={
-                <Button
-                  className="btn-color"
-                  onClick={() => setShowAddMemberModal(true)}
-                >
-                  <Users size={18} className="me-2" />
-                  Adicionar Membro
-                </Button>
+                canAddMember && (
+                  <Button
+                    className="btn-color"
+                    onClick={() => setShowAddMemberModal(true)}
+                  >
+                    <Users size={18} className="me-2" />
+                    Adicionar Membro
+                  </Button>
+                )
               }
             />
           )}
         </WorkspaceProvider>
       )}
-      
+
       <CreateWorkspaceModal
         show={showCreateWorkspaceModal}
         onCreate={handleCreateWorkspace}
