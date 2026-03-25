@@ -1,6 +1,8 @@
 import { WorkspaceContext } from "./WorkspaceContext";
 import { useWorkspaceTags } from "../hooks/useWorkspaceTags";
 import { useSharedWorkspace } from "../hooks/useSharedWorkspace";
+import {} from "../../projects/hooks/useProjectMembers";
+import { useProjects } from "../../projects/hooks/useProjects";
 
 export function WorkspaceProvider({ workspaceId, workspace, children }) {
   const {
@@ -25,6 +27,15 @@ export function WorkspaceProvider({ workspaceId, workspace, children }) {
     reloadTags,
   } = useWorkspaceTags(workspaceId);
 
+  const {
+    projects,
+    loadingProjects,
+    savingProject,
+    addProject,
+    handleUpdateProject,
+    handleDeleteProject,
+  } = useProjects({ workspaceId });
+
   const value = {
     workspaceId,
     workspace,
@@ -38,6 +49,13 @@ export function WorkspaceProvider({ workspaceId, workspace, children }) {
 
     handleUpdateWorkspace,
     handleDeleteWorkspace,
+
+    projects,
+    loadingProjects,
+    savingProject,
+    addProject,
+    handleUpdateProject,
+    handleDeleteProject,
 
     tags,
     loadingTags,

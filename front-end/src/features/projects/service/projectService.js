@@ -6,7 +6,6 @@ export const getMyProjects = (workspaceId) => {
     });
 };
 
-
 export const createProject = ({ workspaceId, name, description = "" }) => {
     return apiRequest("/projects/create", {
         method: "POST",
@@ -15,5 +14,21 @@ export const createProject = ({ workspaceId, name, description = "" }) => {
             name,
             description,
         }),
-    })
-}
+    });
+};
+
+export const updateProject = (projectId, { name, description = "" }) => {
+    return apiRequest(`/projects/${projectId}`, {
+        method: "PUT",
+        body: JSON.stringify({
+            name,
+            description,
+        }),
+    });
+};
+
+export const deleteProject = (projectId) => {
+    return apiRequest(`/projects/${projectId}`, {
+        method: "DELETE",
+    });
+};

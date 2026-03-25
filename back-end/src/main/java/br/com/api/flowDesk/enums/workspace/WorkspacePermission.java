@@ -2,6 +2,7 @@ package br.com.api.flowDesk.enums.workspace;
 
 public enum WorkspacePermission {
     CREATE_PROJECT,
+    EDIT_PROJECT,
     DELETE_PROJECT,
     ADD_MEMBER,
     UPDATE_MEMBER_ROLE,

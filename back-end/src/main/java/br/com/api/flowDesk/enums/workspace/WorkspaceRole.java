@@ -6,6 +6,7 @@ public enum WorkspaceRole {
 
         OWNER(Set.of(
                         WorkspacePermission.CREATE_PROJECT,
+                        WorkspacePermission.EDIT_PROJECT,
                         WorkspacePermission.DELETE_PROJECT,
                         WorkspacePermission.ADD_MEMBER,
                         WorkspacePermission.UPDATE_MEMBER_ROLE,
@@ -16,6 +17,7 @@ public enum WorkspaceRole {
 
         ADMIN(Set.of(
                         WorkspacePermission.CREATE_PROJECT,
+                        WorkspacePermission.EDIT_PROJECT,
                         WorkspacePermission.ADD_MEMBER,
                         WorkspacePermission.UPDATE_MEMBER_ROLE,
                         WorkspacePermission.REMOVE_MEMBER,

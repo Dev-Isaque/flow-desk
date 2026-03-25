@@ -69,6 +69,43 @@ public class ProjectService {
                 return savedProject;
         }
 
+        @Transactional
+        public ProjectModel update(UUID projectId, CreateProjectRequest dto, UserModel user) {
+
+                var project = projectRepository.findById(projectId)
+                                .orElseThrow(() -> new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND, "Projeto não encontrado"));
+
+                var member = workspaceMemberRepository
+                                .findByWorkspace_IdAndUser_Id(project.getWorkspace().getId(), user.getId())
+                                .orElseThrow(() -> new ResponseStatusException(
+                                                HttpStatus.FORBIDDEN, "Você não pertence ao workspace"));
+
+                PermissionService.checkWorkspace(member.getRole(), WorkspacePermission.EDIT_PROJECT);
+
+                project.setName(dto.getName());
+                project.setDescription(dto.getDescription());
+
+                return projectRepository.save(project);
+        }
+
+        @Transactional
+        public void delete(UUID projectId, UserModel user) {
+
+                var project = projectRepository.findById(projectId)
+                                .orElseThrow(() -> new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND, "Projeto não encontrado"));
+
+                var member = workspaceMemberRepository
+                                .findByWorkspace_IdAndUser_Id(project.getWorkspace().getId(), user.getId())
+                                .orElseThrow(() -> new ResponseStatusException(
+                                                HttpStatus.FORBIDDEN, "Você não pertence ao workspace"));
+
+                PermissionService.checkWorkspace(member.getRole(), WorkspacePermission.DELETE_PROJECT);
+
+                projectRepository.delete(project);
+        }
+
         @Transactional(readOnly = true)
         public List<ProjectResponse> findProjectsByWorkspace(UUID workspaceId, UserModel user) {
 

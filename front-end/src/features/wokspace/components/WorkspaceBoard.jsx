@@ -15,7 +15,6 @@ import { useWorkspace } from "../../wokspace/context/useWorkspace";
 
 export function WorkspaceBoard({
   workspaceId,
-  workspace,
   title,
   extraHeaderActions,
   loadingWorkspace,

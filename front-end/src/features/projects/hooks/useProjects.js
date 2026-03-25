@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { useToast } from "../../../shared/utils/useToast";
 
-import { getMyProjects, createProject } from "../service/projectService";
+import {
+    getMyProjects,
+    createProject,
+    updateProject,
+    deleteProject,
+} from "../service/projectService";
 
 export function useProjects({ workspaceId, initialProjectId }) {
 
@@ -35,7 +40,6 @@ export function useProjects({ workspaceId, initialProjectId }) {
                 setErrorProjects(msg);
 
                 showToast(msg, "error");
-
                 return;
             }
 
@@ -67,29 +71,22 @@ export function useProjects({ workspaceId, initialProjectId }) {
         const cleanName = (name || "").trim();
 
         if (!cleanName) {
-
             const msg = "Digite um nome para o projeto.";
-
             setErrorProjects(msg);
             showToast(msg, "error");
-
             return { ok: false };
         }
 
         if (!workspaceId) {
-
             const msg = "Workspace ainda não carregou.";
-
             setErrorProjects(msg);
             showToast(msg, "error");
-
             return { ok: false };
         }
 
         setSavingProject(true);
 
         try {
-
             const r = await createProject({
                 workspaceId,
                 name: cleanName,
@@ -97,19 +94,14 @@ export function useProjects({ workspaceId, initialProjectId }) {
             });
 
             if (!r?.sucesso) {
-
                 const msg = r?.mensagem || "Não foi possível criar o projeto";
-
                 setErrorProjects(msg);
                 showToast(msg, "error");
-
                 return { ok: false };
             }
 
             if (r?.dados) {
-
                 setProjects((prev) => [...prev, r.dados]);
-
                 setProjectSelecionado(r.dados.id);
 
                 showToast("Projeto criado com sucesso!", "success");
@@ -126,10 +118,95 @@ export function useProjects({ workspaceId, initialProjectId }) {
             const msg = "Erro inesperado ao criar projeto.";
 
             setErrorProjects(msg);
-
             showToast(msg, "error");
 
             return { ok: false };
+
+        } finally {
+            setSavingProject(false);
+        }
+    }
+
+    async function handleUpdateProject(projectId, data) {
+
+        if (!projectId) return;
+
+        setSavingProject(true);
+        setErrorProjects("");
+
+        try {
+            const r = await updateProject(projectId, data);
+
+            if (!r?.sucesso) {
+                const msg = r?.mensagem || "Não foi possível atualizar o projeto";
+                setErrorProjects(msg);
+                showToast(msg, "error");
+                return false;
+            }
+
+            setProjects((prev) =>
+                prev.map((p) =>
+                    p.id === projectId
+                        ? { ...p, ...data }
+                        : p
+                )
+            );
+
+            showToast("Projeto atualizado com sucesso!", "success");
+
+            return true;
+
+        } catch (err) {
+
+            console.error(err);
+
+            const msg = "Erro ao atualizar projeto.";
+
+            setErrorProjects(msg);
+            showToast(msg, "error");
+
+            return false;
+
+        } finally {
+            setSavingProject(false);
+        }
+    }
+
+    async function handleDeleteProject(projectId) {
+
+        if (!projectId) return;
+
+        setSavingProject(true);
+        setErrorProjects("");
+
+        try {
+            const r = await deleteProject(projectId);
+
+            if (!r?.sucesso) {
+                const msg = r?.mensagem || "Não foi possível excluir o projeto";
+                setErrorProjects(msg);
+                showToast(msg, "error");
+                return false;
+            }
+
+            setProjects((prev) =>
+                prev.filter((p) => p.id !== projectId)
+            );
+
+            showToast("Projeto excluído com sucesso!", "success");
+
+            return true;
+
+        } catch (err) {
+
+            console.error(err);
+
+            const msg = "Erro ao excluir projeto.";
+
+            setErrorProjects(msg);
+            showToast(msg, "error");
+
+            return false;
 
         } finally {
             setSavingProject(false);
@@ -162,6 +239,9 @@ export function useProjects({ workspaceId, initialProjectId }) {
         loadingProjects,
         savingProject,
         errorProjects,
+
         addProject,
+        handleUpdateProject,
+        handleDeleteProject,
     };
 }

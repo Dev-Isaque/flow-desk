@@ -3,6 +3,7 @@ import { useState } from "react";
 import { WorkspaceGeneral } from "./settings/WorkspaceGeneral";
 import { WorkspaceMembers } from "./settings/WorkspaceMembers";
 import { WorkspaceTags } from "./settings/WorkspaceTags";
+import { WorkspaceProjects } from "./settings/WorkspaceProjects";
 
 import { Button } from "../../../shared/components/Button";
 import { useWorkspace } from "../context/useWorkspace";
@@ -39,6 +40,8 @@ export function WorkspaceSettings({ workspace, onBack }) {
         handleDeleteMember={handleDeleteMember}
       />
     ),
+
+    projects: <WorkspaceProjects workspace={workspace} />,
 
     tags: <WorkspaceTags workspace={workspace} />,
   };
@@ -97,6 +100,13 @@ export function WorkspaceSettings({ workspace, onBack }) {
             onClick={() => handleRenderingView("members")}
           >
             Membros
+          </Button>
+
+          <Button
+            className="btn-color"
+            onClick={() => handleRenderingView("projects")}
+          >
+            Projetos
           </Button>
 
           <Button
