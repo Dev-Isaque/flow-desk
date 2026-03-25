@@ -2,7 +2,7 @@ import { WorkspaceContext } from "./WorkspaceContext";
 import { useWorkspaceTags } from "../hooks/useWorkspaceTags";
 import { useSharedWorkspace } from "../hooks/useSharedWorkspace";
 
-export function WorkspaceProvider({ workspaceId, children }) {
+export function WorkspaceProvider({ workspaceId, workspace, children }) {
   const {
     members,
     fetchMembers,
@@ -27,6 +27,9 @@ export function WorkspaceProvider({ workspaceId, children }) {
 
   const value = {
     workspaceId,
+    workspace,
+    workspaceRole: workspace?.role,
+
     members,
     fetchMembers,
     handleAddMember,

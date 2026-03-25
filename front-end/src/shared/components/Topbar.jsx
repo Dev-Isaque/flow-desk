@@ -2,7 +2,7 @@ import { Bell, ArrowLeft } from "lucide-react";
 import { AlternateTheme } from "./AlternateTheme";
 import { useMe } from "../../features/user/hooks/useMe";
 
-export function Topbar({ breadcrumb, onBack }) {
+export function Topbar({ breadcrumb, onBack, workspaceRole }) {
   const { usuario } = useMe();
 
   const getInitials = (name) => {
@@ -12,6 +12,19 @@ export function Topbar({ breadcrumb, onBack }) {
       return (words[0][0] + words[words.length - 1][0]).toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
+  };
+
+  const formatRole = (role) => {
+    switch (role) {
+      case "OWNER":
+        return "Owner";
+      case "ADMIN":
+        return "Admin";
+      case "MEMBER":
+        return "Membro";
+      default:
+        return "";
+    }
   };
 
   return (
@@ -50,7 +63,7 @@ export function Topbar({ breadcrumb, onBack }) {
               className="mb-0 theme-text-muted"
               style={{ fontSize: "0.7rem", letterSpacing: "0.5px" }}
             >
-              MEMBER
+              {formatRole(workspaceRole) || ""}
             </p>
           </div>
           <div

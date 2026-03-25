@@ -11,6 +11,7 @@ import { TaskBody } from "../../tasks/components/TaskBody";
 import { useProjects } from "../../projects/hooks/useProjects";
 import { useProjectTasks } from "../../tasks/hooks/useProjectTasks";
 import { useWorkspaceTags } from "../../wokspace/hooks/useWorkspaceTags";
+import { useWorkspace } from "../../wokspace/context/useWorkspace";
 
 export function WorkspaceBoard({
   workspaceId,
@@ -21,6 +22,8 @@ export function WorkspaceBoard({
   onBack,
 }) {
   const { projectId } = useParams();
+
+  const { workspaceRole } = useWorkspace() || {};
 
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [editingTaskId, seteditingTaskId] = useState(null);
@@ -125,7 +128,7 @@ export function WorkspaceBoard({
 
       <ProjectBar
         projects={projects}
-        workspaceRole={workspace.role}
+        workspaceRole={workspaceRole}
         projectSelecionado={projectSelecionado}
         setProjectSelecionado={setProjectSelecionado}
         isCreatingProject={isCreatingProject}

@@ -18,7 +18,10 @@ function PersonalWorkspace() {
 
   return (
     <div className="tasks-page position-relative">
-      <Topbar breadcrumb={<span className="theme-text">Suas Tarefas</span>} />
+      <Topbar
+        breadcrumb={<span className="theme-text">Suas Tarefas</span>}
+        workspaceRole="OWNER"
+      />
 
       {erroTela && <p className="auth-error">{erroTela}</p>}
 

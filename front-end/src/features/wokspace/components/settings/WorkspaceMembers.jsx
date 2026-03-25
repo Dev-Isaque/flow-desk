@@ -4,7 +4,7 @@ import {
   Check,
   X,
   UserPlus,
-  UserCog ,
+  UserCog,
 } from "lucide-react";
 
 import { useEffect, useState, useMemo } from "react";
@@ -129,10 +129,16 @@ export function WorkspaceMembers({
           <table className="table table-borderless table-hover align-middle settings-table">
             <thead>
               <tr className="theme-text-muted">
-                <th>Membro</th>
-                <th>Função</th>
-                <th>Status</th>
-                <th style={{ width: "300px" }}>Ações</th>
+                <th style={{ width: "60%" }}>Membro</th>
+                <th className="text-center" style={{ width: "20%" }}>
+                  Função
+                </th>
+                <th className="text-center" style={{ width: "20%" }}>
+                  Status
+                </th>
+                <th className="text-center" style={{ width: "10%" }}>
+                  Ações
+                </th>
               </tr>
             </thead>
 
@@ -144,87 +150,100 @@ export function WorkspaceMembers({
                 return (
                   <tr key={member.id} className="member-row">
                     <td>
-                      <div className="d-flex align-items-center gap-3">
-                        <div className="member-avatar">
+                      <div className="member-info d-flex align-items-center gap-3 w-100 overflow-hidden">
+                        <div className="member-avatar flex-shrink-0">
                           {member.email[0].toUpperCase()}
                         </div>
 
-                        <div>
-                          <div className="fw-semibold">{member.name}</div>
-                          <small className="theme-text-muted">
+                        <div className="member-text overflow-hidden">
+                          <div className="fw-semibold text-truncate">
+                            {member.name}
+                          </div>
+                          <small className="theme-text-muted text-truncate d-block">
                             {member.email}
                           </small>
                         </div>
                       </div>
                     </td>
 
-                    <td>
+                    <td className="align-middle">
                       <span
-                        className={`role-badge role-${member.role.toLowerCase()}`}
+                        className={`role-badge role-${member.role.toLowerCase()} d-inline-block w-100 text-center`}
                       >
                         {member.role}
                       </span>
                     </td>
 
-                    <td>
-                      <span className="status-active">● Ativo</span>
+                    <td className="align-middle">
+                      <span className="status-active text-nowrap w-100 d-block text-center">
+                        ● Ativo
+                      </span>
                     </td>
 
-                    <td className="d-flex align-items-center gap-2">
-                      {!isOwner && !isEditing && (
-                        <Button
-                          className="btn-outline-secondary border-0"
-                          onClick={() => handleSelectRole(member)}
-                        >
-                          <SquarePen size={18} />
-                        </Button>
-                      )}
-
-                      {!isOwner && isEditing && (
-                        <>
-                          <select
-                            className="form-select form-select-sm"
-                            value={selectedRole}
-                            onChange={(e) => setSelectedRole(e.target.value)}
-                          >
-                            <option value="ADMIN">Admin</option>
-                            <option value="MEMBER">Member</option>
-                            <option value="VIEWER">Viewer</option>
-                          </select>
-
+                    <td>
+                      <div className="d-flex align-items-center gap-2 w-100">
+                        {!isOwner && !isEditing && (
                           <Button
-                            className="btn-success btn-sm"
-                            onClick={() => handleConfirmRole(member.id)}
+                            className="btn-outline-secondary border-0 flex-fill"
+                            onClick={() => handleSelectRole(member)}
+                            title="Editar Função"
                           >
-                            <Check size={16} />
+                            <SquarePen size={18} />
                           </Button>
+                        )}
 
+                        {!isOwner && isEditing && (
+                          <>
+                            <select
+                              className="form-select form-select-sm flex-fill"
+                              value={selectedRole}
+                              onChange={(e) => setSelectedRole(e.target.value)}
+                            >
+                              <option value="ADMIN">Admin</option>
+                              <option value="MEMBER">Member</option>
+                              <option value="VIEWER">Viewer</option>
+                            </select>
+
+                            <Button
+                              className="btn-success btn-sm flex-fill"
+                              onClick={() => handleConfirmRole(member.id)}
+                              title="Confirmar"
+                            >
+                              <Check size={16} />
+                            </Button>
+
+                            <Button
+                              className="btn-secondary btn-sm flex-fill"
+                              onClick={handleCancelEdit}
+                              title="Cancelar"
+                            >
+                              <X size={16} />
+                            </Button>
+                          </>
+                        )}
+
+                        {!isOwner && !isEditing && (
                           <Button
-                            className="btn-secondary btn-sm"
-                            onClick={handleCancelEdit}
+                            className="btn-outline-primary border-0 flex-fill"
+                            onClick={() => openPermissionsModal(member)}
+                            title="Permissões"
                           >
-                            <X size={16} />
+                            <UserCog size={18} />
                           </Button>
-                        </>
-                      )}
-
-                      {!isOwner && !isEditing && (
-                        <Button
-                          className="btn-outline-danger border-0"
-                          onClick={() =>
-                            handleDeleteMember(workspace.id, member.id)
-                          }
-                        >
-                          <UserRoundMinus size={18} />
-                        </Button>
-                      )}
-
-                      <Button
-                        className="btn-outline-primary border-0"
-                        onClick={() => openPermissionsModal(member)}
-                      >
-                        <UserCog size={18}/>
-                      </Button>
+                        )}
+                        
+                        {!isOwner && !isEditing && (
+                          <Button
+                            className="btn-outline-danger border-0 flex-fill"
+                            onClick={() =>
+                              handleDeleteMember(workspace.id, member.id)
+                            }
+                            title="Remover Membro"
+                          >
+                            <UserRoundMinus size={18} />
+                          </Button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );

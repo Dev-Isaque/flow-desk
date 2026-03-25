@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, SquarePen } from "lucide-react";
 import { Button } from "../../../../shared/components/Button";
 import { Input } from "../../../../shared/components/Input";
 import { useWorkspace } from "../../context/useWorkspace";
@@ -203,47 +203,62 @@ export function WorkspaceTags() {
               <table className="table table-borderless table-hover align-middle settings-table">
                 <thead>
                   <tr className="theme-text-muted">
-                    <th>COR</th>
-                    <th>NOME DA TAG</th>
-                    <th>USO</th>
-                    <th>AÇÕES</th>
+                    <th style={{ width: "10%" }} className="text-center">
+                      COR
+                    </th>
+                    <th style={{ width: "50%" }}>NOME DA TAG</th>
+                    <th style={{ width: "20%" }} className="text-center">
+                      USO
+                    </th>
+                    <th style={{ width: "20%" }} className="text-center">
+                      AÇÕES
+                    </th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {tags.map((tag) => (
                     <tr key={tag.id}>
-                      <td>
+                      <td className="text-center">
                         <div
+                          className="mx-auto"
                           style={{
                             width: "18px",
                             height: "18px",
                             borderRadius: "50%",
                             background: tag.color || DEFAULT_COLOR,
+                            border: "2px solid rgba(0,0,0,0.05)",
                           }}
                         />
                       </td>
 
-                      <td className="fw-medium">{tag.name}</td>
-
                       <td>
-                        <span className="badge bg-secondary">
-                          {tag.usage ?? 0} tarefas
+                        <div className="fw-semibold text-truncate">
+                          {tag.name}
+                        </div>
+                      </td>
+
+                      <td className="text-center">
+                        <span className="badge bg-secondary px-3 py-2">
+                          {tag.usage ?? 0}
                         </span>
                       </td>
 
                       <td>
-                        <button
-                          className="btn btn-link text-info"
-                          onClick={() =>
-                            handleSelectTag({
-                              ...tag,
-                              color: tag.color || DEFAULT_COLOR,
-                            })
-                          }
-                        >
-                          Editar
-                        </button>
+                        <div className="d-flex justify-content-center">
+                          <Button
+                            className="btn-outline-primary border-0 px-2"
+                            onClick={() =>
+                              handleSelectTag({
+                                ...tag,
+                                color: tag.color || DEFAULT_COLOR,
+                              })
+                            }
+                            title="Editar Tag"
+                          >
+                            <SquarePen size={18} />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}

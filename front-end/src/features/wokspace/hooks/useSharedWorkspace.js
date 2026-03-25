@@ -46,7 +46,23 @@ export function useSharedWorkspace() {
 
         try {
             const response = await listWorkspaceMembers(workspaceId);
-            setMembers(response?.dados || []);
+
+            const rolePriority = {
+                OWNER: 1,
+                ADMIN: 2,
+                MEMBER: 3,
+                VIEWER: 4,
+            };
+
+            const sortedMembers = (response?.dados || []).sort((a, b) => {
+                const roleDiff = rolePriority[a.role] - rolePriority[b.role];
+
+                if (roleDiff !== 0) return roleDiff;
+
+                return a.name.localeCompare(b.name);
+            });
+
+            setMembers(sortedMembers);
 
         } catch (err) {
             console.error("Falha na requisição:", err);
@@ -77,7 +93,7 @@ export function useSharedWorkspace() {
             await updateWorkspace(workspaceId, data);
 
             await fetchWorkspaces();
-            
+
             showToast("Workspace atualizado com sucesso!", "success");
         } catch (err) {
             console.error("Falha na requisição:", err);

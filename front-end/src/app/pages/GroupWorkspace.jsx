@@ -102,107 +102,104 @@ function GroupWorkspace() {
 
   return (
     <div className="tasks-page position-relative">
-      <Topbar breadcrumb={breadcrumb} />
+      <WorkspaceProvider
+        workspaceId={activeWorkspaceId}
+        workspace={workspaceAtivo}
+      >
+        <Topbar breadcrumb={breadcrumb} workspaceRole={workspaceRole} />
 
-      {erroTela && <p className="auth-error">{erroTela}</p>}
+        {erroTela && <p className="auth-error">{erroTela}</p>}
 
-      {!activeWorkspaceId && (
-        <div className="workspace-dashboard">
-          <div className="d-flex justify-content-between align-items-end mb-4">
-            <div>
-              <h1 className="mb-1 theme-text">Meus Grupos</h1>
+        {!activeWorkspaceId && (
+          <div className="workspace-dashboard">
+            <div className="d-flex justify-content-between align-items-end mb-4">
+              <div>
+                <h1 className="mb-1 theme-text">Meus Grupos</h1>
+                <p className="mb-0 theme-text-muted">
+                  Gerencie suas equipes e colabore em projetos.
+                </p>
+              </div>
 
-              <p className="mb-0 theme-text-muted">
-                Gerencie suas equipes e colabore em projetos.
-              </p>
+              <Button
+                className="btn-color px-4"
+                onClick={() => setShowCreateWorkspaceModal(true)}
+              >
+                <Plus size={18} className="me-2" />
+                Criar Novo Grupo
+              </Button>
             </div>
 
-            <Button
-              className="btn-color px-4"
-              onClick={() => setShowCreateWorkspaceModal(true)}
-            >
-              <Plus size={18} className="me-2" />
-              Criar Novo Grupo
-            </Button>
-          </div>
+            <div className="search-bar-container mb-4 position-relative">
+              <Search
+                size={18}
+                className="position-absolute theme-text-muted"
+                style={{ left: "15px", top: "12px" }}
+              />
 
-          <div className="search-bar-container mb-4 position-relative">
-            <Search
-              size={18}
-              className="position-absolute theme-text-muted"
-              style={{ left: "15px", top: "12px" }}
-            />
-
-            <input
-              type="text"
-              className="form-control workspace-search-input ps-5 py-2"
-              placeholder="Buscar por nome do grupo..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          {loading ? (
-            <div className="task-body-state">
-              <p className="theme-text-muted">Carregando seus grupos...</p>
+              <input
+                type="text"
+                className="form-control workspace-search-input ps-5 py-2"
+                placeholder="Buscar por nome do grupo..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-          ) : (
-            <div className="row g-4">
-              {filteredWorkspaces.map((workspace) => (
-                <div className="col-12 col-md-6 col-lg-4" key={workspace.id}>
-                  <WorkspaceCard
-                    workspace={workspace}
-                    onOpen={(id) => navigate(`/groups/${id}`)}
-                    onOpenSettings={(id) => navigate(`/groups/${id}/settings`)}
-                    onDelete={(id) => {
-                      if (
-                        window.confirm(
-                          "Tem certeza que deseja excluir este workspace?",
-                        )
-                      ) {
-                        handleDeleteWorkspace(id);
-                      }
-                    }}
-                    onLeave={(id) => {
-                      if (
-                        window.confirm(
-                          "Tem certeza que deseja sair deste workspace?",
-                        )
-                      ) {
-                        handleLeaveWorkspace(id);
-                      }
-                    }}
-                  />
-                </div>
-              ))}
 
-              <div className="col-12 col-md-6 col-lg-4">
-                <div
-                  className="workspace-new-card"
-                  onClick={() => setShowCreateWorkspaceModal(true)}
-                >
-                  <div className="workspace-new-icon-wrapper">
-                    <Plus size={24} />
+            {loading ? (
+              <div className="task-body-state">
+                <p className="theme-text-muted">Carregando seus grupos...</p>
+              </div>
+            ) : (
+              <div className="row g-4">
+                {filteredWorkspaces.map((workspace) => (
+                  <div className="col-12 col-md-6 col-lg-4" key={workspace.id}>
+                    <WorkspaceCard
+                      workspace={workspace}
+                      onOpen={(id) => navigate(`/groups/${id}`)}
+                      onOpenSettings={(id) =>
+                        navigate(`/groups/${id}/settings`)
+                      }
+                      onDelete={(id) => {
+                        if (window.confirm("Deseja excluir este workspace?")) {
+                          handleDeleteWorkspace(id);
+                        }
+                      }}
+                      onLeave={(id) => {
+                        if (window.confirm("Deseja sair deste workspace?")) {
+                          handleLeaveWorkspace(id);
+                        }
+                      }}
+                    />
                   </div>
+                ))}
 
-                  <h5 className="theme-text">Novo Grupo</h5>
-
-                  <p
-                    className="theme-text-muted"
-                    style={{ fontSize: "0.9rem" }}
+                <div className="col-12 col-md-6 col-lg-4">
+                  <div
+                    className="workspace-new-card"
+                    onClick={() => setShowCreateWorkspaceModal(true)}
                   >
-                    Crie um novo espaço de trabalho
-                  </p>
+                    <div className="workspace-new-icon-wrapper">
+                      <Plus size={24} />
+                    </div>
+
+                    <h5 className="theme-text">Novo Grupo</h5>
+
+                    <p
+                      className="theme-text-muted"
+                      style={{ fontSize: "0.9rem" }}
+                    >
+                      Crie um novo espaço de trabalho
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )}
 
-      {activeWorkspaceId && workspaceAtivo && (
-        <WorkspaceProvider workspaceId={activeWorkspaceId}>
-          {settingsWorkspaceId ? (
+        {activeWorkspaceId &&
+          workspaceAtivo &&
+          (settingsWorkspaceId ? (
             <WorkspaceSettings
               workspace={workspaceAtivo}
               onBack={() => navigate(`/groups/${workspaceId}`)}
@@ -226,9 +223,8 @@ function GroupWorkspace() {
                 )
               }
             />
-          )}
-        </WorkspaceProvider>
-      )}
+          ))}
+      </WorkspaceProvider>
 
       <CreateWorkspaceModal
         show={showCreateWorkspaceModal}
