@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import br.com.api.flowDesk.dto.project.request.CreateProjectRequest;
+import br.com.api.flowDesk.dto.project.request.UpdateProjectRequest;
 import br.com.api.flowDesk.dto.project.response.ProjectResponse;
 import br.com.api.flowDesk.enums.project.ProjectRole;
 import br.com.api.flowDesk.enums.workspace.WorkspacePermission;
@@ -70,7 +71,7 @@ public class ProjectService {
         }
 
         @Transactional
-        public ProjectModel update(UUID projectId, CreateProjectRequest dto, UserModel user) {
+        public ProjectModel update(UUID projectId, UpdateProjectRequest dto, UserModel user) {
 
                 var project = projectRepository.findById(projectId)
                                 .orElseThrow(() -> new ResponseStatusException(

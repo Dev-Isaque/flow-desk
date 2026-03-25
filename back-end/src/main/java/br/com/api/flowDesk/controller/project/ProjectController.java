@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.api.flowDesk.dto.project.request.CreateProjectRequest;
+import br.com.api.flowDesk.dto.project.request.UpdateProjectRequest;
 import br.com.api.flowDesk.dto.project.response.ProjectResponse;
 import br.com.api.flowDesk.model.project.ProjectModel;
 import br.com.api.flowDesk.model.user.UserModel;
@@ -55,7 +56,7 @@ public class ProjectController {
     @PutMapping("/{projectId}")
     public ResponseEntity<ProjectModel> update(
             @PathVariable UUID projectId,
-            @RequestBody @Valid CreateProjectRequest dto,
+            @RequestBody @Valid UpdateProjectRequest dto,
             @RequestHeader("Authorization") String authHeader) {
 
         String token = authHeader.replace("Bearer ", "").trim();

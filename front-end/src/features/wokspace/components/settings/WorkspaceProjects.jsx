@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { SquarePen, Trash2 } from "lucide-react";
+import { SquarePen, Trash2, Check, X } from "lucide-react";
+
 import { Button } from "../../../../shared/components/Button";
 import { useWorkspace } from "../../context/useWorkspace";
 import { AddProjectModal } from "../../../projects/components/modals/AddProjectModal";
@@ -15,6 +16,35 @@ export function WorkspaceProjects() {
   } = useWorkspace();
 
   const [showModal, setShowModal] = useState(false);
+
+  const [editingProjectId, setEditingProjectId] = useState(null);
+  const [editingName, setEditingName] = useState("");
+
+  function startEditing(project) {
+    setEditingProjectId(project.id);
+    setEditingName(project.name);
+  }
+
+  function cancelEditing() {
+    setEditingProjectId(null);
+    setEditingName("");
+  }
+
+  async function handleSave(projectId) {
+    const name = editingName.trim();
+    if (!name) return;
+
+    await handleUpdateProject(projectId, { name });
+
+    cancelEditing();
+  }
+
+  async function handleDelete(projectId) {
+    const confirm = window.confirm("Deseja excluir este projeto?");
+    if (!confirm) return;
+
+    await handleDeleteProject(projectId);
+  }
 
   return (
     <div className="workspace-settings">
@@ -47,67 +77,88 @@ export function WorkspaceProjects() {
               </thead>
 
               <tbody>
-                {projects?.map((project) => (
-                  <tr key={project.id}>
-                    <td>
-                      <div className="fw-semibold text-truncate">
-                        {project.name}
-                      </div>
-                    </td>
+                {projects?.map((project) => {
+                  const isEditing = editingProjectId === project.id;
 
-                    <td className="text-center">
-                      <span className="badge bg-secondary px-3 py-2">
-                        {project.tasksCount ?? 0}
-                      </span>
-                    </td>
+                  return (
+                    <tr key={project.id}>
+                      <td>
+                        {isEditing ? (
+                          <input
+                            className="form-control form-control-sm"
+                            value={editingName}
+                            onChange={(e) => setEditingName(e.target.value)}
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                handleSave(project.id);
+                              }
+                              if (e.key === "Escape") {
+                                cancelEditing();
+                              }
+                            }}
+                          />
+                        ) : (
+                          <div className="fw-semibold text-truncate">
+                            {project.name}
+                          </div>
+                        )}
+                      </td>
 
-                    <td className="text-center">
-                      <span className="badge bg-secondary px-3 py-2">
-                        {project.membersCount ?? 0}
-                      </span>
-                    </td>
+                      <td className="text-center">
+                        <span className="badge bg-secondary px-3 py-2">
+                          {project.tasksCount ?? 0}
+                        </span>
+                      </td>
 
-                    <td>
-                      <div className="d-flex justify-content-center gap-2">
-                        <Button
-                          className="btn-outline-secondary border-0 px-2"
-                          title="Editar Projeto"
-                          onClick={() => {
-                            const newName = prompt(
-                              "Novo nome do projeto:",
-                              project.name,
-                            );
+                      <td className="text-center">
+                        <span className="badge bg-secondary px-3 py-2">
+                          {project.membersCount ?? 0}
+                        </span>
+                      </td>
 
-                            if (!newName || newName.trim() === project.name)
-                              return;
+                      <td>
+                        <div className="d-flex justify-content-center gap-2">
+                          {isEditing ? (
+                            <>
+                              <Button
+                                className="btn-color px-2"
+                                onClick={() => handleSave(project.id)}
+                              >
+                                <Check size={16} />
+                              </Button>
 
-                            handleUpdateProject(project.id, {
-                              name: newName,
-                            });
-                          }}
-                        >
-                          <SquarePen size={16} />
-                        </Button>
+                              <Button
+                                className="btn-outline-secondary px-2"
+                                onClick={cancelEditing}
+                              >
+                                <X size={16} />
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button
+                                className="btn-outline-secondary border-0 px-2"
+                                title="Editar Projeto"
+                                onClick={() => startEditing(project)}
+                              >
+                                <SquarePen size={16} />
+                              </Button>
 
-                        <Button
-                          className="btn-outline-danger border-0 px-2"
-                          title="Excluir Projeto"
-                          onClick={() => {
-                            const confirmDelete = window.confirm(
-                              `Deseja excluir o projeto "${project.name}"?`,
-                            );
-
-                            if (!confirmDelete) return;
-
-                            handleDeleteProject(project.id);
-                          }}
-                        >
-                          <Trash2 size={16} />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                              <Button
+                                className="btn-outline-danger border-0 px-2"
+                                title="Excluir Projeto"
+                                onClick={() => handleDelete(project.id)}
+                              >
+                                <Trash2 size={16} />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
 
                 {projects?.length === 0 && (
                   <tr>
