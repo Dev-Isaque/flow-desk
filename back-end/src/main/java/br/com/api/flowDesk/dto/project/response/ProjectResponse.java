@@ -13,6 +13,8 @@ public class ProjectResponse {
         private UUID id;
         private String name;
         private String description;
+        private Integer tasksCount;
+        private Integer membersCount;
         private ProjectRole role;
 
 }

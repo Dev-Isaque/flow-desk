@@ -74,9 +74,8 @@ public class TaskModel {
     @JoinColumn(name = "created_by", nullable = false)
     private UserModel createdBy;
 
-    @ManyToOne
-    @JoinColumn(name = "assigned_to")
-    private UserModel assignedTo;
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TaskCollaboratorModel> collaborators = new ArrayList<>();
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentModel> comments = new ArrayList<>();

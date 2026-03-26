@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.api.flowDesk.dto.task.TagDTO;
 import br.com.api.flowDesk.dto.task.request.CreateTagRequest;
 import br.com.api.flowDesk.dto.task.request.UpdateTagRequest;
-import br.com.api.flowDesk.service.auth.AuthTokenService;
 import br.com.api.flowDesk.service.task.TagService;
 import jakarta.validation.Valid;
 
@@ -30,9 +29,6 @@ public class TagController {
 
     @Autowired
     private TagService tagService;
-
-    @Autowired
-    private AuthTokenService authTokenService;
 
     @GetMapping("/{workspaceId}/tags")
     public ResponseEntity<List<TagDTO>> listByWorkspace(

@@ -36,11 +36,20 @@ function AppRoutes() {
           <Route path="/groups" element={<GroupWorkspace />} />
           <Route path="/groups/:workspaceId" element={<GroupWorkspace />} />
           <Route
+            path="/groups/:workspaceId/project/"
+            element={<GroupWorkspace />}
+          />
+          <Route
             path="/groups/:workspaceId/project/:projectId"
             element={<GroupWorkspace />}
           />
           <Route
             path="/groups/:workspaceId/settings"
+            element={<GroupWorkspace />}
+          />
+
+          <Route
+            path="/groups/:workspaceId/settings/:tab"
             element={<GroupWorkspace />}
           />
 

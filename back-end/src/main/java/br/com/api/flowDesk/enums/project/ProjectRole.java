@@ -5,6 +5,7 @@ import java.util.Set;
 public enum ProjectRole {
 
     MANAGER(Set.of(
+            ProjectPermission.ASSIGN_TASK,
             ProjectPermission.VIEW_PROJECT,
             ProjectPermission.UPDATE_PROJECT,
             ProjectPermission.DELETE_PROJECT,
@@ -16,6 +17,7 @@ public enum ProjectRole {
             ProjectPermission.UPDATE_MEMBER_ROLE)),
 
     CONTRIBUTOR(Set.of(
+            ProjectPermission.ASSIGN_TASK,
             ProjectPermission.VIEW_PROJECT,
             ProjectPermission.CREATE_TASK,
             ProjectPermission.UPDATE_TASK)),

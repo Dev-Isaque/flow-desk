@@ -22,27 +22,27 @@ export function WorkspaceBoard({
 }) {
   const { projectId } = useParams();
 
+  const selectedProject = projectId || "ALL";
+
   const { workspaceRole } = useWorkspace() || {};
 
   const [showTaskModal, setShowTaskModal] = useState(false);
-  const [editingTaskId, seteditingTaskId] = useState(null);
+  const [editingTaskId, setEditingTaskId] = useState(null);
 
   const {
     projects,
-    projectSelecionado,
-    setProjectSelecionado,
     loadingProjects,
     savingProject,
     errorProjects,
     addProject,
-  } = useProjects({ workspaceId, initialProjectId: projectId });
+  } = useProjects({ workspaceId });
 
   const {
     tasks,
     loading: loadingTasks,
     error: errorTasks,
     setTasks,
-  } = useProjectTasks(projectSelecionado);
+  } = useProjectTasks(selectedProject, workspaceId);
 
   const [isCreatingProject, setIsCreatingProject] = useState(false);
 
@@ -70,7 +70,7 @@ export function WorkspaceBoard({
     setTasks((prev) =>
       prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)),
     );
-    seteditingTaskId(null);
+    setEditingTaskId(null);
   }
 
   function handleDeletedTask(taskId) {
@@ -78,7 +78,7 @@ export function WorkspaceBoard({
   }
 
   function handleEditTask(task) {
-    seteditingTaskId(task.id);
+    setEditingTaskId(task.id);
     setShowTaskModal(true);
   }
 
@@ -96,8 +96,6 @@ export function WorkspaceBoard({
             <button
               onClick={onBack}
               className="btn btn-link theme-text-muted p-0 border-0 hover-primary mt-2"
-              style={{ transition: "color 0.2s" }}
-              title="Voltar"
             >
               <ArrowLeft size={32} />
             </button>
@@ -111,10 +109,7 @@ export function WorkspaceBoard({
               {workspaceName}
             </h1>
 
-            <p
-              className="theme-text-muted mb-0"
-              style={{ fontSize: "0.95rem", lineHeight: "1.5" }}
-            >
+            <p className="theme-text-muted mb-0">
               Central de gerenciamento de fluxo de trabalho.
             </p>
           </div>
@@ -128,8 +123,6 @@ export function WorkspaceBoard({
       <ProjectBar
         projects={projects}
         workspaceRole={workspaceRole}
-        projectSelecionado={projectSelecionado}
-        setProjectSelecionado={setProjectSelecionado}
         isCreatingProject={isCreatingProject}
         onOpenCreate={openCreateProject}
         loadingWorkspace={loadingWorkspace}
@@ -152,7 +145,7 @@ export function WorkspaceBoard({
       ) : (
         <TaskBody
           workspaceId={workspaceId}
-          projectId={projectSelecionado}
+          projectId={selectedProject}
           tasks={tasks}
           loading={loadingTasks}
           error={errorTasks}
@@ -162,25 +155,26 @@ export function WorkspaceBoard({
         />
       )}
 
-      <Button
-        type="button"
-        className="floating-btn btn-color"
-        onClick={() => {
-          seteditingTaskId(null);
-          setShowTaskModal(true);
-        }}
-        disabled={projectSelecionado === "ALL" || !projectSelecionado}
-      >
-        <Plus /> Nova Tarefa
-      </Button>
+      {selectedProject !== "ALL" && (
+        <Button
+          type="button"
+          className="floating-btn btn-color"
+          onClick={() => {
+            setEditingTaskId(null);
+            setShowTaskModal(true);
+          }}
+        >
+          <Plus /> Nova Tarefa
+        </Button>
+      )}
 
       <TaskModal
         show={showTaskModal}
         onClose={() => {
           setShowTaskModal(false);
-          seteditingTaskId(null);
+          setEditingTaskId(null);
         }}
-        projectId={projectSelecionado}
+        projectId={selectedProject === "ALL" ? null : selectedProject}
         taskId={editingTaskId}
         onCreated={handleCreatedTask}
         onUpdated={handleUpdatedTask}

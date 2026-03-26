@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
 import { WorkspaceGeneral } from "./settings/WorkspaceGeneral";
 import { WorkspaceMembers } from "./settings/WorkspaceMembers";
@@ -19,7 +19,10 @@ export function WorkspaceSettings({ workspace, onBack }) {
     handleDeleteWorkspace,
   } = useWorkspace();
 
-  const [activeTab, setActiveTab] = useState("general");
+  const { tab } = useParams();
+  const navigate = useNavigate();
+
+  const activeTab = tab || "general";
 
   const screens = {
     general: (
@@ -47,7 +50,7 @@ export function WorkspaceSettings({ workspace, onBack }) {
   };
 
   function handleRenderingView(screenName) {
-    setActiveTab(screenName);
+    navigate(`/groups/${workspace.id}/settings/${screenName}`);
   }
 
   return (
@@ -89,28 +92,28 @@ export function WorkspaceSettings({ workspace, onBack }) {
       <div className="d-flex justify-content-center mb-4">
         <div className="settings-tabs">
           <Button
-            className="btn-color"
+            className={`btn-color ${activeTab === "general" ? "active" : ""}`}
             onClick={() => handleRenderingView("general")}
           >
             Geral
           </Button>
 
           <Button
-            className="btn-color"
+            className={`btn-color ${activeTab === "members" ? "active" : ""}`}
             onClick={() => handleRenderingView("members")}
           >
             Membros
           </Button>
 
           <Button
-            className="btn-color"
+            className={`btn-color ${activeTab === "projects" ? "active" : ""}`}
             onClick={() => handleRenderingView("projects")}
           >
             Projetos
           </Button>
 
           <Button
-            className="btn-color"
+            className={`btn-color ${activeTab === "tags" ? "active" : ""}`}
             onClick={() => handleRenderingView("tags")}
           >
             Tags/Etiquetas
@@ -118,7 +121,9 @@ export function WorkspaceSettings({ workspace, onBack }) {
         </div>
       </div>
 
-      <div className="conteudo-da-view">{screens[activeTab]}</div>
+      <div className="conteudo-da-view">
+        {screens[activeTab] || screens.general}
+      </div>
     </div>
   );
 }

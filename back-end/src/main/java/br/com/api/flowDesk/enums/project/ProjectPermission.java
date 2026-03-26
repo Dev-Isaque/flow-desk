@@ -1,6 +1,8 @@
 package br.com.api.flowDesk.enums.project;
 
 public enum ProjectPermission {
+    ASSIGN_TASK,
+
     VIEW_PROJECT,
     UPDATE_PROJECT,
     DELETE_PROJECT,

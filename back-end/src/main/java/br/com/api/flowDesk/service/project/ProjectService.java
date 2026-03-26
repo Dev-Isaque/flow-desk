@@ -115,26 +115,20 @@ public class ProjectService {
                                 .orElseThrow(() -> new ResponseStatusException(
                                                 HttpStatus.FORBIDDEN, "Você não pertence ao workspace"));
 
-                if (member.getRole() == WorkspaceRole.OWNER ||
-                                member.getRole() == WorkspaceRole.ADMIN) {
+                var results = projectRepository.findProjectsAndRoles(workspaceId, user.getId());
 
-                        var projects = projectRepository.findAllByWorkspaceId(workspaceId);
+                return results.stream().map(obj -> {
+                        ProjectModel project = (ProjectModel) obj[0];
+                        ProjectRole role = (ProjectRole) obj[1];
 
-                        return projects.stream().map(p -> {
-                                var role = projectMemberRepository
-                                                .findByProject_IdAndUser_Id(p.getId(), user.getId())
-                                                .map(pm -> pm.getRole())
-                                                .orElse(null);
-
-                                return new ProjectResponse(
-                                                p.getId(),
-                                                p.getName(),
-                                                p.getDescription(),
-                                                role);
-                        }).toList();
-                }
-
-                return projectRepository.findProjectsWithRole(workspaceId, user.getId());
+                        return new ProjectResponse(
+                                        project.getId(),
+                                        project.getName(),
+                                        project.getDescription(),
+                                        project.getTasks().size(),
+                                        project.getMembers().size(),
+                                        role);
+                }).toList();
         }
 
         @Transactional(readOnly = true)
@@ -144,7 +138,6 @@ public class ProjectService {
                                 .findByWorkspace_IdAndUser_Id(workspaceId, loggedUser.getId())
                                 .orElseThrow(() -> new RuntimeException("Você não pertence ao workspace"));
 
-                // 🔐 Segurança
                 if (requester.getRole() != WorkspaceRole.ADMIN &&
                                 requester.getRole() != WorkspaceRole.OWNER) {
                         throw new RuntimeException("Sem permissão");
@@ -165,6 +158,8 @@ public class ProjectService {
                                         project.getId(),
                                         project.getName(),
                                         project.getDescription(),
+                                        project.getTasks().size(),
+                                        project.getMembers().size(),
                                         role);
 
                 }).toList();

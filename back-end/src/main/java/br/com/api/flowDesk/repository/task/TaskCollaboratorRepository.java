@@ -1,0 +1,18 @@
+package br.com.api.flowDesk.repository.task;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import br.com.api.flowDesk.model.task.TaskCollaboratorModel;
+
+public interface TaskCollaboratorRepository extends JpaRepository<TaskCollaboratorModel, UUID> {
+
+    Optional<TaskCollaboratorModel> findByTask_IdAndUser_Id(UUID taskId, UUID userId);
+
+    List<TaskCollaboratorModel> findByTask_Id(UUID taskId);
+
+    void deleteByTask_IdAndUser_Id(UUID taskId, UUID userId);
+}

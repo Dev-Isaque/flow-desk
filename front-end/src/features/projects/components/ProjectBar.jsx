@@ -1,12 +1,11 @@
 import { Plus } from "lucide-react";
 import { Button } from "../../../shared/components/Button";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import "../style/projectBar.css";
 
 export function ProjectBar({
   projects = [],
   workspaceRole,
-  projectSelecionado,
   isCreatingProject,
   onOpenCreate,
   loadingWorkspace,
@@ -17,8 +16,11 @@ export function ProjectBar({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { projectId } = useParams();
 
   const isPersonal = location.pathname.startsWith("/personal");
+
+  const selectedProject = projectId || "ALL";
 
   function goToProject(projectId) {
     if (isPersonal) {
@@ -44,7 +46,7 @@ export function ProjectBar({
       <Button
         type="button"
         className={`project-tab ${
-          projectSelecionado === "ALL" ? "project-tab--active" : ""
+          selectedProject === "ALL" ? "project-tab--active" : ""
         }`}
         onClick={() => goToProject("ALL")}
         disabled={savingProject}
@@ -62,7 +64,7 @@ export function ProjectBar({
             key={p.id}
             type="button"
             className={`project-tab ${
-              projectSelecionado === p.id ? "project-tab--active" : ""
+              selectedProject === p.id ? "project-tab--active" : ""
             }`}
             onClick={() => goToProject(p.id)}
             disabled={savingProject || isCreatingProject}

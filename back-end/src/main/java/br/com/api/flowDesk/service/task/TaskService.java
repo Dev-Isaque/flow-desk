@@ -24,11 +24,13 @@ import br.com.api.flowDesk.enums.task.TaskStatus;
 import br.com.api.flowDesk.model.task.TagModel;
 import br.com.api.flowDesk.model.task.TaskModel;
 import br.com.api.flowDesk.model.user.UserModel;
+import br.com.api.flowDesk.repository.project.ProjectMemberRepository;
 import br.com.api.flowDesk.repository.project.ProjectRepository;
 import br.com.api.flowDesk.repository.task.TagRepository;
 import br.com.api.flowDesk.repository.task.TaskItemRepository;
 import br.com.api.flowDesk.repository.task.TaskRepository;
 import br.com.api.flowDesk.repository.user.UserRepository;
+import br.com.api.flowDesk.repository.workspace.WorkspaceMemberRepository;
 
 @Service
 public class TaskService {
@@ -47,6 +49,11 @@ public class TaskService {
     private TagService tagService;
     @Autowired
     private AttachmentService attachmentService;
+    @Autowired
+    private WorkspaceMemberRepository workspaceMemberRepository;
+
+    @Autowired
+    private ProjectMemberRepository projectMemberRepository;
 
     public List<TaskDTO> listByProject(UUID projectId) {
         return taskRepository.findByProjectId(projectId)
