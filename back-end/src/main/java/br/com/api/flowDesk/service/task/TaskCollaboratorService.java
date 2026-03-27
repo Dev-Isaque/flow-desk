@@ -24,122 +24,126 @@ import br.com.api.flowDesk.service.permission.PermissionService;
 @Service
 public class TaskCollaboratorService {
 
-    @Autowired
-    private TaskRepository taskRepository;
+        @Autowired
+        private TaskRepository taskRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+        @Autowired
+        private UserRepository userRepository;
 
-    @Autowired
-    private TaskCollaboratorRepository taskMemberRepository;
+        @Autowired
+        private TaskCollaboratorRepository taskMemberRepository;
 
-    @Autowired
-    private WorkspaceMemberRepository workspaceMemberRepository;
+        @Autowired
+        private WorkspaceMemberRepository workspaceMemberRepository;
 
-    @Autowired
-    private ProjectMemberRepository projectMemberRepository;
+        @Autowired
+        private ProjectMemberRepository projectMemberRepository;
 
-    @Transactional
-    public void addCollaborator(UUID taskId, UUID userId, TaskRole role, UserModel loggedUser) {
+        @Transactional
+        public void addCollaborator(UUID taskId, UUID userId, TaskRole role, UserModel loggedUser) {
 
-        TaskModel task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+                TaskModel task = taskRepository.findById(taskId)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Tarefa não encontrada"));
 
-        var workspaceRole = workspaceMemberRepository
-                .findByWorkspace_IdAndUser_Id(
-                        task.getProject().getWorkspace().getId(),
-                        loggedUser.getId())
-                .map(m -> m.getRole())
-                .orElse(null);
+                var workspaceRole = workspaceMemberRepository
+                                .findByWorkspace_IdAndUser_Id(
+                                                task.getProject().getWorkspace().getId(),
+                                                loggedUser.getId())
+                                .map(m -> m.getRole())
+                                .orElse(null);
 
-        var projectRole = projectMemberRepository
-                .findByProject_IdAndUser_Id(
-                        task.getProject().getId(),
-                        loggedUser.getId())
-                .map(m -> m.getRole())
-                .orElse(null);
+                var projectRole = projectMemberRepository
+                                .findByProject_IdAndUser_Id(
+                                                task.getProject().getId(),
+                                                loggedUser.getId())
+                                .map(m -> m.getRole())
+                                .orElse(null);
 
-        PermissionService.checkTaskPermission(
-                workspaceRole,
-                projectRole,
-                task,
-                loggedUser,
-                TaskPermission.ADD_COLLABORATOR);
+                PermissionService.checkTaskPermission(
+                                workspaceRole,
+                                projectRole,
+                                task,
+                                loggedUser,
+                                TaskPermission.ADD_COLLABORATOR);
 
-        UserModel user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+                UserModel user = userRepository.findById(userId)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Usuário não encontrado"));
 
-        var existing = taskMemberRepository.findByTask_IdAndUser_Id(taskId, userId);
+                var existing = taskMemberRepository.findByTask_IdAndUser_Id(taskId, userId);
 
-        if (existing.isPresent()) {
-            existing.get().setRole(role);
-            return;
+                if (existing.isPresent()) {
+                        existing.get().setRole(role);
+                        return;
+                }
+
+                TaskCollaboratorModel collaborator = new TaskCollaboratorModel();
+                collaborator.setTask(task);
+                collaborator.setUser(user);
+                collaborator.setRole(role);
+
+                taskMemberRepository.save(collaborator);
         }
 
-        TaskCollaboratorModel collaborator = new TaskCollaboratorModel();
-        collaborator.setTask(task);
-        collaborator.setUser(user);
-        collaborator.setRole(role);
+        @Transactional
+        public void removeCollaborator(UUID taskId, UUID userId, UserModel loggedUser) {
 
-        taskMemberRepository.save(collaborator);
-    }
+                TaskModel task = taskRepository.findById(taskId)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Tarefa não encontrada"));
 
-    @Transactional
-    public void removeCollaborator(UUID taskId, UUID userId, UserModel loggedUser) {
+                var workspaceRole = workspaceMemberRepository
+                                .findByWorkspace_IdAndUser_Id(
+                                                task.getProject().getWorkspace().getId(),
+                                                loggedUser.getId())
+                                .map(m -> m.getRole())
+                                .orElse(null);
 
-        TaskModel task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+                var projectRole = projectMemberRepository
+                                .findByProject_IdAndUser_Id(
+                                                task.getProject().getId(),
+                                                loggedUser.getId())
+                                .map(m -> m.getRole())
+                                .orElse(null);
 
-        var workspaceRole = workspaceMemberRepository
-                .findByWorkspace_IdAndUser_Id(
-                        task.getProject().getWorkspace().getId(),
-                        loggedUser.getId())
-                .map(m -> m.getRole())
-                .orElse(null);
+                PermissionService.checkTaskPermission(
+                                workspaceRole,
+                                projectRole,
+                                task,
+                                loggedUser,
+                                TaskPermission.REMOVE_COLLABORATOR);
 
-        var projectRole = projectMemberRepository
-                .findByProject_IdAndUser_Id(
-                        task.getProject().getId(),
-                        loggedUser.getId())
-                .map(m -> m.getRole())
-                .orElse(null);
+                taskMemberRepository.deleteByTask_IdAndUser_Id(taskId, userId);
+        }
 
-        PermissionService.checkTaskPermission(
-                workspaceRole,
-                projectRole,
-                task,
-                loggedUser,
-                TaskPermission.REMOVE_COLLABORATOR);
+        public List<TaskCollaboratorModel> list(UUID taskId, UserModel loggedUser) {
 
-        taskMemberRepository.deleteByTask_IdAndUser_Id(taskId, userId);
-    }
+                TaskModel task = taskRepository.findById(taskId)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Tarefa não encontrada"));
 
-    public List<TaskCollaboratorModel> list(UUID taskId, UserModel loggedUser) {
+                var workspaceRole = workspaceMemberRepository
+                                .findByWorkspace_IdAndUser_Id(
+                                                task.getProject().getWorkspace().getId(),
+                                                loggedUser.getId())
+                                .map(m -> m.getRole())
+                                .orElse(null);
 
-        TaskModel task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+                var projectRole = projectMemberRepository
+                                .findByProject_IdAndUser_Id(
+                                                task.getProject().getId(),
+                                                loggedUser.getId())
+                                .map(m -> m.getRole())
+                                .orElse(null);
 
-        var workspaceRole = workspaceMemberRepository
-                .findByWorkspace_IdAndUser_Id(
-                        task.getProject().getWorkspace().getId(),
-                        loggedUser.getId())
-                .map(m -> m.getRole())
-                .orElse(null);
+                PermissionService.checkTaskPermission(
+                                workspaceRole,
+                                projectRole,
+                                task,
+                                loggedUser,
+                                TaskPermission.VIEW_TASK);
 
-        var projectRole = projectMemberRepository
-                .findByProject_IdAndUser_Id(
-                        task.getProject().getId(),
-                        loggedUser.getId())
-                .map(m -> m.getRole())
-                .orElse(null);
-
-        PermissionService.checkTaskPermission(
-                workspaceRole,
-                projectRole,
-                task,
-                loggedUser,
-                TaskPermission.VIEW_TASK);
-
-        return taskMemberRepository.findByTask_Id(taskId);
-    }
+                return taskMemberRepository.findByTask_Id(taskId);
+        }
 }

@@ -15,11 +15,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "task_collaborators")
+@Table(name = "task_collaborators", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "task_id", "user_id" })
+})
 @Getter
 @Setter
 public class TaskCollaboratorModel {

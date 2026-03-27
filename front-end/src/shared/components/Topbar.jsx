@@ -3,7 +3,7 @@ import { AlternateTheme } from "./AlternateTheme";
 import { useMe } from "../../features/user/hooks/useMe";
 
 export function Topbar({ breadcrumb, onBack, workspaceRole }) {
-  const { usuario } = useMe();
+  const { user } = useMe();
 
   const getInitials = (name) => {
     if (!name) return "US";
@@ -57,7 +57,7 @@ export function Topbar({ breadcrumb, onBack, workspaceRole }) {
               className="mb-0 fw-semibold theme-text"
               style={{ fontSize: "0.85rem" }}
             >
-              {usuario ? usuario.name : "Carregando..."}
+              {user ? user.name : "Carregando..."}
             </p>
             <p
               className="mb-0 theme-text-muted"
@@ -75,7 +75,7 @@ export function Topbar({ breadcrumb, onBack, workspaceRole }) {
               color: "#102222",
             }}
           >
-            {usuario ? getInitials(usuario.name) : "..."}
+            {user ? getInitials(user.name) : "..."}
           </div>
         </div>
       </div>

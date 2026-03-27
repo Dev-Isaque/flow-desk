@@ -4,11 +4,11 @@ import { Input } from "../../../shared/components/Input";
 import { Spinner } from "../../../shared/components/Spinner";
 import { AuthLayout } from "../../../app/layouts/AuthLayout";
 
-import { useUsuario } from "../../user/hooks/useUsuario";
+import { useUser } from "../../user/hooks/useUser";
 import { useState } from "react";
 
 export function Register() {
-  const { cadastrar, user, setUser } = useUsuario();
+  const { cadastrar, user, setUser } = useUser();
   const [mensagem, setMensagem] = useState("");
   const [loading, setLoading] = useState(false);
 

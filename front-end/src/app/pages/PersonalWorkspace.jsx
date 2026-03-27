@@ -9,7 +9,7 @@ import { WorkspaceProvider } from "../../features/wokspace/context/WorkspaceProv
 import { Topbar } from "../../shared/components/Topbar";
 
 function PersonalWorkspace() {
-  const { usuario, errorMe } = useMe();
+  const { user, errorMe } = useMe();
 
   const { workspace, loadingWorkspace, errorWorkspace } =
     usePersonalWorkspace();
@@ -31,7 +31,7 @@ function PersonalWorkspace() {
             workspaceId={workspace.id}
             workspace={workspace}
             loadingWorkspace={loadingWorkspace}
-            title={`Tarefas de ${usuario ? usuario.name : "..."}`}
+            title={`Tarefas de ${user ? user.name : "..."}`}
           />
         </WorkspaceProvider>
       )}

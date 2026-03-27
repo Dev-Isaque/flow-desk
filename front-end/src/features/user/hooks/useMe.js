@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getMe } from "../service/userService";
 
 export function useMe() {
-    const [usuario, setUsuario] = useState(null);
+    const [user, setuser] = useState(null);
     const [loadingMe, setLoadingMe] = useState(true);
     const [errorMe, setErrorMe] = useState("");
 
@@ -22,7 +22,7 @@ export function useMe() {
                 return;
             }
 
-            setUsuario(r.dados);
+            setuser(r.dados);
             if (alive) setLoadingMe(false);
         }
 
@@ -33,5 +33,5 @@ export function useMe() {
         };
     }, []);
 
-    return { usuario, loadingMe, errorMe };
+    return { user, loadingMe, errorMe };
 }

@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 
 public class UserDTO {
     private UUID id;
+
     @NotBlank
     private String name;
 

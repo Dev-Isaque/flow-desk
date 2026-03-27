@@ -101,16 +101,25 @@ public class TaskController {
     @PostMapping("/{taskId}/tags")
     public ResponseEntity<TaskDTO> addTagToTask(
             @PathVariable UUID taskId,
-            @RequestBody @Valid CreateTagRequest dto) {
+            @RequestBody @Valid CreateTagRequest dto,
+            @RequestHeader("Authorization") String authorization) {
 
-        return ResponseEntity.ok(taskService.addTagToTask(taskId, dto));
+        String token = authorization.replace("Bearer ", "").trim();
+        var user = authTokenService.requireUserByToken(token);
+
+        return ResponseEntity.ok(taskService.addTagToTask(taskId, dto, user));
     }
 
     @DeleteMapping("/{taskId}/tags/{tagId}")
     public ResponseEntity<TaskResponse> removeTag(
             @PathVariable UUID taskId,
-            @PathVariable UUID tagId) {
-        TaskResponse updatedTask = taskService.removeTag(taskId, tagId);
+            @PathVariable UUID tagId,
+            @RequestHeader("Authorization") String authorization) {
+
+        String token = authorization.replace("Bearer ", "").trim();
+        var user = authTokenService.requireUserByToken(token);
+
+        TaskResponse updatedTask = taskService.removeTag(taskId, tagId, user);
         return ResponseEntity.ok(updatedTask);
     }
 

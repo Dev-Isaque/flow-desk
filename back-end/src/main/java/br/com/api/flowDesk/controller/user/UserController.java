@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.api.flowDesk.dto.auth.UserResponseDTO;
 import br.com.api.flowDesk.dto.user.UserDTO;
+import br.com.api.flowDesk.dto.user.UserResponseDTO;
 import br.com.api.flowDesk.model.user.UserModel;
 import br.com.api.flowDesk.service.auth.AuthTokenService;
 import br.com.api.flowDesk.service.user.UserService;
@@ -54,6 +54,7 @@ public class UserController {
         UserModel user = authTokenService.requireUserByToken(token);
 
         UserResponseDTO dto = new UserResponseDTO(
+                user.getId(),
                 user.getName(),
                 user.getEmail());
 

@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import br.com.api.flowDesk.dto.auth.AuthResponseDTO;
 import br.com.api.flowDesk.dto.auth.LoginDTO;
-import br.com.api.flowDesk.dto.auth.UserResponseDTO;
+import br.com.api.flowDesk.dto.user.UserResponseDTO;
 import br.com.api.flowDesk.model.auth.AuthTokenModel;
 import br.com.api.flowDesk.model.user.UserModel;
 import br.com.api.flowDesk.repository.auth.AuthTokenRepository;
@@ -48,8 +48,12 @@ public class AuthService {
 
         authTokenRepository.save(session);
 
-        UserResponseDTO userResponse = new UserResponseDTO(user.getName(), user.getEmail());
+        UserResponseDTO userResponse = new UserResponseDTO(user.getId(), user.getName(), user.getEmail());
 
-        return new AuthResponseDTO(true, token, userResponse);
+        return new AuthResponseDTO(
+                true,
+                "Login realizado com sucesso",
+                token,
+                userResponse);
     }
 }

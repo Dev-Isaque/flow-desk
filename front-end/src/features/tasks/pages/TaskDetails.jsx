@@ -15,6 +15,9 @@ import { TaskDescription } from "../components/TaskDescription";
 import { TaskProperty } from "../components/Taskproperty";
 import { TaskFiles } from "../components/TaskFiles";
 import { TaskModal } from "../components/TaskModal";
+import { useCollaboratorsTask } from "../hooks/useCollaboratorsTask";
+import { TaskCollaboratorsCard } from "../components/TaskCollaboratorsCard";
+import { useProjectMembersList } from "../../projects/hooks/useProjectMembersList"; //
 
 import { useTask } from "../hooks/useTask";
 import { useTaskItems } from "../hooks/useTaskItems";
@@ -57,6 +60,15 @@ export default function TaskDetails() {
     isProcessing,
     loadingTags,
   } = useTaskTags(initialTask, initialTask?.workspaceId);
+
+  const {
+    collaborators,
+    addCollaborator,
+    removeCollaborator,
+    loading: loadingCollaborators,
+  } = useCollaboratorsTask(taskId);
+
+  const { members } = useProjectMembersList(initialTask?.projectId); // 👈
 
   const [newTitle, setNewTitle] = useState("");
   const [saving, setSaving] = useState(false);
@@ -229,6 +241,14 @@ export default function TaskDetails() {
           />
 
           <TaskFiles taskId={taskId} />
+
+          <TaskCollaboratorsCard
+            collaborators={collaborators}
+            loading={loadingCollaborators}
+            members={members}
+            addCollaborator={addCollaborator}
+            removeCollaborator={removeCollaborator}
+          />
 
           <div className="d-flex flex-column gap-2 mt-4 mb-3">
             <Button

@@ -19,18 +19,25 @@ import br.com.api.flowDesk.dto.task.request.UpdateTaskRequest;
 import br.com.api.flowDesk.dto.task.response.TagResponse;
 import br.com.api.flowDesk.dto.task.response.TaskResponse;
 import br.com.api.flowDesk.dto.taskitem.TaskProgressDTO;
+import br.com.api.flowDesk.enums.project.ProjectRole;
+import br.com.api.flowDesk.enums.task.TaskPermission;
 import br.com.api.flowDesk.enums.task.TaskPriority;
+import br.com.api.flowDesk.enums.task.TaskRole;
 import br.com.api.flowDesk.enums.task.TaskStatus;
+import br.com.api.flowDesk.enums.workspace.WorkspaceRole;
 import br.com.api.flowDesk.model.task.TagModel;
+import br.com.api.flowDesk.model.task.TaskCollaboratorModel;
 import br.com.api.flowDesk.model.task.TaskModel;
 import br.com.api.flowDesk.model.user.UserModel;
 import br.com.api.flowDesk.repository.project.ProjectMemberRepository;
 import br.com.api.flowDesk.repository.project.ProjectRepository;
 import br.com.api.flowDesk.repository.task.TagRepository;
+import br.com.api.flowDesk.repository.task.TaskCollaboratorRepository;
 import br.com.api.flowDesk.repository.task.TaskItemRepository;
 import br.com.api.flowDesk.repository.task.TaskRepository;
 import br.com.api.flowDesk.repository.user.UserRepository;
 import br.com.api.flowDesk.repository.workspace.WorkspaceMemberRepository;
+import br.com.api.flowDesk.service.permission.PermissionService;
 
 @Service
 public class TaskService {
@@ -51,23 +58,10 @@ public class TaskService {
     private AttachmentService attachmentService;
     @Autowired
     private WorkspaceMemberRepository workspaceMemberRepository;
-
+    @Autowired
+    private TaskCollaboratorRepository taskCollaboratorRepository;
     @Autowired
     private ProjectMemberRepository projectMemberRepository;
-
-    public List<TaskDTO> listByProject(UUID projectId) {
-        return taskRepository.findByProjectId(projectId)
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<TaskDTO> listByWorkspace(UUID workspaceId) {
-        return taskRepository.findByProject_Workspace_Id(workspaceId)
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
-    }
 
     private String formatEstimatedTime(Long seconds) {
         if (seconds == null)
@@ -89,14 +83,9 @@ public class TaskService {
     }
 
     private TaskDTO toDTO(TaskModel task) {
-
         var tagDTOs = task.getTags()
                 .stream()
-                .map(tag -> new TagDTO(
-                        tag.getId(),
-                        tag.getName(),
-                        tag.getColor(),
-                        0))
+                .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getColor(), 0))
                 .toList();
 
         return new TaskDTO(
@@ -115,12 +104,9 @@ public class TaskService {
     }
 
     private TaskResponse toResponse(TaskModel task) {
-
         Set<TagResponse> tagResponses = task.getTags()
                 .stream()
-                .map(tag -> new TagResponse(
-                        tag.getId(),
-                        tag.getName()))
+                .map(tag -> new TagResponse(tag.getId(), tag.getName()))
                 .collect(Collectors.toSet());
 
         return new TaskResponse(
@@ -135,102 +121,94 @@ public class TaskService {
                 tagResponses);
     }
 
+    private WorkspaceRole getWorkspaceRole(UUID workspaceId, UUID userId) {
+        return workspaceMemberRepository.findByWorkspace_IdAndUser_Id(workspaceId, userId)
+                .map(m -> m.getRole())
+                .orElse(null);
+    }
+
+    private ProjectRole getProjectRole(UUID projectId, UUID userId) {
+        return projectMemberRepository.findByProject_IdAndUser_Id(projectId, userId)
+                .map(m -> m.getRole())
+                .orElse(null);
+    }
+
+    private void checkPermission(TaskModel task, UserModel user, TaskPermission permission) {
+        WorkspaceRole workspaceRole = getWorkspaceRole(task.getProject().getWorkspace().getId(), user.getId());
+        ProjectRole projectRole = getProjectRole(task.getProject().getId(), user.getId());
+        PermissionService.checkTaskPermission(workspaceRole, projectRole, task, user, permission);
+    }
+
     @Transactional
     public TaskDTO create(CreateTaskRequest dto, UserModel user) {
-
         var project = projectRepository.findById(dto.getProjectId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Projeto não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projeto não encontrado"));
 
         if (dto.getTitle() == null || dto.getTitle().trim().isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Título é obrigatório");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Título é obrigatório");
         }
 
         var task = new TaskModel();
         task.setProject(project);
         task.setTitle(dto.getTitle().trim());
-        task.setDescription(
-                dto.getDescription() != null ? dto.getDescription().trim() : null);
-
-        task.setPriority(
-                dto.getPriority() != null
-                        ? dto.getPriority()
-                        : TaskPriority.MEDIUM);
-
-        task.setStatus(
-                dto.getStatus() != null
-                        ? dto.getStatus()
-                        : TaskStatus.BACKLOG);
-
+        task.setDescription(dto.getDescription() != null ? dto.getDescription().trim() : null);
+        task.setPriority(dto.getPriority() != null ? dto.getPriority() : TaskPriority.MEDIUM);
+        task.setStatus(dto.getStatus() != null ? dto.getStatus() : TaskStatus.BACKLOG);
         task.setDueDateTime(dto.getDueDateTime());
-        task.setEstimatedTimeSeconds(
-                parseEstimatedTime(dto.getEstimatedTime()));
-
+        task.setEstimatedTimeSeconds(parseEstimatedTime(dto.getEstimatedTime()));
         task.setCreatedBy(user);
 
         if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()) {
-
             var tags = tagRepository.findAllById(dto.getTagIds());
-
             if (tags.size() != dto.getTagIds().size()) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST, "Uma ou mais tags não existem");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Uma ou mais tags não existem");
             }
 
             var workspaceId = project.getWorkspace().getId();
-
             boolean anyFromOtherWorkspace = tags.stream()
                     .anyMatch(t -> !t.getWorkspace().getId().equals(workspaceId));
-
             if (anyFromOtherWorkspace) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Tag de outro workspace não é permitida");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tag de outro workspace não é permitida");
             }
 
             task.getTags().addAll(tags);
         }
 
-        return toDTO(taskRepository.save(task));
+        task = taskRepository.save(task);
+
+        TaskCollaboratorModel owner = new TaskCollaboratorModel();
+        owner.setTask(task);
+        owner.setUser(user);
+        owner.setRole(TaskRole.OWNER);
+        taskCollaboratorRepository.save(owner);
+
+        return toDTO(task);
     }
 
     @Transactional
     public TaskDTO update(UUID taskId, UpdateTaskRequest dto, UserModel user) {
-
         var task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
 
-        if (!task.getCreatedBy().getId().equals(user.getId())) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Você não pode alterar esta tarefa");
-        }
+        checkPermission(task, user, TaskPermission.UPDATE_TASK);
 
         if (dto.getTitle() != null && !dto.getTitle().trim().isEmpty()) {
             task.setTitle(dto.getTitle().trim());
         }
-
         if (dto.getDescription() != null) {
             task.setDescription(dto.getDescription().trim());
         }
-
         if (dto.getPriority() != null) {
             task.setPriority(dto.getPriority());
         }
-
         if (dto.getStatus() != null) {
             task.setStatus(dto.getStatus());
         }
-
         if (dto.getDueDateTime() != null) {
             task.setDueDateTime(dto.getDueDateTime());
         }
-
         if (dto.getEstimatedTime() != null) {
-            task.setEstimatedTimeSeconds(
-                    parseEstimatedTime(dto.getEstimatedTime()));
+            task.setEstimatedTimeSeconds(parseEstimatedTime(dto.getEstimatedTime()));
         }
 
         return toDTO(taskRepository.save(task));
@@ -238,16 +216,10 @@ public class TaskService {
 
     @Transactional
     public void delete(UUID taskId, UserModel user) {
-
         TaskModel task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
 
-        if (!task.getCreatedBy().getId().equals(user.getId())) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Você não tem permissão para excluir esta tarefa");
-        }
+        checkPermission(task, user, TaskPermission.DELETE_TASK);
 
         var attachments = attachmentService.findByTask(taskId);
         for (var attachment : attachments) {
@@ -259,18 +231,12 @@ public class TaskService {
 
     @Transactional
     public TaskDTO updateStatus(UUID taskId, TaskStatus newStatus, UserModel user) {
-
         TaskModel task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
 
-        if (!task.getCreatedBy().getId().equals(user.getId())) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN, "Você não pode alterar esta tarefa");
-        }
+        checkPermission(task, user, TaskPermission.UPDATE_TASK);
 
         task.setStatus(newStatus);
-
         return toDTO(taskRepository.save(task));
     }
 
@@ -281,61 +247,64 @@ public class TaskService {
 
         long total = taskItemRepository.countByTask_Id(taskId);
         long completed = taskItemRepository.countByTask_IdAndDoneTrue(taskId);
+        double percentage = total > 0 ? ((double) completed / total) * 100.0 : 0.0;
 
-        double percentage = 0.0;
-
-        if (total > 0) {
-            percentage = ((double) completed / total) * 100.0;
-        }
-
-        return new TaskProgressDTO(
-                task.getId(),
-                total,
-                completed,
-                percentage);
+        return new TaskProgressDTO(task.getId(), total, completed, percentage);
     }
 
     @Transactional(readOnly = true)
     public TaskDTO getTaskById(UUID id) {
         TaskModel task = taskRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
 
         return toDTO(task);
     }
 
     @Transactional
-    public TaskDTO addTagToTask(UUID taskId, CreateTagRequest tagDto) {
+    public TaskDTO addTagToTask(UUID taskId, CreateTagRequest tagDto, UserModel user) {
         TaskModel task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
 
+        checkPermission(task, user, TaskPermission.UPDATE_TASK);
+
         UUID workspaceId = task.getProject().getWorkspace().getId();
-
         TagDTO tagResult = tagService.create(workspaceId, tagDto);
-
         TagModel tagEntity = tagRepository.findById(tagResult.getId()).orElseThrow();
 
         task.getTags().add(tagEntity);
-
         return toDTO(taskRepository.save(task));
     }
 
     @Transactional
-    public TaskResponse removeTag(UUID taskId, UUID tagId) {
-
+    public TaskResponse removeTag(UUID taskId, UUID tagId, UserModel user) {
         TaskModel task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+
+        checkPermission(task, user, TaskPermission.UPDATE_TASK);
 
         TagModel tag = tagRepository.findById(tagId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag não encontrada"));
 
         task.getTags().remove(tag);
-
         tag.getTasks().remove(task);
 
         taskRepository.save(task);
 
         return toResponse(task);
+    }
+
+    public List<TaskDTO> listByProject(UUID projectId) {
+        return taskRepository.findByProjectId(projectId)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<TaskDTO> listByWorkspace(UUID workspaceId) {
+        return taskRepository.findByProject_Workspace_Id(workspaceId)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
 }

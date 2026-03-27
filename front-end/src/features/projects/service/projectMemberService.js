@@ -1,5 +1,11 @@
 import { apiRequest } from "../../api/apiRequest";
 
+export const getProjectMembers = (projectId) => {
+    return apiRequest(`/projects/${projectId}/members`, {
+        method: "GET",
+    });
+};
+
 export const getMemberProjects = (workspaceId, memberId) => {
     return apiRequest(`/projects/workspace/${workspaceId}/member/${memberId}`, {
         method: "GET",

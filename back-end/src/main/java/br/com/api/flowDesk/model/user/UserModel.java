@@ -37,6 +37,7 @@ public class UserModel {
 
     @Column(name = "password_hash", nullable = false)
     private String password;
+
     private String code;
 
     @CreationTimestamp
