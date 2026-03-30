@@ -8,6 +8,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import br.com.api.flowDesk.model.project.ProjectMemberModel;
 import br.com.api.flowDesk.model.workspace.WorkspaceMemberModel;
 import jakarta.persistence.Column;
@@ -48,8 +50,10 @@ public class UserModel {
     private LocalDate updatedAt;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<WorkspaceMemberModel> workspaceMemberships;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<ProjectMemberModel> projectMemberships;
 }

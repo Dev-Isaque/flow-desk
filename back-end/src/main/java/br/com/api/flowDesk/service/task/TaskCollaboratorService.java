@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import br.com.api.flowDesk.dto.task.response.TaskCollaboratorResponseDTO;
 import br.com.api.flowDesk.enums.task.TaskPermission;
 import br.com.api.flowDesk.enums.task.TaskRole;
 import br.com.api.flowDesk.model.task.TaskCollaboratorModel;
@@ -117,7 +118,7 @@ public class TaskCollaboratorService {
                 taskMemberRepository.deleteByTask_IdAndUser_Id(taskId, userId);
         }
 
-        public List<TaskCollaboratorModel> list(UUID taskId, UserModel loggedUser) {
+        public List<TaskCollaboratorResponseDTO> list(UUID taskId, UserModel loggedUser) {
 
                 TaskModel task = taskRepository.findById(taskId)
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -144,6 +145,12 @@ public class TaskCollaboratorService {
                                 loggedUser,
                                 TaskPermission.VIEW_TASK);
 
-                return taskMemberRepository.findByTask_Id(taskId);
+                return taskMemberRepository.findByTask_Id(taskId)
+                                .stream()
+                                .map(c -> new TaskCollaboratorResponseDTO(
+                                                c.getUser().getId(),
+                                                c.getUser().getName(),
+                                                c.getRole()))
+                                .toList();
         }
 }

@@ -142,6 +142,8 @@ export default function TaskDetails() {
     );
   }
 
+  console.log(collaborators);
+
   return (
     <div className="container-fluid py-3 task-details">
       <div className="row">

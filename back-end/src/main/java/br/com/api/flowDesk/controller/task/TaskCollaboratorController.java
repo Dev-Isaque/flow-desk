@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.api.flowDesk.dto.task.response.TaskCollaboratorResponseDTO;
 import br.com.api.flowDesk.enums.task.TaskRole;
-import br.com.api.flowDesk.model.task.TaskCollaboratorModel;
 import br.com.api.flowDesk.model.user.UserModel;
 import br.com.api.flowDesk.service.auth.AuthTokenService;
 import br.com.api.flowDesk.service.task.TaskCollaboratorService;
@@ -33,12 +33,11 @@ public class TaskCollaboratorController {
     private AuthTokenService authTokenService;
 
     @GetMapping
-    public ResponseEntity<List<TaskCollaboratorModel>> list(
+    public ResponseEntity<List<TaskCollaboratorResponseDTO>> list(
             @PathVariable UUID taskId,
             @RequestHeader("Authorization") String authHeader) {
 
         String token = authHeader.replace("Bearer ", "").trim();
-
         UserModel user = authTokenService.requireUserByToken(token);
 
         return ResponseEntity.ok(

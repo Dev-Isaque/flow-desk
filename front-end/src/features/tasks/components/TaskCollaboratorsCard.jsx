@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Button } from "../../../shared/components/Button";
 
 export function TaskCollaboratorsCard({
-  collaborators,
+  collaborators = [],
   loading,
-  members,
+  members = [],
   addCollaborator,
   removeCollaborator,
 }) {
@@ -22,19 +22,24 @@ export function TaskCollaboratorsCard({
       )}
 
       <ul className="list-unstyled mb-3">
-        {collaborators.map((c) => (
+        {collaborators?.map((c) => (
           <li
-            key={c.user.id}
+            key={c.user?.id || c.userId}
             className="d-flex justify-content-between align-items-center mb-2"
           >
             <div>
-              <strong>{c.user.name}</strong>
+              <strong>
+                {c.user?.name ||
+                  members.find((m) => m.userId === c.userId)?.name ||
+                  "Usuário"}
+              </strong>
+
               <div style={{ fontSize: "12px", opacity: 0.6 }}>{c.role}</div>
             </div>
 
             <Button
               className="btn-sm btn-danger"
-              onClick={() => removeCollaborator(c.user.id)}
+              onClick={() => removeCollaborator(c.user?.id || c.userId)}
             >
               Remover
             </Button>
@@ -62,7 +67,7 @@ export function TaskCollaboratorsCard({
           onChange={(e) => setRole(e.target.value)}
         >
           <option value="VIEWER">Viewer</option>
-          <option value="EDITOR">Editor</option>
+          <option value="COLLABORATOR">Editor</option>
         </select>
 
         <Button
