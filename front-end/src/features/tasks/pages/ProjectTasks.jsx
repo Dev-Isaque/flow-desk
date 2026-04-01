@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { TaskCard } from "../components/TaskCard";
 import { deleteTask as deleteTaskRequest } from "../services/taskService";
 
+import { useConfirm } from "../../../shared/hooks/useConfirm";
+
 export default function ProjectTasks({
   tasks = [],
   loading,
@@ -20,9 +22,10 @@ export default function ProjectTasks({
     return list;
   }, [tasks, activeTaskId]);
 
-  async function handleDelete(task) {
-    const confirmed = window.confirm(`Deseja excluir "${task.title}"?`);
+  const { confirm } = useConfirm();
 
+  async function handleDelete(task) {
+    const confirmed = await confirm(`Deseja excluir "${task.title}"?`);
     if (!confirmed) return;
 
     try {

@@ -1,4 +1,3 @@
-import { ImageOff } from "lucide-react";
 import { apiRequest } from "../../api/apiRequest";
 
 export async function createTask(payload) {
@@ -31,17 +30,29 @@ export async function deleteTask(taskId) {
 }
 
 export async function listTasksByProject(projectId) {
-    const res = await apiRequest(`/projects/${projectId}/tasks`);
+    try {
+        const res = await apiRequest(`/projects/${projectId}/tasks`);
 
-    if (!res.sucesso) throw new Error(res.mensagem);
-    return res.dados;
+        if (!res.sucesso) throw new Error(res.mensagem);
+
+        return res.dados;
+    } catch (e) {
+        console.error("Erro ao buscar tasks:", e);
+        throw e;
+    }
 }
 
 export async function listTasksByWorkspace(workspaceId) {
-    const res = await apiRequest(`/workspaces/${workspaceId}/tasks`);
 
-    if (!res.sucesso) throw new Error(res.mensagem);
-    return res.dados;
+    try {
+        const res = await apiRequest(`/workspaces/${workspaceId}/tasks`);
+
+        if (!res.sucesso) throw new Error(res.mensagem);
+        return res.dados;
+    } catch (e) {
+        console.error("Erro ao buscar tasks:", e);
+        throw e;
+    }
 }
 
 export async function getTaskProgress(taskId) {

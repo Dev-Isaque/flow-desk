@@ -4,6 +4,8 @@ import { Button } from "../../../../shared/components/Button";
 import { Input } from "../../../../shared/components/Input";
 import { useWorkspace } from "../../context/useWorkspace";
 
+import { useConfirm } from "../../../../shared/hooks/useConfirm";
+
 const COLORS = [
   "#ef4444",
   "#f59e0b",
@@ -29,6 +31,8 @@ export function WorkspaceTags() {
   const [newTagColor, setNewTagColor] = useState(DEFAULT_COLOR);
 
   const [creatingMode, setCreatingMode] = useState(false);
+
+  const { confirm } = useConfirm();
 
   function handleSelectTag(tag) {
     setSelectedTag(tag);
@@ -102,14 +106,10 @@ export function WorkspaceTags() {
   async function handleDelete() {
     if (!selectedTag) return;
 
-    const confirmDelete = window.confirm(
-      "Tem certeza que deseja excluir esta tag?",
-    );
-
-    if (!confirmDelete) return;
-
-    await deleteTag(selectedTag.id);
-    setSelectedTag(null);
+    confirm("Tem certeza que deseja excluir esta tag?", async () => {
+      await deleteTag(selectedTag.id);
+      setSelectedTag(null);
+    });
   }
 
   function handleCancel() {

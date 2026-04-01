@@ -8,8 +8,6 @@ export function TaskDescription({ description }) {
   return (
     <>
       <div className="task-details__card p-3">
-
-
         <p>{description}</p>
       </div>
     </>

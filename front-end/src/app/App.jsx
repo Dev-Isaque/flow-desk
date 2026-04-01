@@ -4,14 +4,17 @@ import "../shared/styles/theme.css";
 import AppRoutes from "./routes/AppRoutes";
 import { ToastProvider } from "../shared/context/toastContext";
 import { AuthProvider } from "../shared/context/authContext";
+import { ConfirmProvider } from "./provider/ConfirmProvider";
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <ToastProvider>
-          <AppRoutes />
-        </ToastProvider>
+        <ConfirmProvider>
+          <ToastProvider>
+            <AppRoutes />
+          </ToastProvider>
+        </ConfirmProvider>
       </AuthProvider>
     </BrowserRouter>
   );

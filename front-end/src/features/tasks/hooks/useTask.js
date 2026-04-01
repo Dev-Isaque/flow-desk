@@ -66,14 +66,12 @@ export function useTask(taskId) {
         }
     }, [showToast]);
 
-    const updateTask = useCallback(async (payload) => {
-        if (!taskId) return null;
-
+    const updateTask = useCallback(async (id, payload) => {
         try {
             setSaving(true);
             setError(null);
 
-            const updated = await updateTaskRequest(taskId, payload);
+            const updated = await updateTaskRequest(id, payload);
 
             setTask(updated);
 

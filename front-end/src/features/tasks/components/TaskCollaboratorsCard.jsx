@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Button } from "../../../shared/components/Button";
+import { Input } from "../../../shared/components/Input";
+
+import { useConfirm } from "../../../shared/hooks/useConfirm";
 
 export function TaskCollaboratorsCard({
   collaborators = [],
@@ -10,6 +13,8 @@ export function TaskCollaboratorsCard({
 }) {
   const [selectedUser, setSelectedUser] = useState("");
   const [role, setRole] = useState("VIEWER");
+
+  const { confirm } = useConfirm();
 
   return (
     <div className="mt-3 p-3 theme-bg-card theme-border rounded">
@@ -39,7 +44,14 @@ export function TaskCollaboratorsCard({
 
             <Button
               className="btn-sm btn-danger"
-              onClick={() => removeCollaborator(c.user?.id || c.userId)}
+              onClick={async () => {
+                const confirmed = await confirm(
+                  "Deseja remover este colaborador?",
+                );
+                if (confirmed) {
+                  removeCollaborator(c.user?.id || c.userId);
+                }
+              }}
             >
               Remover
             </Button>
@@ -48,8 +60,8 @@ export function TaskCollaboratorsCard({
       </ul>
 
       <div className="d-flex flex-column gap-2">
-        <select
-          className="form-control"
+        <Input
+          as="select"
           value={selectedUser}
           onChange={(e) => setSelectedUser(e.target.value)}
         >
@@ -59,16 +71,16 @@ export function TaskCollaboratorsCard({
               {m.name}
             </option>
           ))}
-        </select>
+        </Input>
 
-        <select
-          className="form-control"
+        <Input
+          as="select"
           value={role}
           onChange={(e) => setRole(e.target.value)}
         >
           <option value="VIEWER">Viewer</option>
           <option value="COLLABORATOR">Editor</option>
-        </select>
+        </Input>
 
         <Button
           className="btn-color"

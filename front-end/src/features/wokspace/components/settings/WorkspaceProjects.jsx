@@ -5,6 +5,8 @@ import { Button } from "../../../../shared/components/Button";
 import { useWorkspace } from "../../context/useWorkspace";
 import { AddProjectModal } from "../../../projects/components/modals/AddProjectModal";
 
+import { useConfirm } from "../../../../shared/hooks/useConfirm";
+
 export function WorkspaceProjects() {
   const {
     projects,
@@ -19,6 +21,8 @@ export function WorkspaceProjects() {
 
   const [editingProjectId, setEditingProjectId] = useState(null);
   const [editingName, setEditingName] = useState("");
+
+  const { confirm } = useConfirm();
 
   function startEditing(project) {
     setEditingProjectId(project.id);
@@ -40,10 +44,9 @@ export function WorkspaceProjects() {
   }
 
   async function handleDelete(projectId) {
-    const confirm = window.confirm("Deseja excluir este projeto?");
-    if (!confirm) return;
-
-    await handleDeleteProject(projectId);
+    confirm("Deseja excluir este projeto?", async () => {
+      await handleDeleteProject(projectId);
+    });
   }
 
   return (

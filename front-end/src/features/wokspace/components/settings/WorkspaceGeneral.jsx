@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Input } from "../../../../shared/components/Input";
 import { Button } from "../../../../shared/components/Button";
 
+import { useConfirm } from "../../../../shared/hooks/useConfirm";
+
 export function WorkspaceGeneral({ workspace, onSave, onDelete }) {
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
@@ -11,6 +13,8 @@ export function WorkspaceGeneral({ workspace, onSave, onDelete }) {
   });
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  const { confirm } = useConfirm();
 
   function startEditing() {
     setForm({
@@ -58,19 +62,19 @@ export function WorkspaceGeneral({ workspace, onSave, onDelete }) {
 
   async function handleDelete() {
     if (!workspace?.id) return;
-    if (!confirm("Tem certeza que deseja excluir este workspace?")) return;
 
-    try {
-      setDeleting(true);
-      await onDelete?.(workspace.id);
-
-      window.location.href = "/groups";
-    } catch (err) {
-      console.error("Erro ao deletar workspace:", err);
-      alert("Erro ao excluir workspace. Tente novamente.");
-    } finally {
-      setDeleting(false);
-    }
+    confirm("Tem certeza que deseja excluir este workspace?", async () => {
+      try {
+        setDeleting(true);
+        await onDelete?.(workspace.id);
+        window.location.href = "/groups";
+      } catch (err) {
+        console.error("Erro ao deletar workspace:", err);
+        alert("Erro ao excluir workspace. Tente novamente.");
+      } finally {
+        setDeleting(false);
+      }
+    });
   }
 
   return (

@@ -14,6 +14,8 @@ import { Input } from "../../../../shared/components/Input";
 import { AddMemberModal } from "../../components/modals/AddMemberModal";
 import { MemberPermissionsModal } from "../../components/modals/MemberPermissionsModal";
 
+import { useConfirm } from "../../../../shared/hooks/useConfirm";
+
 export function WorkspaceMembers({
   workspace,
   members,
@@ -33,6 +35,8 @@ export function WorkspaceMembers({
 
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
+
+  const { confirm } = useConfirm();
 
   const pageSize = 6;
 
@@ -231,12 +235,14 @@ export function WorkspaceMembers({
                             <UserCog size={18} />
                           </Button>
                         )}
-                        
+
                         {!isOwner && !isEditing && (
                           <Button
                             className="btn-outline-danger border-0 flex-fill"
                             onClick={() =>
-                              handleDeleteMember(workspace.id, member.id)
+                              confirm("Deseja remover este membro?", () => {
+                                handleDeleteMember(workspace.id, member.id);
+                              })
                             }
                             title="Remover Membro"
                           >

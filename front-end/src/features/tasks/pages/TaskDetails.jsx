@@ -8,6 +8,8 @@ import {
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { Topbar } from "../../../shared/components/Topbar";
+
 import { TaskItemsList } from "../components/TaskItemsList";
 import { TaskProgress } from "../components/TaskProgress";
 import { TaskComment } from "../components/TaskComment";
@@ -26,6 +28,8 @@ import { useTaskTags } from "../hooks/useTaskTags";
 
 import { Button } from "../../../shared/components/Button";
 import { formatDate } from "../../../shared/utils/formatDate";
+
+import { useConfirm } from "../../../shared/hooks/useConfirm";
 
 export default function TaskDetails() {
   const { taskId } = useParams();
@@ -68,7 +72,7 @@ export default function TaskDetails() {
     loading: loadingCollaborators,
   } = useCollaboratorsTask(taskId);
 
-  const { members } = useProjectMembersList(initialTask?.projectId); // 👈
+  const { members } = useProjectMembersList(initialTask?.projectId);
 
   const [newTitle, setNewTitle] = useState("");
   const [saving, setSaving] = useState(false);
@@ -78,6 +82,8 @@ export default function TaskDetails() {
     () => newTitle.trim().length > 0 && !saving,
     [newTitle, saving],
   );
+
+  const { confirm } = useConfirm();
 
   async function handleAdd() {
     if (!canAdd) return;
@@ -97,7 +103,7 @@ export default function TaskDetails() {
   }
 
   async function handleDelete() {
-    const confirmed = window.confirm(
+    const confirmed = await confirm(
       "Tem certeza que deseja excluir esta tarefa?",
     );
     if (!confirmed) return;
@@ -142,22 +148,21 @@ export default function TaskDetails() {
     );
   }
 
-  console.log(collaborators);
-
   return (
     <div className="container-fluid py-3 task-details">
+      <Topbar
+        breadcrumb={
+          <span
+            className="task-details__back theme-text-muted p-2"
+            style={{ cursor: "pointer" }}
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft size={18} /> Voltar
+          </span>
+        }
+      />
       <div className="row">
         <div className="col-lg-8 col-xl-9">
-          <div className="m-2">
-            <Button
-              className="task-details__back theme-text-muted"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft size={18} />
-              <span className="ms-1">Voltar</span>
-            </Button>
-          </div>
-
           <div className="task-details__header">
             <div className="task-hero theme-bg-card theme-border">
               <div className="task-hero__content">
@@ -269,7 +274,7 @@ export default function TaskDetails() {
             </Button>
 
             <Button
-              className="btn btn-link theme-text-muted text-decoration-none border theme-border w-100 p-2"
+              className="btn-secondary text-decoration-none border theme-border w-100 p-2"
               onClick={handleEdit}
             >
               Editar Detalhes
@@ -297,6 +302,7 @@ export default function TaskDetails() {
         show={showEditModal}
         onClose={() => setShowEditModal(false)}
         projectId={initialTask.workspaceId}
+        task={initialTask}
         onUpdated={() => {
           setShowEditModal(false);
           window.location.reload();

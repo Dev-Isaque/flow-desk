@@ -91,6 +91,7 @@ public class TaskService {
         return new TaskDTO(
                 task.getId(),
                 task.getTitle(),
+                task.getDescription(),
                 task.getStatus(),
                 task.getPriority(),
                 task.getDueDateTime(),
@@ -293,16 +294,45 @@ public class TaskService {
         return toResponse(task);
     }
 
-    public List<TaskDTO> listByProject(UUID projectId) {
+    @Transactional(readOnly = true)
+    public List<TaskDTO> listByProject(UUID projectId, UserModel user) {
+
+        var project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projeto não encontrado"));
+
+        WorkspaceRole workspaceRole = getWorkspaceRole(project.getWorkspace().getId(), user.getId());
+        ProjectRole projectRole = getProjectRole(projectId, user.getId());
+
         return taskRepository.findByProjectId(projectId)
                 .stream()
+                .filter(task -> PermissionService.canViewTask(
+                        workspaceRole,
+                        projectRole,
+                        task,
+                        user))
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<TaskDTO> listByWorkspace(UUID workspaceId) {
+    @Transactional(readOnly = true)
+    public List<TaskDTO> listByWorkspace(UUID workspaceId, UserModel user) {
+
+        WorkspaceRole workspaceRole = getWorkspaceRole(workspaceId, user.getId());
+
         return taskRepository.findByProject_Workspace_Id(workspaceId)
                 .stream()
+                .filter(task -> {
+
+                    ProjectRole projectRole = getProjectRole(
+                            task.getProject().getId(),
+                            user.getId());
+
+                    return PermissionService.canViewTask(
+                            workspaceRole,
+                            projectRole,
+                            task,
+                            user);
+                })
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }

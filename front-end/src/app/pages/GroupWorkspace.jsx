@@ -20,6 +20,8 @@ import { AddMemberModal } from "../../features/wokspace/components/modals/AddMem
 import { WorkspaceSettings } from "../../features/wokspace/components/WorkspaceSettings";
 import { WorkspaceProvider } from "../../features/wokspace/context/WorkspaceProvider";
 
+import { useConfirm } from "../../shared/hooks/useConfirm";
+
 function GroupWorkspace() {
   const { errorMe } = useMe();
 
@@ -100,6 +102,8 @@ function GroupWorkspace() {
     <span className="theme-text">Grupos</span>
   );
 
+  const { confirm } = useConfirm();
+
   return (
     <div className="tasks-page position-relative">
       <WorkspaceProvider
@@ -160,14 +164,14 @@ function GroupWorkspace() {
                         navigate(`/groups/${id}/settings`)
                       }
                       onDelete={(id) => {
-                        if (window.confirm("Deseja excluir este workspace?")) {
+                        confirm("Deseja excluir este workspace?", () => {
                           handleDeleteWorkspace(id);
-                        }
+                        });
                       }}
                       onLeave={(id) => {
-                        if (window.confirm("Deseja sair deste workspace?")) {
+                        confirm("Deseja sair deste workspace?", () => {
                           handleLeaveWorkspace(id);
-                        }
+                        });
                       }}
                     />
                   </div>

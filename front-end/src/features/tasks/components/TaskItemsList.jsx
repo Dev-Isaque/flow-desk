@@ -1,7 +1,11 @@
 import { CheckCircle2, Circle, Trash2 } from "lucide-react";
 import { Button } from "../../../shared/components/Button";
 
+import { useConfirm } from "../../../shared/hooks/useConfirm";
+
 export function TaskItemsList({ items = [], onToggle, onDelete }) {
+  const { confirm } = useConfirm();
+
   if (!items.length) return <p className="mb-0">Nenhum item ainda.</p>;
 
   return (
@@ -37,11 +41,11 @@ export function TaskItemsList({ items = [], onToggle, onDelete }) {
 
           <Button
             className="task-item__btn p-0 border-0 bg-transparent"
-            onClick={() => {
-              const confirmDelete = window.confirm(
+            onClick={async () => {
+              const confirmed = await confirm(
                 "Tem certeza que deseja excluir este item?",
               );
-              if (confirmDelete) {
+              if (confirmed) {
                 onDelete?.(item.id);
               }
             }}

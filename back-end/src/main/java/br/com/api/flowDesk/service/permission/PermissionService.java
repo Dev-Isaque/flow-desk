@@ -16,7 +16,9 @@ public class PermissionService {
 
     public static void checkWorkspace(WorkspaceRole role, WorkspacePermission permission) {
         if (role == null || !role.hasPermission(permission)) {
-            throw new RuntimeException("Sem permissão: " + permission);
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Sem permissão: " + permission);
         }
     }
 
@@ -26,21 +28,22 @@ public class PermissionService {
             ProjectPermission permission) {
 
         if (workspaceRole == null) {
-            throw new RuntimeException("Usuário não pertence ao workspace");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Sem workspace");
         }
 
         if (workspaceRole == WorkspaceRole.OWNER) {
             return;
         }
 
-        if (workspaceRole == WorkspaceRole.ADMIN) {
-            if (permission != ProjectPermission.DELETE_PROJECT) {
-                return;
-            }
+        if (workspaceRole == WorkspaceRole.ADMIN &&
+                permission != ProjectPermission.DELETE_PROJECT) {
+            return;
         }
 
         if (projectRole == null || !projectRole.hasPermission(permission)) {
-            throw new RuntimeException("Sem permissão: " + permission);
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Sem permissão: " + permission);
         }
     }
 
@@ -51,39 +54,66 @@ public class PermissionService {
             UserModel user,
             TaskPermission permission) {
 
-        if (workspaceRole == null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Sem workspace");
+        if (!canAccessTask(workspaceRole, projectRole, task, user, permission)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Sem permissão: " + permission);
         }
+    }
 
-        if (workspaceRole == WorkspaceRole.OWNER) {
-            return;
-        }
+    public static boolean canViewTask(
+            WorkspaceRole workspaceRole,
+            ProjectRole projectRole,
+            TaskModel task,
+            UserModel user) {
 
-        if (workspaceRole == WorkspaceRole.ADMIN) {
-            if (permission != TaskPermission.DELETE_TASK) {
-                return;
-            }
+        return canAccessTask(
+                workspaceRole,
+                projectRole,
+                task,
+                user,
+                TaskPermission.VIEW_TASK);
+    }
+
+    private static boolean canAccessTask(
+            WorkspaceRole workspaceRole,
+            ProjectRole projectRole,
+            TaskModel task,
+            UserModel user,
+            TaskPermission permission) {
+
+        if (workspaceRole == null)
+            return false;
+
+        if (workspaceRole == WorkspaceRole.OWNER)
+            return true;
+
+        if (workspaceRole == WorkspaceRole.ADMIN &&
+                permission != TaskPermission.DELETE_TASK) {
+            return true;
         }
 
         if (projectRole != null &&
                 projectRole.hasPermission(mapTaskToProject(permission))) {
-            return;
+            return true;
         }
 
-        if (task.getCreatedBy().getId().equals(user.getId())) {
-            return;
+        if (task.getCreatedBy() != null &&
+                task.getCreatedBy().getId().equals(user.getId())) {
+            return true;
         }
 
-        for (TaskCollaboratorModel c : task.getCollaborators()) {
-            if (c.getUser().getId().equals(user.getId()) &&
-                    c.getRole().hasPermission(permission)) {
-                return;
+        if (task.getCollaborators() != null) {
+            for (TaskCollaboratorModel c : task.getCollaborators()) {
+                if (c.getUser() != null &&
+                        c.getUser().getId().equals(user.getId()) &&
+                        c.getRole().hasPermission(permission)) {
+                    return true;
+                }
             }
         }
 
-        throw new ResponseStatusException(
-                HttpStatus.FORBIDDEN,
-                "Sem permissão: " + permission);
+        return false;
     }
 
     private static ProjectPermission mapTaskToProject(TaskPermission permission) {

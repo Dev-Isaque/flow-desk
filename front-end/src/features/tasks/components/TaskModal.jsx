@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "../../../shared/components/Button";
 import { Modal } from "../../../shared/components/Modal";
 import { Input } from "../../../shared/components/Input";
@@ -11,55 +11,40 @@ export function TaskModal({
   show,
   onClose,
   projectId,
-  taskId,
+  task,
   onCreated,
   onUpdated,
 }) {
-  const { task, createTask, updateTask, saving, error } = useTask(taskId);
+  const { createTask, updateTask, saving, error } = useTask();
   const { statuses, priorities, loading } = useTaskEnums();
 
-  const isEditing = !!taskId;
+  const isEditing = !!task;
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("MEDIUM");
-  const [status, setStatus] = useState("BACKLOG");
-  const [dueDate, setDueDate] = useState("");
-  const [estimatedTime, setEstimatedTime] = useState("");
+  const initialForm = useMemo(
+    () => ({
+      title: task?.title || "",
+      description: task?.description || "",
+      priority: task?.priority || "MEDIUM",
+      status: task?.status || "BACKLOG",
+      dueDate: task?.dueDateTime?.split("T")[0] || "",
+      estimatedTime: task?.estimatedTime || "",
+    }),
+    [task],
+  );
+
+  const [form, setForm] = useState(initialForm);
 
   const today = new Date().toISOString().split("T")[0];
-
-  useEffect(() => {
-    if (isEditing && task) {
-      setTitle(task.title || "");
-      setDescription(task.description || "");
-      setPriority(task.priority || "MEDIUM");
-      setStatus(task.status || "BACKLOG");
-      setDueDate(task.dueDateTime?.split("T")[0] || "");
-      setEstimatedTime(task.estimatedTime || "");
-    }
-  }, [isEditing, task]);
-
-  useEffect(() => {
-    if (!show) {
-      setTitle("");
-      setDescription("");
-      setPriority("MEDIUM");
-      setStatus("BACKLOG");
-      setDueDate("");
-      setEstimatedTime("");
-    }
-  }, [show]);
 
   const canSave = useMemo(() => {
     return (
       projectId &&
       projectId !== "ALL" &&
-      title.trim().length > 0 &&
+      form.title.trim().length > 0 &&
       !saving &&
       !loading
     );
-  }, [projectId, title, saving, loading]);
+  }, [projectId, form.title, saving, loading]);
 
   async function handleSave() {
     if (!canSave) return;
@@ -67,18 +52,18 @@ export function TaskModal({
     try {
       const payload = {
         projectId,
-        title: title.trim(),
-        description: description.trim() || null,
-        priority,
-        status,
-        dueDateTime: dueDate ? `${dueDate}T00:00:00` : null,
-        estimatedTime: estimatedTime || null,
+        title: form.title.trim(),
+        description: form.description.trim() || null,
+        priority: form.priority,
+        status: form.status,
+        dueDateTime: form.dueDate ? `${form.dueDate}T00:00:00` : null,
+        estimatedTime: form.estimatedTime || null,
       };
 
       let result;
 
       if (isEditing) {
-        result = await updateTask(payload);
+        result = await updateTask(task.id, payload);
         onUpdated?.(result);
       } else {
         result = await createTask(payload);
@@ -95,6 +80,7 @@ export function TaskModal({
 
   return (
     <Modal
+      key={task?.id || "new"} 
       id="modalTask"
       title={isEditing ? "Editar Tarefa" : "Nova Tarefa"}
       show={show}
@@ -115,33 +101,21 @@ export function TaskModal({
             className="btn-color"
             onClick={handleSave}
             disabled={!canSave}
-            style={{ padding: "0.6rem 1.5rem", borderRadius: "10px" }}
           >
             {saving ? "Salvando..." : isEditing ? "Atualizar" : "Criar Tarefa"}
           </Button>
         </>
       }
     >
-      {projectId === "ALL" && !isEditing && (
-        <div className="project-warning">
-          <strong>Atenção:</strong> Selecione um projeto antes de criar.
-        </div>
-      )}
-
-      {error && (
-        <div
-          className="alert alert-danger py-2"
-          style={{ borderRadius: "10px" }}
-        >
-          {error}
-        </div>
-      )}
+      {error && <div className="alert alert-danger py-2">{error}</div>}
 
       <div className="d-flex flex-column gap-3">
         <Input
           label="Título"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          value={form.title}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, title: e.target.value }))
+          }
           disabled={saving}
           autoFocus
         />
@@ -150,8 +124,10 @@ export function TaskModal({
           label="Descrição"
           as="textarea"
           rows={3}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          value={form.description}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, description: e.target.value }))
+          }
           disabled={saving}
         />
 
@@ -160,8 +136,10 @@ export function TaskModal({
             <Input
               label="Prioridade"
               as="select"
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
+              value={form.priority}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, priority: e.target.value }))
+              }
               disabled={saving || loading}
             >
               {priorities.map((p) => (
@@ -176,8 +154,10 @@ export function TaskModal({
             <Input
               label="Status"
               as="select"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
+              value={form.status}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, status: e.target.value }))
+              }
               disabled={saving || loading}
             >
               {statuses.map((s) => (
@@ -194,9 +174,11 @@ export function TaskModal({
             <Input
               label="Prazo Final"
               type="date"
-              value={dueDate}
+              value={form.dueDate}
               min={today}
-              onChange={(e) => setDueDate(e.target.value)}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, dueDate: e.target.value }))
+              }
               disabled={saving}
             />
           </div>
@@ -204,9 +186,13 @@ export function TaskModal({
           <div className="col-md-6">
             <Input
               label="Estimativa"
-              placeholder="00:30:00"
-              value={estimatedTime}
-              onChange={(e) => setEstimatedTime(e.target.value)}
+              value={form.estimatedTime}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  estimatedTime: e.target.value,
+                }))
+              }
               disabled={saving}
             />
           </div>

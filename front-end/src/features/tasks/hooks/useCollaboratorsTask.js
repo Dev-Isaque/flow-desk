@@ -13,7 +13,6 @@ export function useCollaboratorsTask(taskId) {
         try {
             setLoading(true);
             const data = await getCollaborators(taskId);
-            console.log("getCollaborators retornou:", data);
             setCollaborators(data?.dados ?? []);
         } catch (err) {
             console.error("Erro ao buscar colaboradores", err);
@@ -36,7 +35,7 @@ export function useCollaboratorsTask(taskId) {
         try {
             await removeCollaboratorFromTask(taskId, userId);
             setCollaborators((prev) =>
-                prev.filter((c) => c.user.id !== userId)
+                prev.filter((c) => (c.user?.id || c.userId) !== userId)
             );
         } catch (err) {
             console.error("Erro ao remover colaborador", err);

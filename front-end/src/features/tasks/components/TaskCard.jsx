@@ -26,13 +26,6 @@ export function TaskCard({
 
   const timer = useTaskTimer(task?.estimatedTime);
 
-  function handlePlayPause() {
-    setActiveTaskId(task?.id);
-    if (timer.isRunning) return timer.pause();
-    if (timer.isPaused) return timer.resume();
-    return timer.start();
-  }
-
   function getStatusVisual(status) {
     switch (status) {
       case "BACKLOG":

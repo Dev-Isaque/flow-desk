@@ -14,6 +14,11 @@ export function useProjectTasks(projectId, workspaceId) {
     const [error, setError] = useState(null);
 
     const load = useCallback(async () => {
+        if (!workspaceId && (!projectId || projectId === "ALL")) {
+            setTasks([]);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -41,5 +46,9 @@ export function useProjectTasks(projectId, workspaceId) {
         load();
     }, [load]);
 
-    return { tasks, loading, error, setTasks };
+    useEffect(() => {
+        setTasks([]);
+    }, [projectId, workspaceId]);
+
+    return { tasks, loading, error, reload: load, setTasks };
 }

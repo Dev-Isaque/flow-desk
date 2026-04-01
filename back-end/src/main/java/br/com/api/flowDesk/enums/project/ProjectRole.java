@@ -10,8 +10,6 @@ public enum ProjectRole {
             ProjectPermission.UPDATE_PROJECT,
             ProjectPermission.DELETE_PROJECT,
             ProjectPermission.CREATE_TASK,
-            ProjectPermission.UPDATE_TASK,
-            ProjectPermission.DELETE_TASK,
             ProjectPermission.ADD_MEMBER,
             ProjectPermission.REMOVE_MEMBER,
             ProjectPermission.UPDATE_MEMBER_ROLE)),
@@ -19,8 +17,7 @@ public enum ProjectRole {
     CONTRIBUTOR(Set.of(
             ProjectPermission.ASSIGN_TASK,
             ProjectPermission.VIEW_PROJECT,
-            ProjectPermission.CREATE_TASK,
-            ProjectPermission.UPDATE_TASK)),
+            ProjectPermission.CREATE_TASK)),
 
     VIEWER(Set.of(
             ProjectPermission.VIEW_PROJECT));
