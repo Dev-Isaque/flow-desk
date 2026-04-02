@@ -76,7 +76,7 @@ public class PermissionService {
                 TaskPermission.VIEW_TASK);
     }
 
-    private static boolean canAccessTask(
+    public static boolean canAccessTask(
             WorkspaceRole workspaceRole,
             ProjectRole projectRole,
             TaskModel task,

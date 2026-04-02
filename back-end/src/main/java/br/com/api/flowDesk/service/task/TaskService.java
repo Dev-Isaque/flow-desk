@@ -88,6 +88,16 @@ public class TaskService {
                 .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getColor(), 0))
                 .toList();
 
+        var role = PermissionService.getUserTaskRole(task, user);
+
+        boolean canEdit = role != null && role.hasPermission(TaskPermission.UPDATE_TASK);
+        boolean canDelete = role != null && role.hasPermission(TaskPermission.DELETE_TASK);
+        boolean canComment = role != null && role.hasPermission(TaskPermission.COMMENT);
+        boolean canAddAttachment = role != null && role.hasPermission(TaskPermission.ADD_ATTACHMENT);
+        boolean canManageCollaborators = role != null &&
+                (role.hasPermission(TaskPermission.ADD_COLLABORATOR) ||
+                        role.hasPermission(TaskPermission.REMOVE_COLLABORATOR));
+
         return new TaskDTO(
                 task.getId(),
                 task.getTitle(),
@@ -102,7 +112,12 @@ public class TaskService {
                 task.getCreatedBy().getName(),
                 task.getCreatedAt(),
                 tagDTOs,
-                PermissionService.getUserTaskRole(task, user));
+                role,
+                canEdit,
+                canDelete,
+                canComment,
+                canAddAttachment,
+                canManageCollaborators);
     }
 
     private TaskResponse toResponse(TaskModel task) {

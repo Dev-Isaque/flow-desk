@@ -204,15 +204,12 @@ export default function TaskDetails() {
             {itemsLoading && <p className="theme-text-muted">Carregando...</p>}
             {error && <p className="auth-error">{error}</p>}
 
-            {!itemsLoading && !error && (
-              <div className="task-details__card theme-bg-card theme-border p-3">
-                <TaskItemsList
-                  items={items}
-                  onToggle={handleToggle}
-                  onDelete={remove}
-                />
-              </div>
-            )}
+            <TaskItemsList
+              items={items}
+              onToggle={handleToggle}
+              onDelete={remove}
+              canEdit={initialTask?.canEdit}
+            />
 
             <div className="task-details__card theme-bg-card theme-border p-4 d-flex gap-2 mt-4">
               <input
@@ -220,12 +217,12 @@ export default function TaskDetails() {
                 placeholder="Novo item do checklist..."
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                disabled={saving}
+                disabled={saving || !initialTask?.canEdit}
               />
               <Button
                 className="btn-color px-4"
                 onClick={handleAdd}
-                disabled={!canAdd}
+                disabled={!canAdd || !initialTask?.canEdit}
               >
                 {saving ? "..." : "Adicionar"}
               </Button>
@@ -233,7 +230,7 @@ export default function TaskDetails() {
           </div>
 
           <div className="p-2 mb-3">
-            <TaskComment taskId={taskId} />
+            <TaskComment taskId={taskId} canComment={initialTask?.canComment} />
           </div>
         </div>
 
@@ -241,21 +238,27 @@ export default function TaskDetails() {
           <TaskProperty
             task={taskWithTags || initialTask}
             workspaceTags={workspaceTags}
-            onAddTag={associateTag}
-            onRemoveTag={removeTag}
+            onAddTag={initialTask?.canEdit ? associateTag : undefined}
+            onRemoveTag={initialTask?.canEdit ? removeTag : undefined}
             isProcessing={isProcessing}
             loadingTags={loadingTags}
           />
 
-          <TaskFiles taskId={taskId} />
-
-          <TaskCollaboratorsCard
-            collaborators={collaborators}
-            loading={loadingCollaborators}
-            members={members}
-            addCollaborator={addCollaborator}
-            removeCollaborator={removeCollaborator}
+          <TaskFiles
+            taskId={taskId}
+            canUpload={initialTask?.canAddAttachment}
+            canDelete={initialTask?.canDelete}
           />
+
+          {initialTask?.canManageCollaborators && (
+            <TaskCollaboratorsCard
+              collaborators={collaborators}
+              loading={loadingCollaborators}
+              members={members}
+              addCollaborator={addCollaborator}
+              removeCollaborator={removeCollaborator}
+            />
+          )}
 
           <div className="d-flex flex-column gap-2 mt-4 mb-3">
             <Button
@@ -263,7 +266,7 @@ export default function TaskDetails() {
                 initialTask?.status === "DONE" ? "btn-success" : "btn-color"
               }`}
               onClick={handleCompleteTask}
-              disabled={taskSaving}
+              disabled={taskSaving || !initialTask?.canEdit}
             >
               <BadgeCheck size={20} />
               <span className="ms-2">
@@ -273,27 +276,26 @@ export default function TaskDetails() {
               </span>
             </Button>
 
-            <Button
-              className="btn-secondary text-decoration-none border theme-border w-100 p-2"
-              onClick={handleEdit}
-            >
-              Editar Detalhes
-            </Button>
-
-            <Button className="btn btn-link theme-text-muted text-decoration-none border theme-border w-100 p-2">
-              <Share2 size={18} className="me-2" />
-              Compartilhar
-            </Button>
+            {initialTask?.canEdit && (
+              <Button
+                className="btn-secondary text-decoration-none border theme-border w-100 p-2"
+                onClick={handleEdit}
+              >
+                Editar Detalhes
+              </Button>
+            )}
 
             <hr className="my-2 theme-border" />
 
-            <Button
-              className="btn btn-danger w-100 p-2 opacity-75 hover-opacity-100"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? "Excluindo..." : "Excluir tarefa"}
-            </Button>
+            {initialTask?.canDelete && (
+              <Button
+                className="btn btn-danger w-100 p-2 opacity-75 hover-opacity-100"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Excluindo..." : "Excluir tarefa"}
+              </Button>
+            )}
           </div>
         </div>
       </div>

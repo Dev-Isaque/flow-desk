@@ -37,6 +37,12 @@ public class TaskDTO {
 
     private TaskRole currentUserRole;
 
+    private boolean canEdit;
+    private boolean canDelete;
+    private boolean canComment;
+    private boolean canAddAttachment;
+    private boolean canManageCollaborators;
+
     @JsonProperty("statusDescription")
     public String getStatusDescription() {
         return status != null ? status.getDescription() : null;

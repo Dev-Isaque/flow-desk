@@ -106,15 +106,18 @@ export function TaskProperty({
               className="value tag-badge d-flex align-items-center gap-1"
             >
               {tag.name}
-              <X
-                size={12}
-                className="cursor-pointer"
-                onClick={() => onRemoveTag(tag.id)}
-              />
+
+              {onRemoveTag && (
+                <X
+                  size={12}
+                  className="cursor-pointer"
+                  onClick={() => onRemoveTag(tag.id)}
+                />
+              )}
             </span>
           ))}
 
-          {isAdding ? (
+          {onAddTag && isAdding ? (
             <div className="add-tag-popover p-2 border rounded bg-white shadow-sm mt-2">
               <div className="d-flex justify-content-between align-items-center mb-2">
                 <span className="extra-small fw-bold text-muted">

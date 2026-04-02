@@ -3,7 +3,7 @@ import { CommentList } from "./comment/CommentList";
 import { CommentForm } from "./comment/CommentForm";
 import { MessagesSquare } from "lucide-react";
 
-export function TaskComment({ taskId }) {
+export function TaskComment({ taskId, canComment }) {
   const { comments, addComment, loading, error } = useComments(taskId);
 
   return (
@@ -19,7 +19,7 @@ export function TaskComment({ taskId }) {
         <CommentList comments={comments} />
       </div>
 
-      <CommentForm onSubmit={addComment} loading={loading} />
+      {canComment && <CommentForm onSubmit={addComment} loading={loading} />}
     </div>
   );
 }

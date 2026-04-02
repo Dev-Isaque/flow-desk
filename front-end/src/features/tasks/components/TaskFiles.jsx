@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { useTaskAttachments } from "../hooks/useTaskAttachments";
 import { Button } from "../../../shared/components/Button";
 
-export function TaskFiles({ taskId }) {
+export function TaskFiles({ taskId, canUpload, canDelete }) {
   const fileInputRef = useRef(null);
 
   const { attachments, loading, uploading, upload, remove, download, preview } =
@@ -28,21 +28,25 @@ export function TaskFiles({ taskId }) {
           <Files size={20} /> Arquivos
         </h5>
 
-        <Button
-          className="btn-color btn-sm"
-          onClick={handleUploadClick}
-          disabled={uploading}
-        >
-          <Plus size={16} />
-        </Button>
+        {canUpload && (
+          <Button
+            className="btn-color btn-sm"
+            onClick={handleUploadClick}
+            disabled={uploading}
+          >
+            <Plus size={16} />
+          </Button>
+        )}
       </div>
 
-      <input
-        type="file"
-        ref={fileInputRef}
-        hidden
-        onChange={handleFileChange}
-      />
+      {canUpload && (
+        <input
+          type="file"
+          ref={fileInputRef}
+          hidden
+          onChange={handleFileChange}
+        />
+      )}
 
       {loading && <p>Carregando...</p>}
 
@@ -76,13 +80,15 @@ export function TaskFiles({ taskId }) {
                 <Download size={14} />
               </Button>
 
-              <Button
-                className="btn-sm btn-outline-danger"
-                onClick={() => remove(file.id)}
-                title="Excluir arquivo"
-              >
-                <Trash2 size={14} />
-              </Button>
+              {canDelete && (
+                <Button
+                  className="btn-sm btn-outline-danger"
+                  onClick={() => remove(file.id)}
+                  title="Excluir arquivo"
+                >
+                  <Trash2 size={14} />
+                </Button>
+              )}
             </div>
           </li>
         ))}
