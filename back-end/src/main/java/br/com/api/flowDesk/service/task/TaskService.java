@@ -82,7 +82,7 @@ public class TaskService {
         return (mm * 60) + ss;
     }
 
-    private TaskDTO toDTO(TaskModel task) {
+    private TaskDTO toDTO(TaskModel task, UserModel user) {
         var tagDTOs = task.getTags()
                 .stream()
                 .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getColor(), 0))
@@ -101,7 +101,8 @@ public class TaskService {
                 task.getCreatedBy().getId(),
                 task.getCreatedBy().getName(),
                 task.getCreatedAt(),
-                tagDTOs);
+                tagDTOs,
+                PermissionService.getUserTaskRole(task, user));
     }
 
     private TaskResponse toResponse(TaskModel task) {
@@ -183,7 +184,7 @@ public class TaskService {
         owner.setRole(TaskRole.OWNER);
         taskCollaboratorRepository.save(owner);
 
-        return toDTO(task);
+        return toDTO(task, user);
     }
 
     @Transactional
@@ -212,7 +213,7 @@ public class TaskService {
             task.setEstimatedTimeSeconds(parseEstimatedTime(dto.getEstimatedTime()));
         }
 
-        return toDTO(taskRepository.save(task));
+        return toDTO(taskRepository.save(task), user);
     }
 
     @Transactional
@@ -238,7 +239,8 @@ public class TaskService {
         checkPermission(task, user, TaskPermission.UPDATE_TASK);
 
         task.setStatus(newStatus);
-        return toDTO(taskRepository.save(task));
+
+        return toDTO(taskRepository.save(task), user);
     }
 
     @Transactional(readOnly = true)
@@ -254,11 +256,11 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-    public TaskDTO getTaskById(UUID id) {
+    public TaskDTO getTaskById(UUID id, UserModel user) {
         TaskModel task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
 
-        return toDTO(task);
+        return toDTO(task, user);
     }
 
     @Transactional
@@ -273,7 +275,8 @@ public class TaskService {
         TagModel tagEntity = tagRepository.findById(tagResult.getId()).orElseThrow();
 
         task.getTags().add(tagEntity);
-        return toDTO(taskRepository.save(task));
+
+        return toDTO(taskRepository.save(task), user);
     }
 
     @Transactional
@@ -310,7 +313,7 @@ public class TaskService {
                         projectRole,
                         task,
                         user))
-                .map(this::toDTO)
+                .map(task -> toDTO(task, user))
                 .collect(Collectors.toList());
     }
 
@@ -333,7 +336,7 @@ public class TaskService {
                             task,
                             user);
                 })
-                .map(this::toDTO)
+                .map(task -> toDTO(task, user))
                 .collect(Collectors.toList());
     }
 

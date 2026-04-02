@@ -94,8 +94,13 @@ public class TaskController {
     }
 
     @GetMapping("/{taskId}")
-    public ResponseEntity<TaskDTO> getTaskById(@PathVariable UUID taskId) {
-        return ResponseEntity.ok(taskService.getTaskById(taskId));
+    public ResponseEntity<TaskDTO> getTaskById(@PathVariable UUID taskId,
+            @RequestHeader("Authorization") String authorization) {
+
+        String token = authorization.replace("Bearer ", "").trim();
+        var user = authTokenService.requireUserByToken(token);
+
+        return ResponseEntity.ok(taskService.getTaskById(taskId, user));
     }
 
     @PostMapping("/{taskId}/tags")

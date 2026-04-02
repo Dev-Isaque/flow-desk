@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import br.com.api.flowDesk.enums.task.TaskPriority;
+import br.com.api.flowDesk.enums.task.TaskRole;
 import br.com.api.flowDesk.enums.task.TaskStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,6 +34,8 @@ public class TaskDTO {
 
     private LocalDateTime createdAt;
     private List<TagDTO> tags;
+
+    private TaskRole currentUserRole;
 
     @JsonProperty("statusDescription")
     public String getStatusDescription() {

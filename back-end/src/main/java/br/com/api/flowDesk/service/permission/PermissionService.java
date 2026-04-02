@@ -6,6 +6,7 @@ import org.springframework.web.server.ResponseStatusException;
 import br.com.api.flowDesk.enums.project.ProjectPermission;
 import br.com.api.flowDesk.enums.project.ProjectRole;
 import br.com.api.flowDesk.enums.task.TaskPermission;
+import br.com.api.flowDesk.enums.task.TaskRole;
 import br.com.api.flowDesk.enums.workspace.WorkspacePermission;
 import br.com.api.flowDesk.enums.workspace.WorkspaceRole;
 import br.com.api.flowDesk.model.task.TaskCollaboratorModel;
@@ -146,5 +147,26 @@ public class PermissionService {
             case DELETE_TASK -> ProjectPermission.DELETE_TASK;
             default -> ProjectPermission.VIEW_PROJECT;
         };
+    }
+
+    public static TaskRole getUserTaskRole(TaskModel task, UserModel user) {
+        if (task == null || user == null)
+            return null;
+
+        if (task.getCreatedBy() != null &&
+                task.getCreatedBy().getId().equals(user.getId())) {
+            return TaskRole.OWNER;
+        }
+
+        if (task.getCollaborators() != null) {
+            for (TaskCollaboratorModel c : task.getCollaborators()) {
+                if (c.getUser() != null &&
+                        c.getUser().getId().equals(user.getId())) {
+                    return c.getRole();
+                }
+            }
+        }
+
+        return null;
     }
 }
