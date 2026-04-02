@@ -40,6 +40,8 @@ export function TaskBody({
     );
   }
 
+  console.log("Project Id: ", projectId)
+
   return (
     <ProjectTasks
       tasks={tasks}

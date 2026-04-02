@@ -93,6 +93,29 @@ public class PermissionService {
             return true;
         }
 
+        if (projectRole == ProjectRole.MANAGER) {
+            return true;
+        }
+
+        if (permission == TaskPermission.VIEW_TASK) {
+
+            if (task.getCreatedBy() != null &&
+                    task.getCreatedBy().getId().equals(user.getId())) {
+                return true;
+            }
+
+            if (task.getCollaborators() != null) {
+                for (TaskCollaboratorModel c : task.getCollaborators()) {
+                    if (c.getUser() != null &&
+                            c.getUser().getId().equals(user.getId())) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         if (projectRole != null &&
                 projectRole.hasPermission(mapTaskToProject(permission))) {
             return true;
