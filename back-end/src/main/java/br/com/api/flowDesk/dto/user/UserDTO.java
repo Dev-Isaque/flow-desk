@@ -21,6 +21,8 @@ public class UserDTO {
     @NotBlank(message = "Confirmação de senha é obrigatória")
     private String password_confirm;
 
+    private String photoUrl;
+
     public UserDTO() {
     }
 
@@ -28,6 +30,14 @@ public class UserDTO {
         this.name = name;
         this.email = email;
         this.password = password;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -60,5 +70,13 @@ public class UserDTO {
 
     public void setPassword_confirm(String password_confirm) {
         this.password_confirm = password_confirm;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 }

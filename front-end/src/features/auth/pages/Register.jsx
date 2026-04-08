@@ -6,14 +6,26 @@ import { AuthLayout } from "../../../app/layouts/AuthLayout";
 
 import { useUser } from "../../user/hooks/useUser";
 import { useState } from "react";
+import { useToast } from "../../../shared/utils/useToast";
 
 export function Register() {
-  const { cadastrar, user, setUser } = useUser();
+  const { registerUser, user, setUser, photoFile, setPhotoFile } = useUser();
   const [mensagem, setMensagem] = useState("");
   const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
 
   function handleChange(e) {
     setUser({ ...user, [e.target.name]: e.target.value });
+  }
+
+  function handleFileChange(e) {
+    const file = e.target.files[0];
+    if (file && !["image/jpeg", "image/png"].includes(file.type)) {
+      setMensagem("Apenas arquivos JPG e PNG são permitidos");
+      return;
+    }
+    setMensagem("");
+    setPhotoFile(file);
   }
 
   async function handleSubmit(e) {
@@ -27,22 +39,22 @@ export function Register() {
 
     setLoading(true);
 
-    const r = await cadastrar();
+    const r = await registerUser();
 
-    setTimeout(() => {
-      setLoading(false);
+    setLoading(false);
 
-      if (!r.sucesso) {
-        setMensagem(r.mensagem);
-      }
+    if (!r.sucesso) {
+      setMensagem(r.mensagem);
+      showToast(r.mensagem, "error");
+      return;
+    }
 
-      alert("Usuário cadastrado com sucesso!");
-    }, 800);
+    showToast("Usuário cadastrado com sucesso!", "success");
   }
 
   return (
     <AuthLayout title="Registre-se">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="auth-inputs">
           <Input
             label="Nome"
@@ -79,6 +91,15 @@ export function Register() {
             value={user?.password_confirm || ""}
             onChange={handleChange}
           />
+
+          <div className="auth-input">
+            <label>Foto de perfil (JPG ou PNG)</label>
+            <input
+              type="file"
+              accept=".jpg,.jpeg,.png"
+              onChange={handleFileChange}
+            />
+          </div>
         </div>
 
         <div className="auth-footer">

@@ -1,9 +1,30 @@
 import { apiRequest } from "../../api/apiRequest";
 
-export const cadastrar = (user) => {
+export const registerUser = (user, photoFile) => {
+    const formData = new FormData();
+    formData.append("name", user.name);
+    formData.append("email", user.email);
+    formData.append("password", user.password);
+    formData.append("password_confirm", user.password_confirm);
+    if (photoFile) formData.append("photoFile", photoFile);
+
     return apiRequest("/users/register", {
         method: "POST",
-        body: JSON.stringify(user),
+        body: formData,
+    });
+};
+
+export const updateUser = (id, user, photoFile) => {
+    const formData = new FormData();
+    formData.append("name", user.name);
+    formData.append("email", user.email);
+    formData.append("password", user.password);
+    formData.append("password_confirm", user.password_confirm);
+    if (photoFile) formData.append("photoFile", photoFile);
+
+    return apiRequest(`/users/update/${id}`, {
+        method: "PUT",
+        body: formData,
     });
 };
 

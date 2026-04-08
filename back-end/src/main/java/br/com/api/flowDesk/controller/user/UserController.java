@@ -8,14 +8,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import br.com.api.flowDesk.dto.user.UserDTO;
 import br.com.api.flowDesk.dto.user.UserResponseDTO;
@@ -56,7 +57,8 @@ public class UserController {
         UserResponseDTO dto = new UserResponseDTO(
                 user.getId(),
                 user.getName(),
-                user.getEmail());
+                user.getEmail(),
+                user.getPhotoUrl());
 
         return ResponseEntity.ok(dto);
     }
@@ -66,18 +68,22 @@ public class UserController {
         return ResponseEntity.ok(service.findByEmail(email));
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<UserModel> create(@Valid @RequestBody UserDTO dto) {
-        UserModel user = service.create(dto);
+    @PostMapping(value = "/register", consumes = { "multipart/form-data" })
+    public ResponseEntity<UserModel> create(
+            @Valid @ModelAttribute UserDTO dto,
+            @RequestParam(value = "photoFile", required = false) MultipartFile photoFile) {
+
+        UserModel user = service.create(dto, photoFile);
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
-    @PutMapping("update/{id}")
+    @PutMapping(value = "update/{id}", consumes = { "multipart/form-data" })
     public ResponseEntity<UserModel> update(
             @PathVariable UUID id,
-            @Valid @RequestBody UserDTO dto) {
+            @Valid @ModelAttribute UserDTO dto,
+            @RequestParam(value = "photoFile", required = false) MultipartFile photoFile) {
 
-        UserModel user = service.update(id, dto);
+        UserModel user = service.update(id, dto, photoFile);
         return ResponseEntity.ok(user);
     }
 

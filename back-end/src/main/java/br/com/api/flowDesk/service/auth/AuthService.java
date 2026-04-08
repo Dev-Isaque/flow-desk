@@ -48,7 +48,8 @@ public class AuthService {
 
         authTokenRepository.save(session);
 
-        UserResponseDTO userResponse = new UserResponseDTO(user.getId(), user.getName(), user.getEmail());
+        UserResponseDTO userResponse = new UserResponseDTO(user.getId(), user.getName(), user.getEmail(),
+                user.getPhotoUrl());
 
         return new AuthResponseDTO(
                 true,
