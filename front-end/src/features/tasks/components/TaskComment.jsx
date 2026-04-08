@@ -15,8 +15,14 @@ export function TaskComment({ taskId, canComment }) {
 
       {error && <p className="text-danger">{error}</p>}
 
-      <div className="comment-chat-container">
-        <CommentList comments={comments} />
+      <div className="comment-chat-container p-2">
+        {loading ? (
+          <p className="text-secondary">Carregando comentários...</p>
+        ) : comments.length === 0 ? (
+          <p className="text-secondary">Nenhum comentário ainda.</p>
+        ) : (
+          <CommentList comments={comments} />
+        )}
       </div>
 
       {canComment && <CommentForm onSubmit={addComment} loading={loading} />}

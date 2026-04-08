@@ -101,37 +101,39 @@ export function TaskProperty({
 
         <div className="d-flex flex-wrap gap-2 align-items-center">
           {task?.tags?.map((tag) => (
-            <span
-              key={tag.id}
-              className="value tag-badge d-flex align-items-center gap-1"
-            >
-              {tag.name}
+            <span key={tag.id} className="tag-badge">
+              <span>#{tag.name}</span>
 
               {onRemoveTag && (
-                <X
-                  size={12}
-                  className="cursor-pointer"
+                <span
+                  className="remove-btn"
                   onClick={() => onRemoveTag(tag.id)}
-                />
+                >
+                  <X size={10} />
+                </span>
               )}
             </span>
           ))}
 
           {onAddTag && isAdding ? (
-            <div className="add-tag-popover p-2 border rounded bg-white shadow-sm mt-2">
+            <div className="add-tag-popover mt-2">
               <div className="d-flex justify-content-between align-items-center mb-2">
-                <span className="extra-small fw-bold text-muted">
+                <span
+                  className="fw-semibold theme-text-muted"
+                  style={{ fontSize: "11px", letterSpacing: "0.5px" }}
+                >
                   ADICIONAR TAG
                 </span>
+
                 <X
                   size={14}
-                  className="cursor-pointer"
+                  className="cursor-pointer theme-text-muted"
                   onClick={() => setIsAdding(false)}
                 />
               </div>
 
               <select
-                className="form-select form-select-sm mb-2"
+                className="theme-input mb-2"
                 onChange={handleSelectExisting}
                 defaultValue=""
                 disabled={isProcessing}
@@ -146,28 +148,37 @@ export function TaskProperty({
                 ))}
               </select>
 
+              <div
+                className="text-center theme-text-muted mb-2"
+                style={{ fontSize: "11px" }}
+              >
+                ou
+              </div>
+
               <div className="d-flex gap-1">
                 <input
                   autoFocus
                   type="text"
-                  className="form-control form-control-sm"
-                  placeholder="Ou digite nova..."
+                  className="theme-input"
+                  placeholder="Nova tag..."
                   value={typedName}
                   onChange={(e) => setTypedName(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleConfirmInput()}
                   disabled={isProcessing}
                 />
-                <Button
-                  className="btn-primary btn-sm"
+
+                <button
+                  className="btn-color d-flex align-items-center justify-content-center"
                   onClick={handleConfirmInput}
                   disabled={isProcessing || !typedName.trim()}
+                  style={{ width: "34px", height: "34px", padding: 0 }}
                 >
                   {isProcessing ? (
                     <Loader2 size={14} className="animate-spin" />
                   ) : (
                     <Check size={14} />
                   )}
-                </Button>
+                </button>
               </div>
             </div>
           ) : (

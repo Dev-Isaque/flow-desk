@@ -62,6 +62,7 @@ body {
 
   --bg-color: #f3f6f9;
   --card-color: #ffffff;
+  --card-color-secondary: #f8fafc;
 
   --primary-color: #14b8a6;
   --primary-hover: #4cc5bb;
@@ -92,6 +93,7 @@ body {
 
   --bg-color: #071a21;
   --card-color: #0c2a33;
+  --card-color-secondary: #0f343f;
 
   --primary-color: #00e0b8;
   --primary-hover: #00c9a3;

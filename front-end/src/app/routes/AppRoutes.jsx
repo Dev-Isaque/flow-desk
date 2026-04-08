@@ -8,6 +8,7 @@ import Home from "../pages/Home";
 import PersonalWorkspace from "../pages/PersonalWorkspace";
 import Calendar from "../pages/Calendar";
 import GroupWorkspace from "../pages/GroupWorkspace";
+import Profile from "../pages/Profile";
 
 import PrivateRoute from "./PrivateRoute";
 import { AppLayout } from "../layouts/AppLayout";
@@ -32,6 +33,8 @@ function AppRoutes() {
             path="/personal/project/:projectId"
             element={<PersonalWorkspace />}
           />
+
+          <Route path="/profile" element={<Profile />} />
 
           <Route path="/groups" element={<GroupWorkspace />} />
           <Route path="/groups/:workspaceId" element={<GroupWorkspace />} />

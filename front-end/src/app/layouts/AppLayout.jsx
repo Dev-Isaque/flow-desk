@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu } from "lucide-react";
 
 import { Sidebar } from "../../shared/components/Sidebar";
 import { Button } from "../../shared/components/Button";
@@ -10,11 +10,10 @@ import { useToast } from "../../shared/utils/useToast";
 
 export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const { toast, closeToast } = useToast();
 
-  function openSidebar() {
-    setSidebarOpen(true);
+  function toggleSidebar() {
+    setSidebarOpen((prev) => !prev);
   }
 
   function closeSidebar() {
@@ -23,38 +22,20 @@ export function AppLayout() {
 
   return (
     <div className="app-shell">
-      <div className="d-none d-lg-block">
-        <Sidebar />
-      </div>
+      <Sidebar isOpen={sidebarOpen} onNavigate={closeSidebar} />
 
       {sidebarOpen && (
-        <>
-          <div className="sidebar-overlay d-lg-none" onClick={closeSidebar} />
-
-          <div className="sidebar-mobile d-lg-none">
-            <div className="d-flex justify-content-end p-2">
-              <button
-                className="btn btn-link"
-                onClick={closeSidebar}
-                aria-label="Fechar menu"
-              >
-                <X size={22} />
-              </button>
-            </div>
-
-            <Sidebar onNavigate={closeSidebar} />
-          </div>
-        </>
+        <div className="sidebar-overlay d-lg-none" onClick={closeSidebar} />
       )}
 
-      <main>
-        <Button
-          className="btn-outline-secondary d-lg-none mb-3"
-          onClick={openSidebar}
-          aria-label="Abrir menu"
-        >
-          <Menu size={20} />
-        </Button>
+      <main className="w-100 position-relative">
+        <header className="mobile-topbar d-lg-none d-flex justify-content-between align-items-center px-3">
+          <button className="icon-btn" onClick={toggleSidebar}>
+            <Menu size={20} />
+          </button>
+
+          <span className="fw-semibold">FlowDesk</span>
+        </header>
 
         <div className="app-content">
           <Outlet />

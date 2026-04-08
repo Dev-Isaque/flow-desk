@@ -670,6 +670,90 @@
 }
 
 /* 
+   TAG BADGE
+*/
+
+.tag-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 4px 10px;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    border-radius: 999px;
+
+    background: rgba(var(--primary-rgb), 0.12);
+    color: var(--text-color);
+
+    border: 1px solid rgba(var(--primary-rgb), 0.15);
+
+    transition:
+        background 0.2s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.tag-badge:hover {
+    background: rgba(var(--primary-rgb), 0.2);
+    transform: translateY(-1px);
+}
+
+.tag-badge .remove-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 16px;
+    height: 16px;
+
+    border-radius: 50%;
+    cursor: pointer;
+
+    transition: background 0.2s ease;
+}
+
+.tag-badge .remove-btn:hover {
+    background: rgba(var(--primary-rgb), 0.25);
+}
+
+.add-tag-popover {
+    width: 240px;
+
+    padding: 12px;
+
+    background: var(--card-color-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+
+    box-shadow: var(--shadow);
+
+    animation: fadeIn 0.15s ease;
+}
+
+.add-tag-popover svg {
+    transition: opacity 0.2s ease;
+}
+
+.add-tag-popover svg:hover {
+    opacity: 0.7;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 
    Comment Task
  */
 .comment-chat-container {

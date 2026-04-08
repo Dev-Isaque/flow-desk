@@ -8,6 +8,7 @@ public enum TaskRole {
             TaskPermission.VIEW_TASK,
             TaskPermission.UPDATE_TASK,
             TaskPermission.DELETE_TASK,
+            TaskPermission.COMMENT,
             TaskPermission.ADD_ATTACHMENT,
             TaskPermission.ADD_COLLABORATOR,
             TaskPermission.REMOVE_COLLABORATOR)),

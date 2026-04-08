@@ -14,7 +14,7 @@ import { TaskItemsList } from "../components/TaskItemsList";
 import { TaskProgress } from "../components/TaskProgress";
 import { TaskComment } from "../components/TaskComment";
 import { TaskDescription } from "../components/TaskDescription";
-import { TaskProperty } from "../components/Taskproperty";
+import { TaskProperty } from "../components/TaskProperty";
 import { TaskFiles } from "../components/TaskFiles";
 import { TaskModal } from "../components/TaskModal";
 import { useCollaboratorsTask } from "../hooks/useCollaboratorsTask";
@@ -230,7 +230,10 @@ export default function TaskDetails() {
           </div>
 
           <div className="p-2 mb-3">
-            <TaskComment taskId={taskId} canComment={initialTask?.canComment} />
+            <TaskComment
+              taskId={taskId}
+              canComment={!!initialTask?.canComment}
+            />
           </div>
         </div>
 
