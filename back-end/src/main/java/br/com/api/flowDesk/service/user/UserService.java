@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import br.com.api.flowDesk.dto.user.UserDTO;
+import br.com.api.flowDesk.dto.user.UserCreateDTO;
+import br.com.api.flowDesk.dto.user.UserResponseDTO;
+import br.com.api.flowDesk.dto.user.UserUpdateDTO;
 import br.com.api.flowDesk.model.user.UserModel;
 import br.com.api.flowDesk.repository.user.UserRepository;
 import br.com.api.flowDesk.service.workspace.WorkspaceService;
@@ -25,6 +27,9 @@ public class UserService {
     @Value("${photo.upload-dir}")
     private String UPLOAD_DIR;
 
+    @Value("${app.base-url}")
+    private String baseUrl;
+
     @Autowired
     private UserRepository userRepository;
 
@@ -33,6 +38,15 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    public UserResponseDTO toDTO(UserModel user) {
+        return new UserResponseDTO(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getPhotoUrl(),
+                baseUrl);
+    }
 
     public List<UserModel> findAll() {
         return userRepository.findAll();
@@ -77,7 +91,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserModel create(UserDTO dto, MultipartFile photoFile) {
+    public UserModel create(UserCreateDTO dto, MultipartFile photoFile) {
 
         if (!dto.getPassword().equals(dto.getPassword_confirm())) {
             throw new RuntimeException("As senhas não conferem");
@@ -106,22 +120,63 @@ public class UserService {
     }
 
     @Transactional
-    public UserModel update(UUID id, UserDTO dto, MultipartFile photoFile) {
+    public UserModel update(UUID id, UserUpdateDTO dto, MultipartFile photoFile) {
 
         UserModel user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário Não Encontrado"));
 
-        user.setName(dto.getName());
-        user.setEmail(dto.getEmail());
+        if (dto.getCurrentPassword() != null) {
+            boolean matches = passwordEncoder.matches(
+                    dto.getCurrentPassword(),
+                    user.getPassword());
 
-        if (!dto.getPassword().equals(dto.getPassword_confirm())) {
-            throw new RuntimeException("As senhas não conferem");
+            if (!matches) {
+                throw new RuntimeException("Senha atual incorreta");
+            }
         }
 
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        if (dto.getName() != null && !dto.getName().isBlank()) {
+            user.setName(dto.getName());
+        }
 
-        String photoUrl = savePhotoFile(photoFile, user.getId());
-        if (photoUrl != null) {
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+
+            if (dto.getCurrentPassword() == null) {
+                throw new RuntimeException("Informe a senha atual para alterar o email");
+            }
+
+            String newEmail = dto.getEmail().trim();
+
+            if (!newEmail.equalsIgnoreCase(user.getEmail())) {
+
+                boolean emailExists = userRepository.findByEmail(newEmail)
+                        .map(u -> !u.getId().equals(user.getId()))
+                        .orElse(false);
+
+                if (emailExists) {
+                    throw new RuntimeException("Esse email já está cadastrado.");
+                }
+
+                user.setEmail(newEmail);
+            }
+        }
+
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+
+            if (dto.getCurrentPassword() == null) {
+                throw new RuntimeException("Informe a senha atual para alterar a senha");
+            }
+
+            if (dto.getPassword_confirm() == null ||
+                    !dto.getPassword().equals(dto.getPassword_confirm())) {
+                throw new RuntimeException("As senhas não conferem");
+            }
+
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        if (photoFile != null && !photoFile.isEmpty()) {
+            String photoUrl = savePhotoFile(photoFile, user.getId());
             user.setPhotoUrl(photoUrl);
         }
 

@@ -1,25 +1,31 @@
 package br.com.api.flowDesk.controller.user;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import br.com.api.flowDesk.dto.user.UserDTO;
+import br.com.api.flowDesk.dto.user.UserCreateDTO;
 import br.com.api.flowDesk.dto.user.UserResponseDTO;
+import br.com.api.flowDesk.dto.user.UserUpdateDTO;
 import br.com.api.flowDesk.model.user.UserModel;
 import br.com.api.flowDesk.service.auth.AuthTokenService;
 import br.com.api.flowDesk.service.user.UserService;
@@ -54,11 +60,7 @@ public class UserController {
 
         UserModel user = authTokenService.requireUserByToken(token);
 
-        UserResponseDTO dto = new UserResponseDTO(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getPhotoUrl());
+        UserResponseDTO dto = service.toDTO(user);
 
         return ResponseEntity.ok(dto);
     }
@@ -68,23 +70,49 @@ public class UserController {
         return ResponseEntity.ok(service.findByEmail(email));
     }
 
+    @GetMapping("/{id}/photo")
+    public ResponseEntity<Resource> getUserPhoto(@PathVariable UUID id) throws Exception {
+        UserModel user = service.findById(id);
+
+        if (user.getPhotoUrl() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String fileName = Paths.get(user.getPhotoUrl()).getFileName().toString();
+        Path path = Paths.get("uploads/photo-user").resolve(fileName);
+
+        if (!Files.exists(path)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Resource resource = new UrlResource(path.toUri());
+        String contentType = Files.probeContentType(path);
+
+        return ResponseEntity.ok()
+                .header("Content-Type", contentType != null ? contentType : "application/octet-stream")
+                .body(resource);
+    }
+
     @PostMapping(value = "/register", consumes = { "multipart/form-data" })
     public ResponseEntity<UserModel> create(
-            @Valid @ModelAttribute UserDTO dto,
+            @Valid @ModelAttribute UserCreateDTO dto,
             @RequestParam(value = "photoFile", required = false) MultipartFile photoFile) {
 
         UserModel user = service.create(dto, photoFile);
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
-    @PutMapping(value = "update/{id}", consumes = { "multipart/form-data" })
+    @PatchMapping(value = "/update/{id}", consumes = { "multipart/form-data" })
     public ResponseEntity<UserModel> update(
             @PathVariable UUID id,
-            @Valid @ModelAttribute UserDTO dto,
+            @ModelAttribute UserUpdateDTO dto,
             @RequestParam(value = "photoFile", required = false) MultipartFile photoFile) {
+
+        System.out.println("Recebendo update para ID: " + id);
+        System.out.println("DTO: " + dto);
+        System.out.println("PhotoFile: " + (photoFile != null ? photoFile.getOriginalFilename() : "null"));
 
         UserModel user = service.update(id, dto, photoFile);
         return ResponseEntity.ok(user);
     }
-
 }

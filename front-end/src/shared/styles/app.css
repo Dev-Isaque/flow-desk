@@ -64,6 +64,94 @@
   padding: 24px;
 }
 
+
+/* ========== Profile ========== */
+
+.profile-card {
+  background: var(--card-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.8rem;
+  transition: all 0.25s ease;
+}
+
+.profile-card:hover {
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
+}
+
+.profile-avatar-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--primary-color);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.profile-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 6px rgba(var(--primary-rgb), 0.15);
+}
+
+.profile-avatar-edit {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: var(--primary-color);
+  color: #102222;
+  border-radius: 50%;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-avatar-edit:hover {
+  background: var(--primary-hover);
+  transform: scale(1.1);
+}
+
+.profile-change-photo {
+  font-size: 0.85rem;
+  color: var(--primary-color);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.profile-change-photo:hover {
+  opacity: 0.7;
+}
+
+.profile-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.profile-input {
+  background: var(--bg-color);
+}
+
+.profile-input:disabled {
+  background: rgba(var(--primary-rgb), 0.06);
+  color: var(--text-muted);
+}
+
+.profile-submit {
+  padding: 0.6rem 1.4rem;
+  border-radius: 10px;
+}
+
 /* ========== SIDEBAR ========== */
 
 .app-sidebar {
@@ -280,7 +368,6 @@
   background: rgba(239, 68, 68, 0.12);
 }
 
-/* ANIMAÇÃO */
 
 @keyframes fadeIn {
   from {
@@ -294,7 +381,6 @@
   }
 }
 
-/* RESPONSIVO */
 
 /* ========== MOBILE SIDEBAR ========== */
 .mobile-topbar {

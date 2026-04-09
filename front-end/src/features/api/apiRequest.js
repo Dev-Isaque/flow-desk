@@ -1,3 +1,4 @@
+// userService.js
 const API_URL = "http://localhost:8080";
 
 export async function apiRequest(url, options = {}) {
@@ -43,8 +44,50 @@ export async function apiRequest(url, options = {}) {
     }
 
     if (!response.ok) {
-        return { sucesso: false, mensagem: data?.mensagem || data?.message || "Erro na requisição" };
+        const errorMessage = data?.mensagem || data?.message || "Erro na requisição";
+        return { sucesso: false, mensagem: errorMessage };
     }
 
     return { sucesso: true, dados: data };
+}
+
+export async function updateUser(id, userData, photoFile) {
+    const formData = new FormData();
+
+    if (userData.name) {
+        formData.append("name", userData.name);
+    }
+
+    if (userData.email) {
+        formData.append("email", userData.email);
+    }
+
+    if (userData.currentPassword) {
+        formData.append("currentPassword", userData.currentPassword);
+    }
+
+    if (userData.password) {
+        formData.append("password", userData.password);
+    }
+
+    if (userData.password_confirm) {
+        formData.append("password_confirm", userData.password_confirm);
+    }
+
+    if (photoFile) {
+        formData.append("photoFile", photoFile);
+    }
+
+    console.log("Enviando update com dados:", Object.fromEntries(formData));
+
+    return apiRequest(`/users/update/${id}`, {
+        method: "PATCH",
+        body: formData,
+    });
+}
+
+export async function getMe() {
+    return apiRequest("/users/me", {
+        method: "GET",
+    });
 }

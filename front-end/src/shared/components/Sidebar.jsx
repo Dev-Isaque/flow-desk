@@ -13,6 +13,7 @@ import {
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { useMe } from "../../features/user/hooks/useMe";
 import Logo from "../assets/images/logo.png";
+import { AlternateTheme } from "./AlternateTheme";
 
 import { useState, useRef, useEffect } from "react";
 
@@ -44,8 +45,12 @@ export function Sidebar({ isOpen, onNavigate }) {
 
   return (
     <aside className={`app-sidebar d-flex flex-column ${isOpen ? "open" : ""}`}>
-      <div className="sidebar-top d-flex align-items-center gap-2 px-3 py-3">
+      <div className="sidebar-top d-flex align-items-center justify-content-between px-3 py-3">
         <img src={Logo} alt="FlowDesk" className="sidebar-logo" />
+
+        <div>
+          <AlternateTheme />
+        </div>
       </div>
 
       <nav className="sidebar-nav px-2">
