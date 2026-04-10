@@ -19,12 +19,14 @@ export function WorkspaceBoard({
   extraHeaderActions,
   loadingWorkspace,
   onBack,
+  workspaceRole: propRole,
 }) {
   const { projectId } = useParams();
 
   const selectedProject = projectId || "ALL";
 
-  const { workspaceRole } = useWorkspace() || {};
+  const { workspaceRole: contextRole } = useWorkspace() || {};
+  const workspaceRole = propRole || contextRole;
 
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState(null);

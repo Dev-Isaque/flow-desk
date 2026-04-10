@@ -32,6 +32,7 @@ function PersonalWorkspace() {
             workspace={workspace}
             loadingWorkspace={loadingWorkspace}
             title={`Tarefas de ${user ? user.name : "..."}`}
+            workspaceRole="OWNER"
           />
         </WorkspaceProvider>
       )}

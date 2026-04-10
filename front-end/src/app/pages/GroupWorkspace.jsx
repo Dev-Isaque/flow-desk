@@ -163,15 +163,31 @@ function GroupWorkspace() {
                       onOpenSettings={(id) =>
                         navigate(`/groups/${id}/settings`)
                       }
-                      onDelete={(id) => {
-                        confirm("Deseja excluir este workspace?", () => {
+                      onDelete={async (id) => {
+                        const confirmed = await confirm({
+                          title: "Excluir workspace",
+                          message: "Deseja excluir este workspace?",
+                          confirmText: "Excluir",
+                          cancelText: "Cancelar",
+                          variant: "danger",
+                        });
+
+                        if (confirmed) {
                           handleDeleteWorkspace(id);
-                        });
+                        }
                       }}
-                      onLeave={(id) => {
-                        confirm("Deseja sair deste workspace?", () => {
-                          handleLeaveWorkspace(id);
+                      onLeave={async (id) => {
+                        const confirmed = await confirm({
+                          title: "Sair do workspace",
+                          message: "Deseja sair deste workspace?",
+                          confirmText: "Sair",
+                          cancelText: "Cancelar",
+                          variant: "warning",
                         });
+
+                        if (confirmed) {
+                          handleLeaveWorkspace(id);
+                        }
                       }}
                     />
                   </div>
