@@ -62,7 +62,7 @@ function GroupWorkspace() {
     : null;
 
   const workspaceRole = workspaceAtivo?.role;
-  const canAddMember = workspaceRole === "OWNER" || workspaceRole === "ADMIN";
+  const isWorkspaceOwner = workspaceRole === "OWNER";
 
   const filteredWorkspaces = Array.isArray(workspaces)
     ? workspaces.filter((workspace) =>
@@ -232,7 +232,7 @@ function GroupWorkspace() {
               title={workspaceAtivo?.name || "Grupo"}
               onBack={() => navigate("/groups")}
               extraHeaderActions={
-                canAddMember && (
+                isWorkspaceOwner && (
                   <Button
                     className="btn-color"
                     onClick={() => setShowAddMemberModal(true)}
@@ -252,12 +252,14 @@ function GroupWorkspace() {
         onClose={() => setShowCreateWorkspaceModal(false)}
       />
 
-      <AddMemberModal
-        show={showAddMemberModal}
-        workspaceId={activeWorkspaceId}
-        onAdd={handleAddMember}
-        onClose={() => setShowAddMemberModal(false)}
-      />
+      {isWorkspaceOwner && (
+        <AddMemberModal
+          show={showAddMemberModal}
+          workspaceId={activeWorkspaceId}
+          onAdd={handleAddMember}
+          onClose={() => setShowAddMemberModal(false)}
+        />
+      )}
     </div>
   );
 }

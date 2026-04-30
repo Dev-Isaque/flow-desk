@@ -8,10 +8,12 @@ export function AddMemberModal({ show, workspaceId, onAdd, onClose }) {
   async function handleAdd() {
     if (!email.trim()) return;
 
-    await onAdd(workspaceId, email);
+    const invited = await onAdd(workspaceId, email);
 
-    setEmail("");
-    onClose();
+    if (invited !== false) {
+      setEmail("");
+      onClose();
+    }
   }
 
   if (!show) return null;
@@ -19,7 +21,7 @@ export function AddMemberModal({ show, workspaceId, onAdd, onClose }) {
   return (
     <Modal
       id="modalMembro"
-      title="Adicionar Novo Membro"
+      title="Convidar Membro"
       show={show}
       footer={
         <>
@@ -31,7 +33,7 @@ export function AddMemberModal({ show, workspaceId, onAdd, onClose }) {
           </button>
 
           <Button className="btn-color px-4" onClick={handleAdd}>
-            Adicionar
+            Enviar convite
           </Button>
         </>
       }

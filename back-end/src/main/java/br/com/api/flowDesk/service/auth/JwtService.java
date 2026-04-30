@@ -1,32 +1,42 @@
 package br.com.api.flowDesk.service.auth;
 
 import java.util.Date;
+import java.util.UUID;
+import java.util.Base64;
 
+import javax.crypto.SecretKey;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtService {
 
-    private final String SECRET_KEY = "sua_chave_secreta_muito_forte";
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-    private final long EXPIRATION = 1000 * 60 * 60 * 24;
+    private final long EXPIRATION = 1000L * 60 * 60 * 12; 
 
-    public String generateToken(Long userId) {
+    private SecretKey getKey() {
+        byte[] keyBytes = Base64.getDecoder().decode(secretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public String generateToken(UUID userId) {
         return Jwts.builder()
-                .setSubject(String.valueOf(userId))
+                .setSubject(userId.toString())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .signWith(getKey())
                 .compact();
     }
 
-    public Long getUserId(String token) {
-        Claims claims = getClaims(token);
-        return Long.parseLong(claims.getSubject());
+    public UUID getUserId(String token) {
+        return UUID.fromString(getClaims(token).getSubject());
     }
 
     public boolean isValid(String token) {
@@ -40,7 +50,7 @@ public class JwtService {
 
     private Claims getClaims(String token) {
         return Jwts.parser()
-                .setSigningKey(SECRET_KEY)
+                .setSigningKey(getKey())
                 .parseClaimsJws(token)
                 .getBody();
     }

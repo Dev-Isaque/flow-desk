@@ -20,6 +20,7 @@ import br.com.api.flowDesk.repository.project.ProjectMemberRepository;
 import br.com.api.flowDesk.repository.project.ProjectRepository;
 import br.com.api.flowDesk.repository.task.TaskRepository;
 import br.com.api.flowDesk.repository.user.UserRepository;
+import br.com.api.flowDesk.repository.workspace.WorkspaceInvitationRepository;
 import br.com.api.flowDesk.repository.workspace.WorkspaceMemberRepository;
 import br.com.api.flowDesk.repository.workspace.WorkspaceRepository;
 import br.com.api.flowDesk.service.permission.PermissionService;
@@ -33,6 +34,9 @@ public class WorkspaceService {
 
     @Autowired
     private WorkspaceMemberRepository workspaceMemberRepository;
+
+    @Autowired
+    private WorkspaceInvitationRepository workspaceInvitationRepository;
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -121,6 +125,7 @@ public class WorkspaceService {
             projectRepository.delete(project);
         }
 
+        workspaceInvitationRepository.deleteByWorkspace_Id(workspaceId);
         workspaceMemberRepository.deleteAll(workspace.getMembers());
 
         workspaceRepository.delete(workspace);

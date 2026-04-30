@@ -17,30 +17,32 @@ export function useTask(taskId) {
     const [error, setError] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    useEffect(() => {
+    const reload = useCallback(async () => {
         if (!taskId) return;
 
-        async function load() {
-            try {
-                setLoading(true);
-                setError(null);
+        try {
+            setLoading(true);
+            setError(null);
 
-                const data = await getTaskById(taskId);
-                setTask(data);
-            } catch (e) {
-                console.error(e);
+            const data = await getTaskById(taskId);
+            setTask(data);
+            return data;
+        } catch (e) {
+            console.error(e);
 
-                const msg = e.message || "Erro ao carregar tarefa.";
-                setError(msg);
+            const msg = e.message || "Erro ao carregar tarefa.";
+            setError(msg);
 
-                showToast(msg, "error");
-            } finally {
-                setLoading(false);
-            }
+            showToast(msg, "error");
+            return null;
+        } finally {
+            setLoading(false);
         }
-
-        load();
     }, [taskId, showToast]);
+
+    useEffect(() => {
+        reload();
+    }, [reload]);
 
     const createTask = useCallback(async (payload) => {
         try {
@@ -66,10 +68,13 @@ export function useTask(taskId) {
         }
     }, [showToast]);
 
-    const updateTask = useCallback(async (id, payload) => {
+    const updateTask = useCallback(async (idOrPayload, maybePayload) => {
         try {
             setSaving(true);
             setError(null);
+
+            const id = maybePayload ? idOrPayload : taskId;
+            const payload = maybePayload || idOrPayload;
 
             const updated = await updateTaskRequest(id, payload);
 
@@ -127,6 +132,7 @@ export function useTask(taskId) {
         deleteTask,
         createTask,
         updateTask,
+        reload,
         isDeleting,
     };
 }

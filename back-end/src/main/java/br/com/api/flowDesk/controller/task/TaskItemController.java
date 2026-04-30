@@ -34,8 +34,12 @@ public class TaskItemController {
     private AuthTokenService authTokenService;
 
     @GetMapping("/tasks/{taskId}/items")
-    public List<TaskItemDTO> listByTask(@PathVariable UUID taskId) {
-        return taskItemService.listByTask(taskId);
+    public List<TaskItemDTO> listByTask(
+            @PathVariable UUID taskId,
+            @RequestHeader("Authorization") String authorization) {
+        String token = authorization.replace("Bearer ", "").trim();
+        var user = authTokenService.requireUserByToken(token);
+        return taskItemService.listByTask(taskId, user);
     }
 
     @PostMapping("/tasks/{taskId}/items")
@@ -45,10 +49,10 @@ public class TaskItemController {
             @RequestHeader("Authorization") String authorization) {
 
         String token = authorization.replace("Bearer ", "").trim();
-        authTokenService.requireUserByToken(token);
+        var user = authTokenService.requireUserByToken(token);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(taskItemService.create(taskId, dto));
+                .body(taskItemService.create(taskId, dto, user));
     }
 
     @PatchMapping("/task-items/{itemId}/done")
@@ -58,9 +62,9 @@ public class TaskItemController {
             @RequestHeader("Authorization") String authorization) {
 
         String token = authorization.replace("Bearer ", "").trim();
-        authTokenService.requireUserByToken(token);
+        var user = authTokenService.requireUserByToken(token);
 
-        return taskItemService.setDone(itemId, dto.getDone());
+        return taskItemService.setDone(itemId, dto.getDone(), user);
     }
 
     @DeleteMapping("/task-items/{itemId}")
@@ -69,9 +73,9 @@ public class TaskItemController {
             @RequestHeader("Authorization") String authorization) {
 
         String token = authorization.replace("Bearer ", "").trim();
-        authTokenService.requireUserByToken(token);
+        var user = authTokenService.requireUserByToken(token);
 
-        taskItemService.delete(itemId);
+        taskItemService.delete(itemId, user);
         return ResponseEntity.noContent().build();
     }
 }

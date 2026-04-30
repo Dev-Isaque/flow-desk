@@ -23,6 +23,8 @@ import br.com.api.flowDesk.dto.task.AttachmentDTO;
 import br.com.api.flowDesk.model.task.AttachmentModel; // Import do model para o download
 import br.com.api.flowDesk.service.auth.AuthTokenService;
 import br.com.api.flowDesk.service.task.AttachmentService;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/tasks/{taskId}/attachments")
@@ -36,8 +38,12 @@ public class AttachmentController {
     private AuthTokenService authTokenService;
 
     @GetMapping
-    public List<AttachmentDTO> attachmentsByTask(@PathVariable UUID taskId) {
-        return attachmentService.findByTask(taskId);
+    public List<AttachmentDTO> attachmentsByTask(
+            @PathVariable UUID taskId,
+            @RequestHeader("Authorization") String authorization) {
+        String token = authorization.replace("Bearer ", "").trim();
+        var user = authTokenService.requireUserByToken(token);
+        return attachmentService.findByTask(taskId, user);
     }
 
     @PostMapping
@@ -47,23 +53,34 @@ public class AttachmentController {
             @RequestHeader("Authorization") String authorization) {
 
         String token = authorization.replace("Bearer ", "").trim();
-        authTokenService.requireUserByToken(token);
+        var user = authTokenService.requireUserByToken(token);
 
-        return attachmentService.upload(taskId, file);
+        return attachmentService.upload(taskId, file, user);
     }
 
     @DeleteMapping("/{attachmentId}")
-    public ResponseEntity<Void> delete(@PathVariable UUID attachmentId) {
-        attachmentService.delete(attachmentId);
+    public ResponseEntity<Void> delete(
+            @PathVariable UUID attachmentId,
+            @RequestHeader("Authorization") String authorization) {
+        String token = authorization.replace("Bearer ", "").trim();
+        var user = authTokenService.requireUserByToken(token);
+        attachmentService.delete(attachmentId, user);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{attachmentId}/download")
     public ResponseEntity<Resource> downloadAttachment(
             @PathVariable UUID taskId,
-            @PathVariable UUID attachmentId) {
+            @PathVariable UUID attachmentId,
+            @RequestHeader("Authorization") String authorization) {
+        String token = authorization.replace("Bearer ", "").trim();
+        var user = authTokenService.requireUserByToken(token);
 
         AttachmentModel attachment = attachmentService.findById(attachmentId);
+        attachmentService.findByTask(taskId, user);
+        if (!attachment.getTask().getId().equals(taskId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Anexo não pertence à tarefa informada");
+        }
 
         Resource file = attachmentService.loadFileAsResource(attachment.getStoredFileName());
 
@@ -77,9 +94,16 @@ public class AttachmentController {
     @GetMapping("/{attachmentId}/view")
     public ResponseEntity<Resource> viewAttachment(
             @PathVariable UUID taskId,
-            @PathVariable UUID attachmentId) {
+            @PathVariable UUID attachmentId,
+            @RequestHeader("Authorization") String authorization) {
+        String token = authorization.replace("Bearer ", "").trim();
+        var user = authTokenService.requireUserByToken(token);
 
         AttachmentModel attachment = attachmentService.findById(attachmentId);
+        attachmentService.findByTask(taskId, user);
+        if (!attachment.getTask().getId().equals(taskId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Anexo não pertence à tarefa informada");
+        }
 
         Resource file = attachmentService
                 .loadFileAsResource(attachment.getStoredFileName());

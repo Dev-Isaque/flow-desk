@@ -23,6 +23,7 @@ export function WorkspaceSettings({ workspace, onBack }) {
   const navigate = useNavigate();
 
   const activeTab = tab || "general";
+  const isWorkspaceOwner = workspace?.role === "OWNER";
 
   const screens = {
     general: (
@@ -30,6 +31,7 @@ export function WorkspaceSettings({ workspace, onBack }) {
         workspace={workspace}
         onSave={handleUpdateWorkspace}
         onDelete={handleDeleteWorkspace}
+        canManageWorkspace={isWorkspaceOwner}
       />
     ),
 
@@ -41,6 +43,7 @@ export function WorkspaceSettings({ workspace, onBack }) {
         handleAddMember={handleAddMember}
         handleUpdateMember={handleUpdateMember}
         handleDeleteMember={handleDeleteMember}
+        canManageMembers={isWorkspaceOwner}
       />
     ),
 

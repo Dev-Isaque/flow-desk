@@ -18,6 +18,8 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMemberMode
 
     void deleteByProject_IdAndUser_Id(UUID projectId, UUID userId);
 
+    void deleteByProject_Workspace_IdAndUser_Id(UUID workspaceId, UUID userId);
+
     long countByProject_Id(UUID projectId);
 
 }

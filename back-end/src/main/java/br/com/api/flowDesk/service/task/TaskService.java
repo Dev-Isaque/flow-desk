@@ -19,6 +19,7 @@ import br.com.api.flowDesk.dto.task.request.UpdateTaskRequest;
 import br.com.api.flowDesk.dto.task.response.TagResponse;
 import br.com.api.flowDesk.dto.task.response.TaskResponse;
 import br.com.api.flowDesk.dto.taskitem.TaskProgressDTO;
+import br.com.api.flowDesk.enums.project.ProjectPermission;
 import br.com.api.flowDesk.enums.project.ProjectRole;
 import br.com.api.flowDesk.enums.task.TaskPermission;
 import br.com.api.flowDesk.enums.task.TaskPriority;
@@ -35,8 +36,8 @@ import br.com.api.flowDesk.repository.task.TagRepository;
 import br.com.api.flowDesk.repository.task.TaskCollaboratorRepository;
 import br.com.api.flowDesk.repository.task.TaskItemRepository;
 import br.com.api.flowDesk.repository.task.TaskRepository;
-import br.com.api.flowDesk.repository.user.UserRepository;
 import br.com.api.flowDesk.repository.workspace.WorkspaceMemberRepository;
+import br.com.api.flowDesk.service.notification.NotificationService;
 import br.com.api.flowDesk.service.permission.PermissionService;
 
 @Service
@@ -46,8 +47,6 @@ public class TaskService {
     private TaskRepository taskRepository;
     @Autowired
     private ProjectRepository projectRepository;
-    @Autowired
-    private UserRepository userRepository;
     @Autowired
     private TagRepository tagRepository;
     @Autowired
@@ -62,6 +61,8 @@ public class TaskService {
     private TaskCollaboratorRepository taskCollaboratorRepository;
     @Autowired
     private ProjectMemberRepository projectMemberRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     private String formatEstimatedTime(Long seconds) {
         if (seconds == null)
@@ -89,14 +90,18 @@ public class TaskService {
                 .toList();
 
         var role = PermissionService.getUserTaskRole(task, user);
+        WorkspaceRole workspaceRole = getWorkspaceRole(task.getProject().getWorkspace().getId(), user.getId());
+        ProjectRole projectRole = getProjectRole(task.getProject().getId(), user.getId());
 
-        boolean canEdit = role != null && role.hasPermission(TaskPermission.UPDATE_TASK);
-        boolean canDelete = role != null && role.hasPermission(TaskPermission.DELETE_TASK);
-        boolean canComment = role != null && role.hasPermission(TaskPermission.COMMENT);
-        boolean canAddAttachment = role != null && role.hasPermission(TaskPermission.ADD_ATTACHMENT);
-        boolean canManageCollaborators = role != null &&
-                (role.hasPermission(TaskPermission.ADD_COLLABORATOR) ||
-                        role.hasPermission(TaskPermission.REMOVE_COLLABORATOR));
+        boolean canEdit = PermissionService.canAccessTask(workspaceRole, projectRole, task, user, TaskPermission.UPDATE_TASK);
+        boolean canDelete = PermissionService.canAccessTask(workspaceRole, projectRole, task, user, TaskPermission.DELETE_TASK);
+        boolean canComment = PermissionService.canAccessTask(workspaceRole, projectRole, task, user, TaskPermission.COMMENT);
+        boolean canAddAttachment = PermissionService.canAccessTask(workspaceRole, projectRole, task, user,
+                TaskPermission.ADD_ATTACHMENT);
+        boolean canManageCollaborators = PermissionService.canAccessTask(workspaceRole, projectRole, task, user,
+                TaskPermission.ADD_COLLABORATOR)
+                || PermissionService.canAccessTask(workspaceRole, projectRole, task, user,
+                        TaskPermission.REMOVE_COLLABORATOR);
 
         return new TaskDTO(
                 task.getId(),
@@ -161,6 +166,10 @@ public class TaskService {
         var project = projectRepository.findById(dto.getProjectId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projeto não encontrado"));
 
+        WorkspaceRole workspaceRole = getWorkspaceRole(project.getWorkspace().getId(), user.getId());
+        ProjectRole projectRole = getProjectRole(project.getId(), user.getId());
+        PermissionService.checkProject(workspaceRole, projectRole, ProjectPermission.CREATE_TASK);
+
         if (dto.getTitle() == null || dto.getTitle().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Título é obrigatório");
         }
@@ -172,6 +181,7 @@ public class TaskService {
         task.setPriority(dto.getPriority() != null ? dto.getPriority() : TaskPriority.MEDIUM);
         task.setStatus(dto.getStatus() != null ? dto.getStatus() : TaskStatus.BACKLOG);
         task.setDueDateTime(dto.getDueDateTime());
+        task.setDueReminderSentAt(null);
         task.setEstimatedTimeSeconds(parseEstimatedTime(dto.getEstimatedTime()));
         task.setCreatedBy(user);
 
@@ -199,6 +209,12 @@ public class TaskService {
         owner.setRole(TaskRole.OWNER);
         taskCollaboratorRepository.save(owner);
 
+        var projectMembers = projectMemberRepository.findAllByProject_Id(project.getId())
+                .stream()
+                .map(member -> member.getUser())
+                .toList();
+        notificationService.notifyTaskCreated(task, user, projectMembers);
+
         return toDTO(task, user);
     }
 
@@ -223,6 +239,7 @@ public class TaskService {
         }
         if (dto.getDueDateTime() != null) {
             task.setDueDateTime(dto.getDueDateTime());
+            task.setDueReminderSentAt(null);
         }
         if (dto.getEstimatedTime() != null) {
             task.setEstimatedTimeSeconds(parseEstimatedTime(dto.getEstimatedTime()));
@@ -238,9 +255,9 @@ public class TaskService {
 
         checkPermission(task, user, TaskPermission.DELETE_TASK);
 
-        var attachments = attachmentService.findByTask(taskId);
+        var attachments = attachmentService.findByTask(taskId, user);
         for (var attachment : attachments) {
-            attachmentService.delete(attachment.getId());
+            attachmentService.delete(attachment.getId(), user);
         }
 
         taskRepository.delete(task);
@@ -259,9 +276,11 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-    public TaskProgressDTO getTaskProgress(UUID taskId) {
+    public TaskProgressDTO getTaskProgress(UUID taskId, UserModel user) {
         var task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+
+        checkPermission(task, user, TaskPermission.VIEW_TASK);
 
         long total = taskItemRepository.countByTask_Id(taskId);
         long completed = taskItemRepository.countByTask_IdAndDoneTrue(taskId);
@@ -274,6 +293,8 @@ public class TaskService {
     public TaskDTO getTaskById(UUID id, UserModel user) {
         TaskModel task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+
+        checkPermission(task, user, TaskPermission.VIEW_TASK);
 
         return toDTO(task, user);
     }
@@ -320,6 +341,7 @@ public class TaskService {
 
         WorkspaceRole workspaceRole = getWorkspaceRole(project.getWorkspace().getId(), user.getId());
         ProjectRole projectRole = getProjectRole(projectId, user.getId());
+        PermissionService.checkProject(workspaceRole, projectRole, ProjectPermission.VIEW_PROJECT);
 
         return taskRepository.findByProjectId(projectId)
                 .stream()
@@ -336,6 +358,9 @@ public class TaskService {
     public List<TaskDTO> listByWorkspace(UUID workspaceId, UserModel user) {
 
         WorkspaceRole workspaceRole = getWorkspaceRole(workspaceId, user.getId());
+        if (workspaceRole == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não pertence ao workspace");
+        }
 
         return taskRepository.findByProject_Workspace_Id(workspaceId)
                 .stream()

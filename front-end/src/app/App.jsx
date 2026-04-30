@@ -5,6 +5,7 @@ import AppRoutes from "./routes/AppRoutes";
 import { ToastProvider } from "../shared/context/toastContext";
 import { AuthProvider } from "../shared/context/authContext";
 import { ConfirmProvider } from "./provider/ConfirmProvider";
+import { NotificationProvider } from "../shared/context/notificationContext";
 
 export default function App() {
   return (
@@ -12,7 +13,9 @@ export default function App() {
       <AuthProvider>
         <ConfirmProvider>
           <ToastProvider>
-            <AppRoutes />
+            <NotificationProvider>
+              <AppRoutes />
+            </NotificationProvider>
           </ToastProvider>
         </ConfirmProvider>
       </AuthProvider>

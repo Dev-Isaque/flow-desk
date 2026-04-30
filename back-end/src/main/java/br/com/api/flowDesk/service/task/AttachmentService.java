@@ -14,13 +14,22 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.multipart.MultipartFile;
 
 import br.com.api.flowDesk.dto.task.AttachmentDTO;
+import br.com.api.flowDesk.enums.project.ProjectRole;
+import br.com.api.flowDesk.enums.task.TaskPermission;
 import br.com.api.flowDesk.model.task.AttachmentModel;
 import br.com.api.flowDesk.model.task.TaskModel;
+import br.com.api.flowDesk.model.user.UserModel;
+import br.com.api.flowDesk.repository.project.ProjectMemberRepository;
 import br.com.api.flowDesk.repository.task.AttachmentRepository;
 import br.com.api.flowDesk.repository.task.TaskRepository;
+import br.com.api.flowDesk.repository.workspace.WorkspaceMemberRepository;
+import br.com.api.flowDesk.service.permission.PermissionService;
+import br.com.api.flowDesk.enums.workspace.WorkspaceRole;
+import org.springframework.http.HttpStatus;
 
 @Service
 public class AttachmentService {
@@ -33,6 +42,24 @@ public class AttachmentService {
 
     @Autowired
     private TaskRepository taskRepository;
+    @Autowired
+    private WorkspaceMemberRepository workspaceMemberRepository;
+    @Autowired
+    private ProjectMemberRepository projectMemberRepository;
+
+    private void checkTaskPermission(TaskModel task, UserModel user, TaskPermission permission) {
+        WorkspaceRole workspaceRole = workspaceMemberRepository
+                .findByWorkspace_IdAndUser_Id(task.getProject().getWorkspace().getId(), user.getId())
+                .map(m -> m.getRole())
+                .orElse(null);
+
+        ProjectRole projectRole = projectMemberRepository
+                .findByProject_IdAndUser_Id(task.getProject().getId(), user.getId())
+                .map(m -> m.getRole())
+                .orElse(null);
+
+        PermissionService.checkTaskPermission(workspaceRole, projectRole, task, user, permission);
+    }
 
     private void validateFile(MultipartFile file) {
 
@@ -60,7 +87,10 @@ public class AttachmentService {
                 .orElseThrow(() -> new RuntimeException("Anexo não encontrado"));
     }
 
-    public List<AttachmentDTO> findByTask(UUID taskId) {
+    public List<AttachmentDTO> findByTask(UUID taskId, UserModel user) {
+        TaskModel task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada"));
+        checkTaskPermission(task, user, TaskPermission.VIEW_TASK);
 
         return attachmentRepository.findByTaskId(taskId)
                 .stream()
@@ -69,10 +99,11 @@ public class AttachmentService {
     }
 
     @Transactional
-    public AttachmentDTO upload(UUID taskId, MultipartFile file) {
+    public AttachmentDTO upload(UUID taskId, MultipartFile file, UserModel user) {
 
         TaskModel task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Tarefa não encontrada"));
+        checkTaskPermission(task, user, TaskPermission.ADD_ATTACHMENT);
 
         validateFile(file);
 
@@ -102,10 +133,11 @@ public class AttachmentService {
     }
 
     @Transactional
-    public void delete(UUID attachmentId) {
+    public void delete(UUID attachmentId, UserModel user) {
 
         AttachmentModel attachment = attachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new RuntimeException("Anexo não encontrado"));
+        checkTaskPermission(attachment.getTask(), user, TaskPermission.UPDATE_TASK);
 
         try {
             Path filePath = Paths.get(attachment.getStoragePath()).normalize();

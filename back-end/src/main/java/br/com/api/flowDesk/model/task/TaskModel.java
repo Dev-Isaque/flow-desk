@@ -36,7 +36,6 @@ import lombok.Setter;
 @Entity
 @Table(name = "tasks", indexes = {
         @Index(name = "idx_task_project", columnList = "project_id"),
-        @Index(name = "idx_task_assigned", columnList = "assigned_to"),
         @Index(name = "idx_task_created_by", columnList = "created_by")
 })
 @Getter
@@ -66,6 +65,9 @@ public class TaskModel {
 
     @Column(name = "due_date_time")
     private LocalDateTime dueDateTime;
+
+    @Column(name = "due_reminder_sent_at")
+    private LocalDateTime dueReminderSentAt;
 
     @Column(name = "estimated_time_seconds")
     private Long estimatedTimeSeconds;

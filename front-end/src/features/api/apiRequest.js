@@ -2,7 +2,12 @@
 const API_URL = "http://localhost:8080";
 
 export async function apiRequest(url, options = {}) {
-    const token = localStorage.getItem("token");
+
+    const rawToken = localStorage.getItem("token");
+
+    const token = rawToken && rawToken !== "null" && rawToken !== "undefined"
+        ? rawToken
+        : null;
 
     const method = (options.method || "GET").toUpperCase();
 
@@ -44,6 +49,11 @@ export async function apiRequest(url, options = {}) {
     }
 
     if (!response.ok) {
+        if (response.status === 401) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+        }
         const errorMessage = data?.mensagem || data?.message || "Erro na requisição";
         return { sucesso: false, mensagem: errorMessage };
     }

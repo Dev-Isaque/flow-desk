@@ -89,8 +89,12 @@ public class TaskController {
     }
 
     @GetMapping("/{taskId}/progress")
-    public ResponseEntity<TaskProgressDTO> getProgress(@PathVariable UUID taskId) {
-        return ResponseEntity.ok(taskService.getTaskProgress(taskId));
+    public ResponseEntity<TaskProgressDTO> getProgress(
+            @PathVariable UUID taskId,
+            @RequestHeader("Authorization") String authorization) {
+        String token = authorization.replace("Bearer ", "").trim();
+        var user = authTokenService.requireUserByToken(token);
+        return ResponseEntity.ok(taskService.getTaskProgress(taskId, user));
     }
 
     @GetMapping("/{taskId}")

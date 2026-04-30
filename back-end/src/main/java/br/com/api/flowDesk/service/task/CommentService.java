@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import br.com.api.flowDesk.dto.task.CommentDTO;
@@ -22,6 +23,8 @@ public class CommentService {
     private CommentsRepository commentRepository;
     @Autowired
     private TaskRepository taskRepository;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     private CommentDTO toDTO(CommentModel save) {
         return new CommentDTO(
@@ -56,7 +59,13 @@ public class CommentService {
         comment.setAuthor(user);
         comment.setTask(task);
 
-        return toDTO(commentRepository.save(comment));
+        CommentDTO createdComment = toDTO(commentRepository.save(comment));
+
+        messagingTemplate.convertAndSend(
+                "/topic/tasks/" + task.getId() + "/comments",
+                createdComment);
+
+        return createdComment;
     }
 
 }

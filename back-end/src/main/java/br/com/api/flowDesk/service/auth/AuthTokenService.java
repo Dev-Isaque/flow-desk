@@ -1,31 +1,31 @@
 package br.com.api.flowDesk.service.auth;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import br.com.api.flowDesk.model.auth.AuthTokenModel;
 import br.com.api.flowDesk.model.user.UserModel;
-import br.com.api.flowDesk.repository.auth.AuthTokenRepository;
+import br.com.api.flowDesk.service.user.UserService;
 
 @Service
 public class AuthTokenService {
 
     @Autowired
-    private AuthTokenRepository repo;
+    private JwtService jwtService;
+
+    @Autowired
+    private UserService userService;
 
     public UserModel requireUserByToken(String token) {
 
-        AuthTokenModel session = repo.findByToken(token)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token inválido"));
-
-        if (session.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token expirado");
+        if (!jwtService.isValid(token)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token inválido ou expirado");
         }
 
-        return session.getUser();
+        UUID userId = jwtService.getUserId(token);
+        return userService.findById(userId);
     }
 }

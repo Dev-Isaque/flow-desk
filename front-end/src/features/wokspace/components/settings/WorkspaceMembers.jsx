@@ -23,6 +23,7 @@ export function WorkspaceMembers({
   handleAddMember,
   handleUpdateMember,
   handleDeleteMember,
+  canManageMembers = false,
 }) {
   const [editingMemberId, setEditingMemberId] = useState(null);
   const [selectedRole, setSelectedRole] = useState("");
@@ -58,22 +59,35 @@ export function WorkspaceMembers({
     });
   }, [members, search, roleFilter]);
 
-  const totalPages = Math.ceil(filteredMembers.length / pageSize);
+  const totalPages = Math.max(1, Math.ceil(filteredMembers.length / pageSize));
 
   const paginatedMembers = filteredMembers.slice(
     (page - 1) * pageSize,
     page * pageSize,
   );
 
+  useEffect(() => {
+    setPage(1);
+  }, [search, roleFilter]);
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
+
   const handleSelectRole = (member) => {
     setEditingMemberId(member.id);
     setSelectedRole(member.role);
   };
 
-  const handleConfirmRole = (memberId) => {
-    handleUpdateMember(workspace.id, memberId, selectedRole);
-    setEditingMemberId(null);
-    setSelectedRole("");
+  const handleConfirmRole = async (memberId) => {
+    const updated = await handleUpdateMember(workspace.id, memberId, selectedRole);
+
+    if (updated) {
+      setEditingMemberId(null);
+      setSelectedRole("");
+    }
   };
 
   const handleCancelEdit = () => {
@@ -84,6 +98,20 @@ export function WorkspaceMembers({
   function openPermissionsModal(member) {
     setSelectedMember(member);
     setShowPermissionsModal(true);
+  }
+
+  async function handleRemoveMember(member) {
+    const confirmed = await confirm({
+      title: "Remover membro",
+      message: "Deseja remover este membro do workspace?",
+      confirmText: "Remover",
+      cancelText: "Cancelar",
+      variant: "danger",
+    });
+
+    if (confirmed) {
+      await handleDeleteMember(workspace.id, member.id);
+    }
   }
 
   return (
@@ -97,13 +125,15 @@ export function WorkspaceMembers({
             </small>
           </div>
 
-          <Button
-            className="btn-color d-flex align-items-center gap-2"
-            onClick={() => setShowAddModal(true)}
-          >
-            <UserPlus size={18} />
-            Convidar Membro
-          </Button>
+          {canManageMembers && (
+            <Button
+              className="btn-color d-flex align-items-center gap-2"
+              onClick={() => setShowAddModal(true)}
+            >
+              <UserPlus size={18} />
+              Convidar Membro
+            </Button>
+          )}
         </div>
         <div className="d-flex gap-3 mb-4">
           <div className="input-group">
@@ -140,9 +170,11 @@ export function WorkspaceMembers({
                 <th className="text-center" style={{ width: "20%" }}>
                   Status
                 </th>
-                <th className="text-center" style={{ width: "10%" }}>
-                  Ações
-                </th>
+                {canManageMembers && (
+                  <th className="text-center" style={{ width: "10%" }}>
+                    Ações
+                  </th>
+                )}
               </tr>
             </thead>
 
@@ -184,73 +216,71 @@ export function WorkspaceMembers({
                       </span>
                     </td>
 
-                    <td>
-                      <div className="d-flex align-items-center gap-2 w-100">
-                        {!isOwner && !isEditing && (
-                          <Button
-                            className="btn-outline-secondary border-0 flex-fill"
-                            onClick={() => handleSelectRole(member)}
-                            title="Editar Função"
-                          >
-                            <SquarePen size={18} />
-                          </Button>
-                        )}
-
-                        {!isOwner && isEditing && (
-                          <>
-                            <select
-                              className="form-select form-select-sm flex-fill"
-                              value={selectedRole}
-                              onChange={(e) => setSelectedRole(e.target.value)}
-                            >
-                              <option value="ADMIN">Admin</option>
-                              <option value="MEMBER">Member</option>
-                              <option value="VIEWER">Viewer</option>
-                            </select>
-
+                    {canManageMembers && (
+                      <td>
+                        <div className="d-flex align-items-center gap-2 w-100">
+                          {!isOwner && !isEditing && (
                             <Button
-                              className="btn-success btn-sm flex-fill"
-                              onClick={() => handleConfirmRole(member.id)}
-                              title="Confirmar"
+                              className="btn-outline-secondary border-0 flex-fill"
+                              onClick={() => handleSelectRole(member)}
+                              title="Editar Função"
                             >
-                              <Check size={16} />
+                              <SquarePen size={18} />
                             </Button>
+                          )}
 
+                          {!isOwner && isEditing && (
+                            <>
+                              <select
+                                className="form-select form-select-sm flex-fill"
+                                value={selectedRole}
+                                onChange={(e) => setSelectedRole(e.target.value)}
+                              >
+                                <option value="ADMIN">Admin</option>
+                                <option value="MEMBER">Member</option>
+                                <option value="VIEWER">Viewer</option>
+                              </select>
+
+                              <Button
+                                className="btn-success btn-sm flex-fill"
+                                onClick={() => handleConfirmRole(member.id)}
+                                title="Confirmar"
+                              >
+                                <Check size={16} />
+                              </Button>
+
+                              <Button
+                                className="btn-secondary btn-sm flex-fill"
+                                onClick={handleCancelEdit}
+                                title="Cancelar"
+                              >
+                                <X size={16} />
+                              </Button>
+                            </>
+                          )}
+
+                          {!isOwner && !isEditing && (
                             <Button
-                              className="btn-secondary btn-sm flex-fill"
-                              onClick={handleCancelEdit}
-                              title="Cancelar"
+                              className="btn-outline-primary border-0 flex-fill"
+                              onClick={() => openPermissionsModal(member)}
+                              title="Permissões"
                             >
-                              <X size={16} />
+                              <UserCog size={18} />
                             </Button>
-                          </>
-                        )}
+                          )}
 
-                        {!isOwner && !isEditing && (
-                          <Button
-                            className="btn-outline-primary border-0 flex-fill"
-                            onClick={() => openPermissionsModal(member)}
-                            title="Permissões"
-                          >
-                            <UserCog size={18} />
-                          </Button>
-                        )}
-
-                        {!isOwner && !isEditing && (
-                          <Button
-                            className="btn-outline-danger border-0 flex-fill"
-                            onClick={() =>
-                              confirm("Deseja remover este membro?", () => {
-                                handleDeleteMember(workspace.id, member.id);
-                              })
-                            }
-                            title="Remover Membro"
-                          >
-                            <UserRoundMinus size={18} />
-                          </Button>
-                        )}
-                      </div>
-                    </td>
+                          {!isOwner && !isEditing && (
+                            <Button
+                              className="btn-outline-danger border-0 flex-fill"
+                              onClick={() => handleRemoveMember(member)}
+                              title="Remover Membro"
+                            >
+                              <UserRoundMinus size={18} />
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 );
               })}
@@ -276,12 +306,14 @@ export function WorkspaceMembers({
             </Button>
           </div>
         </div>
-        <AddMemberModal
-          show={showAddModal}
-          workspaceId={workspace?.id}
-          onAdd={handleAddMember}
-          onClose={() => setShowAddModal(false)}
-        />
+        {canManageMembers && (
+          <AddMemberModal
+            show={showAddModal}
+            workspaceId={workspace?.id}
+            onAdd={handleAddMember}
+            onClose={() => setShowAddModal(false)}
+          />
+        )}
         {selectedMember && (
           <MemberPermissionsModal
             show={showPermissionsModal}

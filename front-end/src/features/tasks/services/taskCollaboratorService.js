@@ -18,3 +18,10 @@ export const removeCollaboratorFromTask = (taskId, userId) => {
         method: "DELETE",
     });
 };
+
+export const transferTaskOwner = (taskId, userId) => {
+    return apiRequest(`/tasks/${taskId}/collaborators/owner`, {
+        method: "PATCH",
+        body: JSON.stringify({ userId }),
+    });
+};

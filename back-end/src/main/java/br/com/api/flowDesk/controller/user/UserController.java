@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import br.com.api.flowDesk.dto.user.UserCreateDTO;
 import br.com.api.flowDesk.dto.user.UserResponseDTO;
@@ -106,11 +107,13 @@ public class UserController {
     public ResponseEntity<UserModel> update(
             @PathVariable UUID id,
             @ModelAttribute UserUpdateDTO dto,
-            @RequestParam(value = "photoFile", required = false) MultipartFile photoFile) {
-
-        System.out.println("Recebendo update para ID: " + id);
-        System.out.println("DTO: " + dto);
-        System.out.println("PhotoFile: " + (photoFile != null ? photoFile.getOriginalFilename() : "null"));
+            @RequestParam(value = "photoFile", required = false) MultipartFile photoFile,
+            @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "").trim();
+        UserModel loggedUser = authTokenService.requireUserByToken(token);
+        if (!loggedUser.getId().equals(id)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você só pode atualizar o próprio usuário");
+        }
 
         UserModel user = service.update(id, dto, photoFile);
         return ResponseEntity.ok(user);

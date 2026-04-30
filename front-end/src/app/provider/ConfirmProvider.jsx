@@ -14,12 +14,25 @@ export function ConfirmProvider({ children }) {
     resolve: null,
   });
 
-  const confirm = (options) => {
+  const confirm = (options, onConfirm) => {
     if (typeof options === "string") {
       options = { message: options };
     }
 
     return new Promise((resolve) => {
+      const resolveConfirm = async (confirmed) => {
+        try {
+          if (confirmed && onConfirm) {
+            await onConfirm();
+          }
+
+          resolve(confirmed);
+        } catch (error) {
+          console.error("Erro ao executar confirmação:", error);
+          resolve(false);
+        }
+      };
+
       setConfirmState({
         show: true,
         title: options.title || "Confirmação",
@@ -27,7 +40,7 @@ export function ConfirmProvider({ children }) {
         confirmText: options.confirmText || "Confirmar",
         cancelText: options.cancelText || "Cancelar",
         variant: options.variant || "danger",
-        resolve,
+        resolve: resolveConfirm,
       });
     });
   };
@@ -40,9 +53,12 @@ export function ConfirmProvider({ children }) {
     }));
   };
 
-  const handleConfirm = () => {
-    confirmState.resolve?.(true);
-    handleClose();
+  const handleConfirm = async () => {
+    try {
+      await confirmState.resolve?.(true);
+    } finally {
+      handleClose();
+    }
   };
 
   const handleCancel = () => {

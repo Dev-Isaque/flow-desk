@@ -1,11 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
 import { createComment, listComments } from "../services/commentService";
+import { subscribeTaskComments } from "../services/taskCommentsSocketService";
 
 export function useComments(taskId) {
 
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    const appendComment = useCallback((comment) => {
+        setComments((prev) => {
+            if (prev.some((item) => item.id === comment.id)) {
+                return prev;
+            }
+            return [...prev, comment];
+        });
+    }, []);
 
     const load = useCallback(async () => {
         if (!taskId) {
@@ -27,11 +37,9 @@ export function useComments(taskId) {
     async function addComment(payload) {
         try {
             setError(null);
-            setError(null);
 
             const created = await createComment(taskId, payload);
-
-            setComments(prev => [...prev, created]);
+            appendComment(created);
 
         } catch (e) {
             setError(e.message);
@@ -43,6 +51,16 @@ export function useComments(taskId) {
     useEffect(() => {
         load();
     }, [load]);
+
+    useEffect(() => {
+        if (!taskId) return undefined;
+
+        const unsubscribe = subscribeTaskComments(taskId, (incomingComment) => {
+            appendComment(incomingComment);
+        });
+
+        return unsubscribe;
+    }, [taskId, appendComment]);
 
     return {
         comments,

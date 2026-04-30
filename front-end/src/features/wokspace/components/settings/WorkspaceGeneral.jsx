@@ -5,7 +5,7 @@ import { Button } from "../../../../shared/components/Button";
 
 import { useConfirm } from "../../../../shared/hooks/useConfirm";
 
-export function WorkspaceGeneral({ workspace, onSave, onDelete }) {
+export function WorkspaceGeneral({ workspace, onSave, onDelete, canManageWorkspace = false }) {
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
     name: workspace?.name || "",
@@ -17,6 +17,7 @@ export function WorkspaceGeneral({ workspace, onSave, onDelete }) {
   const { confirm } = useConfirm();
 
   function startEditing() {
+    if (!canManageWorkspace) return;
     setForm({
       name: workspace?.name || "",
       description: workspace?.description || "",
@@ -37,6 +38,7 @@ export function WorkspaceGeneral({ workspace, onSave, onDelete }) {
   }
 
   async function handleSave() {
+    if (!canManageWorkspace) return;
     if (!workspace?.id) return;
     if (!form.name.trim()) return;
 
@@ -61,20 +63,32 @@ export function WorkspaceGeneral({ workspace, onSave, onDelete }) {
   }
 
   async function handleDelete() {
+    if (!canManageWorkspace) return;
     if (!workspace?.id) return;
 
-    confirm("Tem certeza que deseja excluir este workspace?", async () => {
-      try {
-        setDeleting(true);
-        await onDelete?.(workspace.id);
-        window.location.href = "/groups";
-      } catch (err) {
-        console.error("Erro ao deletar workspace:", err);
-        alert("Erro ao excluir workspace. Tente novamente.");
-      } finally {
-        setDeleting(false);
-      }
+    const confirmed = await confirm({
+      title: "Excluir workspace",
+      message: "Tem certeza que deseja excluir este workspace?",
+      confirmText: "Excluir",
+      cancelText: "Cancelar",
+      variant: "danger",
     });
+
+    if (!confirmed) return;
+
+    try {
+      setDeleting(true);
+      const deleted = await onDelete?.(workspace.id);
+
+      if (deleted !== false) {
+        window.location.href = "/groups";
+      }
+    } catch (err) {
+      console.error("Erro ao deletar workspace:", err);
+      alert("Erro ao excluir workspace. Tente novamente.");
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -83,7 +97,7 @@ export function WorkspaceGeneral({ workspace, onSave, onDelete }) {
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h4 className="settings-title mb-0">Informações Gerais</h4>
 
-          {!isEditing && (
+          {!isEditing && canManageWorkspace && (
             <Button
               className="btn-outline-primary btn-sm"
               onClick={startEditing}
@@ -138,22 +152,24 @@ export function WorkspaceGeneral({ workspace, onSave, onDelete }) {
         )}
       </div>
 
-      <div className="settings-card border border-danger-subtle">
-        <h5 className="text-danger mb-2">Zona de Perigo</h5>
+      {canManageWorkspace && (
+        <div className="settings-card border border-danger-subtle">
+          <h5 className="text-danger mb-2">Zona de Perigo</h5>
 
-        <p className="theme-text-muted mb-3">
-          Excluir este workspace removerá permanentemente todos os projetos,
-          membros e dados associados. Esta ação não pode ser desfeita.
-        </p>
+          <p className="theme-text-muted mb-3">
+            Excluir este workspace removerá permanentemente todos os projetos,
+            membros e dados associados. Esta ação não pode ser desfeita.
+          </p>
 
-        <Button
-          className="btn-danger"
-          onClick={handleDelete}
-          disabled={deleting}
-        >
-          {deleting ? "Excluindo..." : "Excluir Workspace"}
-        </Button>
-      </div>
+          <Button
+            className="btn-danger"
+            onClick={handleDelete}
+            disabled={deleting}
+          >
+            {deleting ? "Excluindo..." : "Excluir Workspace"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

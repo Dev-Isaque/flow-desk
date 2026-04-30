@@ -40,6 +40,7 @@ export default function TaskDetails() {
     loading: taskLoading,
     deleteTask,
     updateTask,
+    reload: reloadTask,
     isDeleting,
     saving: taskSaving,
   } = useTask(taskId);
@@ -69,6 +70,7 @@ export default function TaskDetails() {
     collaborators,
     addCollaborator,
     removeCollaborator,
+    transferOwner,
     loading: loadingCollaborators,
   } = useCollaboratorsTask(taskId);
 
@@ -172,7 +174,7 @@ export default function TaskDetails() {
                   </h1>
                   <div className="task-hero__meta theme-text-muted">
                     ID: {initialTask.id?.slice(0, 6)} • Criado em{" "}
-                    {formatDate(initialTask.createdAt)}, por {initialTask?.name}
+                    {formatDate(initialTask.createdAt)}, por {initialTask?.createdByName}
                   </div>
                 </div>
                 <TaskProgress progress={progress} size="hero" showLabel />
@@ -260,6 +262,8 @@ export default function TaskDetails() {
               members={members}
               addCollaborator={addCollaborator}
               removeCollaborator={removeCollaborator}
+              transferOwner={transferOwner}
+              onTransferred={reloadTask}
             />
           )}
 

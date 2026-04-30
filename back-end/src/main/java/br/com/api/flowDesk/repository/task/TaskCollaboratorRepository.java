@@ -15,6 +15,8 @@ public interface TaskCollaboratorRepository extends JpaRepository<TaskCollaborat
 
     void deleteByTask_IdAndUser_Id(UUID taskId, UUID userId);
 
+    void deleteByTask_Project_Workspace_IdAndUser_Id(UUID workspaceId, UUID userId);
+
     @Query("""
                 SELECT c FROM TaskCollaboratorModel c
                 JOIN FETCH c.user

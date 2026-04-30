@@ -91,3 +91,21 @@ export const listWorkspaceMembers = (workspaceId) => {
         method: "GET",
     });
 };
+
+export const listPendingWorkspaceInvitations = () => {
+    return apiRequest("/workspaces/invitations/pending", {
+        method: "GET",
+    });
+};
+
+export const acceptWorkspaceInvitation = (invitationId) => {
+    return apiRequest(`/workspaces/invitations/${invitationId}/accept`, {
+        method: "POST",
+    });
+};
+
+export const declineWorkspaceInvitation = (invitationId) => {
+    return apiRequest(`/workspaces/invitations/${invitationId}/decline`, {
+        method: "POST",
+    });
+};
